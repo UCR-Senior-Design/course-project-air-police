@@ -1,3 +1,5 @@
+#https://quant-aq.github.io/py-quantaq/ library documentation
+
 import quantaq
 from quantaq.utils import to_dataframe
 import pandas as pd
