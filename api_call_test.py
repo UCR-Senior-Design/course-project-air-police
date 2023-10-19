@@ -6,7 +6,7 @@ import pandas as pd
 
 #input your apikey here... not sure if there is any safety issues of putting the api key into github, will look
 ## into but for now im not gonna put it in.
-apiKey = ''
+apiKey = 'AOSIIFR5L7HM6KUISW2D4UFK'
 
 #return a df
 def fetchAllRecent(client):
@@ -37,7 +37,16 @@ def fetchActiveDevices(client):
     devices = to_dataframe(client.devices.list(filter="device_state,eq,ACTIVE"))
     return devices
 
+def getLongitudeLatitude(client, serialNumber):
+    devices = to_dataframe(client.devices.list(limit = 10))
+    # need to add a statement here in case there are some problems
+
+
+
+    return devices.loc[devices['sn'] == serialNumber, 'geo.lat':'geo.lon']
+
 #get the client
 client = quantaq.QuantAQAPIClient(api_key = apiKey)
 # print to test
-print(  fetchAllRecent(client) )
+print(fetchAllRecent(client))
+print(  getLongitudeLatitude(client, 'MOD-PM-00544') )
