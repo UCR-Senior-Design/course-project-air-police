@@ -1,5 +1,5 @@
 #https://quant-aq.github.io/py-quantaq/ library documentation
-
+# eventually put this into a class
 import quantaq
 from quantaq.utils import to_dataframe
 import pandas as pd
@@ -40,13 +40,14 @@ def fetchActiveDevices(client):
 def getLongitudeLatitude(client, serialNumber):
     devices = to_dataframe(client.devices.list(limit = 10))
     # need to add a statement here in case there are some problems
-
-
-
     return devices.loc[devices['sn'] == serialNumber, 'geo.lat':'geo.lon']
+def getAllLatitudeLongitude(client):
+    devices = to_dataframe(client.devices.list(limit = 10))
+    return devices[['sn','geo.lat', 'geo.lon']]
 
 #get the client
 client = quantaq.QuantAQAPIClient(api_key = apiKey)
 # print to test
 print(fetchAllRecent(client))
-print(  getLongitudeLatitude(client, 'MOD-PM-00544') )
+# print(getLongitudeLatitude(client, 'MOD-PM-00156'))
+print(  getAllLatitudeLongitude(client) )
