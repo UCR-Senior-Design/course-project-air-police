@@ -20,16 +20,17 @@ def fetchAllRecent(client):
     #devices = fetchActiveDevices(client)
     data = []
     # get every serial number from devices
-    sn = ['MOD-PM-00635', 'MOD-PM-00689','MOD-PM-00691']
+    sn = ['MOD-PM-00681', 'MOD-PM-00673','MOD-PM-00682','MOD-PM-00676','MOD-PM-00665']
     
-    #loop through each device and call data list limited to the most recent 1. 
+    # #loop through each device and call data list limited to the most recent 1. 
     for i in sn:
         data.append(to_dataframe(client.data.list( sn = i, sort = "timestamp,desc", limit = 1 ) ) )
-        
+    # data = to_dataframe( client.data.list(sn = sns, sort = "timestamp,desc", limit = 1))
+     
 
     #turns list of dataframes into 1 data fram i think.... this is the part that probably went wrong
-    data = pd.concat(data)
-    data = data[['pm10','pm25', 'sn']]
+    data = pd.concat(data, ignore_index=True)
+    data = data[['pm10','pm25', 'sn', 'geo.lat', 'geo.lon']]
     return data
 
 
@@ -54,7 +55,7 @@ print(who)
 # print to test
 print(fetchAllRecent(client))
 devices = to_dataframe(client.devices.list())
-# print(devices.columns)
+print(devices.columns)
 # print(devices)
 # print(getLongitudeLatitude(client, 'MOD-PM-00156'))
 # print(  getAllLatitudeLongitude(client) )
