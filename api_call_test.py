@@ -4,50 +4,35 @@ import quantaq
 from quantaq.utils import to_dataframe
 import pandas as pd
 
-#input your apikey here... not sure if there is any safety issues of putting the api key into github, will look
-## into but for now im not gonna put it in.
-apiKey = 'AOSIIFR5L7HM6KUISW2D4UFK'
 
-#return a df
-def fetchAllRecent(client):
+# input unique apikey here
+apiKey = '7QQN18AOIHAA15UD9SNKUIA1'
 
-    #empty list for later
+
+def fetchSensorData(client, sn):
     data = []
+    for i in sn:
+        data.append( to_dataframe(client.data.list( sn = i, sort="timestamp,desc", limit=1 ) ) )
 
-    #gather device infos currently limited to 10 cuz i dont wanna wait 5 years
-    devices = to_dataframe(client.devices.list(limit = 10))
-
-    #alternative
-    #devices = fetchActiveDevices(client)
-    
-    # get every serial number from devices
-    sn = devices.loc[:,'sn']
-    
-    #loop through each device and call data list limited to the most recent 1. 
-    for i in sn.index:
-        data.append( to_dataframe(client.data.list( sn = sn[i], sort = "timestamp,asc", limit = 1 ) ) )
-
-    #turns list of dataframes into 1 data fram i think.... this is the part that probably went wrong
+    # format and return necessary data
     data = pd.concat(data)
+    data = data[['sn', 'pm10','pm25', 'geo.lat', 'geo.lon']]
     return data
 
 
-#gather active devices
-def fetchActiveDevices(client):
-    devices = to_dataframe(client.devices.list(filter="device_state,eq,ACTIVE"))
-    return devices
+def main():
+    #get the client
+    client = quantaq.QuantAQAPIClient(api_key = apiKey)
+    who = client.whoami()
+    print(who)
 
-def getLongitudeLatitude(client, serialNumber):
-    devices = to_dataframe(client.devices.list(limit = 10))
-    # need to add a statement here in case there are some problems
-    return devices.loc[devices['sn'] == serialNumber, 'geo.lat':'geo.lon']
-def getAllLatitudeLongitude(client):
-    devices = to_dataframe(client.devices.list(limit = 10))
-    return devices[['sn','geo.lat', 'geo.lon']]
+    # choose sensors to look at
+    SN1 = "MOD-PM-00681"
+    SN2 = "MOD-PM-00682"
+    SN3 = "MOD-PM-00673"
+    SN4 = "MOD-PM-00696"
+    sn = [SN1, SN2, SN3, SN4]
+           
+    print (fetchSensorData(client, sn))
 
-#get the client
-client = quantaq.QuantAQAPIClient(api_key = apiKey)
-# print to test
-print(fetchAllRecent(client))
-# print(getLongitudeLatitude(client, 'MOD-PM-00156'))
-print(  getAllLatitudeLongitude(client) )
+main()
