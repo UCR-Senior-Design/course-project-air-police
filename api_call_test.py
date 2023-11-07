@@ -3,11 +3,15 @@
 import quantaq
 from quantaq.utils import to_dataframe
 import pandas as pd
-
+import gmaps
+import gmaps.datasets
+from ipywidgets.embed import embed_minimal_html
+from IPython.display import display
 #input your apikey here... not sure if there is any safety issues of putting the api key into github, will look
 ## into but for now im not gonna put it in.
 apiKey = 'AOSIIFR5L7HM6KUISW2D4UFK'
-
+mapKey = 'AIzaSyC3MDZ1-SOhalWrHhcz_o9WlgePVL_NYTI'
+gmaps.configure(api_key=mapKey)
 #return a df
 def fetchAllRecent(client):
 
@@ -30,7 +34,7 @@ def fetchAllRecent(client):
 
     #turns list of dataframes into 1 data fram i think.... this is the part that probably went wrong
     data = pd.concat(data, ignore_index=True)
-    data = data[['pm10','pm25', 'sn','timestamp', 'geo.lat', 'geo.lon']]
+    data = data[['geo.lat', 'geo.lon','pm10']]
     return data
 
 
@@ -52,21 +56,18 @@ def getAllLatitudeLongitude(client):
 client = quantaq.QuantAQAPIClient(api_key = apiKey)
 who = client.whoami()
 print(who)
-# print to test
-# print(client.devices.list(sn='MOD-PM-00696'))
-# print(fetchAllRecent(client))
+
 devices = to_dataframe(client.devices.list())
-print(devices.loc['MOD-PM-00696'])
-# print(devices.columns)
-# print(devices)
-# print(getLongitudeLatitude(client, 'MOD-PM-00156'))
-# print(  getAllLatitudeLongitude(client) )
+# print(devices.loc['MOD-PM-00696'])
+data = fetchAllRecent(client)
+# data = data.div([1,1,100],axis = 'columns')
 
-# teams = client.teams.list()
-# print(teams)
+fig = gmaps.figure()
+heatmap_layer = gmaps.heatmap_layer(data[['geo.lat', 'geo.lon']], weights=data['pm10'],max_intensity=10,point_radius=300)
+print(data)
+# fig = gmaps.figure(zoom_level=12)
 
-# data = client.data.list( sn = "MOD-PM-00696", sort = "timestamp,desc", limit = 1 ) 
-# # print(data)
-# data = to_dataframe(data)
-# print(data[['pm10','pm25', 'sn']])
-# print(data)
+# display(fig)
+fig.add_layer(heatmap_layer)
+display(fig)
+embed_minimal_html('export.html', views=[fig])
