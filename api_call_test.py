@@ -30,7 +30,7 @@ def fetchAllRecent(client):
 
     #turns list of dataframes into 1 data fram i think.... this is the part that probably went wrong
     data = pd.concat(data, ignore_index=True)
-    data = data[['pm10','pm25', 'sn', 'geo.lat', 'geo.lon']]
+    data = data[['pm10','pm25', 'sn','timestamp', 'geo.lat', 'geo.lon']]
     return data
 
 
@@ -53,9 +53,11 @@ client = quantaq.QuantAQAPIClient(api_key = apiKey)
 who = client.whoami()
 print(who)
 # print to test
-print(fetchAllRecent(client))
+# print(client.devices.list(sn='MOD-PM-00696'))
+# print(fetchAllRecent(client))
 devices = to_dataframe(client.devices.list())
-print(devices.columns)
+print(devices.loc['MOD-PM-00696'])
+# print(devices.columns)
 # print(devices)
 # print(getLongitudeLatitude(client, 'MOD-PM-00156'))
 # print(  getAllLatitudeLongitude(client) )
@@ -63,8 +65,8 @@ print(devices.columns)
 # teams = client.teams.list()
 # print(teams)
 
-data = client.data.list( sn = "MOD-PM-00696", sort = "timestamp,desc", limit = 1 ) 
-# print(data)
-data = to_dataframe(data)
-print(data[['pm10','pm25', 'sn']])
+# data = client.data.list( sn = "MOD-PM-00696", sort = "timestamp,desc", limit = 1 ) 
+# # print(data)
+# data = to_dataframe(data)
+# print(data[['pm10','pm25', 'sn']])
 # print(data)
