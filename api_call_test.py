@@ -13,13 +13,15 @@ apiKey = 'AOSIIFR5L7HM6KUISW2D4UFK'
 
 #updates the list of devices in the area. 
 def update():
-
-    sn = []
+    #passes in our api key
     auth = HTTPBasicAuth(apiKey,"")
-    req1 = requests.request("get","https://api.quant-aq.com/device-api/v1/orgs/1212/networks", headers = None, auth = auth)
-    f = open("exe.json","w")
-    data = req1.json()
+    #uses requests to get our network
+    req = requests.request("get","https://api.quant-aq.com/device-api/v1/orgs/1212/networks", headers = None, auth = auth)
+    #loads the request into a json formatt
+    data = req.json()
+    #gets the list of serialnumbers from the retrieved data
     sn = data["data"][0]["devices"]
+    #returns the list
     return sn
 
 #return a df
