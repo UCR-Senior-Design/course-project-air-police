@@ -9,8 +9,6 @@ import json
 #input your apikey here... not sure if there is any safety issues of putting the api key into github, will look
 ## into but for now im not gonna put it in.
 apiKey = 'AOSIIFR5L7HM6KUISW2D4UFK'
-mapKey = 'AIzaSyC3MDZ1-SOhalWrHhcz_o9WlgePVL_NYTI'
-gmaps.configure(api_key=mapKey)
 
 
 #updates the list of devices in the area. 
