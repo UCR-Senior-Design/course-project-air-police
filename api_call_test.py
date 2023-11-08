@@ -3,12 +3,8 @@
 import quantaq
 from quantaq.utils import to_dataframe
 import pandas as pd
-import gmaps
-import gmaps.datasets
 import requests
 from requests.auth import HTTPBasicAuth
-from ipywidgets.embed import embed_minimal_html
-from IPython.display import display
 import json
 #input your apikey here... not sure if there is any safety issues of putting the api key into github, will look
 ## into but for now im not gonna put it in.
@@ -27,8 +23,6 @@ def update():
     data = req1.json()
     sn = data["data"][0]["devices"]
     return sn
-
-
 
 #return a df
 def fetchAllRecent(client):
