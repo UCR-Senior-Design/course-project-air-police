@@ -23,10 +23,10 @@ def update():
     sn = data["data"][0]["devices"]
     #returns the list
     return sn
-
 #return a df
-def fetchAllRecent(client):
+def fetchData(client):
 
+    # client = quantaq.QuantAQAPIClient(api_key = apiKey)
     #empty list for later
 
     #gather device infos currently limited to 10 cuz i dont wanna wait 5 years
@@ -46,27 +46,18 @@ def fetchAllRecent(client):
 
     #turns list of dataframes into 1 data fram i think.... this is the part that probably went wrong
     data = pd.concat(data, ignore_index=True)
-    data = data[['sn','geo.lat', 'geo.lon','pm25', 'pm10']]
+    data = data[['sn','geo.lat', 'geo.lon','pm25', 'pm10', 'timestamp']]
     return data
 
 
-#gather active devices
-def fetchActiveDevices(client):
-    devices = to_dataframe(client.devices.list(filter="device_state,eq,ACTIVE"))
-    return devices
+#find devices that are not outputting a pm2.5 or pm10 reading
 
-def getLongitudeLatitude(client, serialNumber):
-    devices = to_dataframe(client.devices.list(limit = 10))
-    # need to add a statement here in case there are some problems
-    return devices.loc[devices['sn'] == serialNumber, 'geo.lat':'geo.lon']
-def getAllLatitudeLongitude(client):
-    devices = to_dataframe(client.devices.list())
-    return devices[['sn','geo.lat', 'geo.lon']]
 
 #get the client
 
 client = quantaq.QuantAQAPIClient(api_key = apiKey)
 devices = to_dataframe(client.devices.list())
-data = fetchAllRecent(client)
+print(devices.columns)
+data = fetchData(client)
 print(data)
-
+# print(findNonFunctional(client))
