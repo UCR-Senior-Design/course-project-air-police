@@ -101,6 +101,16 @@ def notFunctional(client=quantaq.QuantAQAPIClient(api_key = apiKey), data = fetc
     return nf
 
 
+def toJson(data):
+    ######################################################################################
+    ## Inputs:                                                                          ##
+    ##        data: current data to find non functional                                 ##
+    ## Output:                                                                          ##
+    ##        jf: json file                                                             ##
+    ######################################################################################
+
+    return data.to_json(orient="split")
+
 #generate heat map function
 ## might move this to javascript
 #https://developers.google.com/maps/documentation/javascript/heatmaplayer
