@@ -69,8 +69,16 @@ def fetchData(client, columns = ['geo.lat', 'geo.lon','sn','pm25','pm10', 'times
 
 
 #find devices that are not outputting a pm2.5 or pm10 reading
-## Not tested currently no internet rn
 def notFunctional(client, data):
+    ######################################################################################
+    ## Inputs:                                                                          ##
+    ##        client: quantaq api client                                                ##
+    ##        data: current data to find non functional                                 ##
+    ##            data must include 'sn', 'pm25', 'pm10', and 'timestamp' columns       ##
+    ## Output:                                                                          ##
+    ##        nf: dataframe of the list of sn, reason, and index                        ##
+    ##            indicates there is a problem with the device                          ##
+    ######################################################################################
     nonFunc = []
     reason = []
     ind = []
@@ -79,13 +87,14 @@ def notFunctional(client, data):
         
         todays = datetime.today()
         todays = todays - timedelta(days = 2)
+        ##checks if the data is outdated
         if row['timestamp'] < todays:
             ind.append(index)
             nonFunc.append(row['sn'])
             reason.append('data too old')
+        ##checks if the data does not display properly
+        ## NOTE: we may change to check if there was a properly read data recently.  but currently just current data. 
         if pd.isna(row['pm25']) or pd.isna(row['pm10']):
-            ## check if the most recent none nan value is not less then say two days before current date before adding to list
-            # print("ERROR")
             if row['sn'] not in nonFunc:
                 ind.append(index)
                 reason.append('pm2.5 or pm10 is not reading properly')
