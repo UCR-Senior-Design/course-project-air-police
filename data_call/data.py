@@ -3,18 +3,16 @@
 import quantaq
 from quantaq.utils import to_dataframe
 import numpy as np
-import gmaps
 import pandas as pd
 import requests
 from requests.auth import HTTPBasicAuth
 import json
-from ipywidgets.embed import embed_minimal_html
 from datetime import datetime, timedelta
 #input your apikey here... not sure if there is any safety issues of putting the api key into github, will look
 ## into but for now im not gonna put it in.
 apiKey = 'AOSIIFR5L7HM6KUISW2D4UFK'
 mapKey = 'AIzaSyC3MDZ1-SOhalWrHhcz_o9WlgePVL_NYTI'
-gmaps.configure(api_key=mapKey)
+
 #updates the list of devices in the area. 
 def update():
     ######################################################################################
@@ -107,32 +105,6 @@ def notFunctional(client=quantaq.QuantAQAPIClient(api_key = apiKey), data = fetc
 ## might move this to javascript
 #https://developers.google.com/maps/documentation/javascript/heatmaplayer
 
-def generateHeatMap(client, data, method):
-    #######################################################################################################
-    ## inputs: client: the quantaq apiclient                                                             ##
-    ##        data: the data used to generate the heatmap. should be in geo.lat geo.lon pm25 pm10 format ##
-    ##        method: indicates whether or not the heatmap displays pm25 or pm10                         ##
-    ## what it should do:                                                                                ##
-    ##        generate heatmap using the google map api if you can.                                      ##
-    ## output:                                                                                           ##
-    ##        create .png file                                                                           ##
-    ## NOTES:                                                                                            ##
-    ##        in the browser, to display the map on the site, just use map.png                           ##
-    #######################################################################################################
-    
-    
-    #rough attempt (Does not Work yet):
-    #data = fetchData(client)
-    # # print(data)
-    # data = data.dropna(how='any')
-    # print(data)
-    # locations = data[['geo.lat', 'geo.lon']]
-    # weight = data['pm25']
-    # fig = gmaps.figure()
-    # heatmap_layer = gmaps.heatmap_layer(locations, weights = weight)
-    # fig.add_layer(heatmap_layer)
-
-    return
 
 
 
