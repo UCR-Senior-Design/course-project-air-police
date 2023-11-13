@@ -104,15 +104,3 @@ def notFunctional(client=quantaq.QuantAQAPIClient(api_key = apiKey), data = fetc
 #generate heat map function
 ## might move this to javascript
 #https://developers.google.com/maps/documentation/javascript/heatmaplayer
-
-
-
-
-
-#get the client
-
-# client = quantaq.QuantAQAPIClient(api_key = apiKey)
-# devices = to_dataframe(client.devices.list())
-# data = fetchData(client)
-# print(data)
-# print(notFunctional(client, data))
