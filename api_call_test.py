@@ -2,15 +2,18 @@
 # eventually put this into a class
 import quantaq
 from quantaq.utils import to_dataframe
+import numpy as np
+import gmaps
 import pandas as pd
 import requests
 from requests.auth import HTTPBasicAuth
 import json
+from ipywidgets.embed import embed_minimal_html
 #input your apikey here... not sure if there is any safety issues of putting the api key into github, will look
 ## into but for now im not gonna put it in.
 apiKey = 'AOSIIFR5L7HM6KUISW2D4UFK'
-
-
+mapKey = 'AIzaSyC3MDZ1-SOhalWrHhcz_o9WlgePVL_NYTI'
+gmaps.configure(api_key=mapKey)
 #updates the list of devices in the area. 
 def update():
     #passes in our api key
@@ -46,7 +49,7 @@ def fetchData(client):
 
     #turns list of dataframes into 1 data fram i think.... this is the part that probably went wrong
     data = pd.concat(data, ignore_index=True)
-    data = data[['sn','geo.lat', 'geo.lon','pm25', 'pm10', 'timestamp']]
+    data = data[['geo.lat', 'geo.lon','pm25']]
     return data
 
 
@@ -59,5 +62,14 @@ client = quantaq.QuantAQAPIClient(api_key = apiKey)
 devices = to_dataframe(client.devices.list())
 print(devices.columns)
 data = fetchData(client)
+# print(data)
+data = data.dropna(how='any')
 print(data)
+locations = data[['geo.lat', 'geo.lon']]
+weight = data['pm25']
+fig = gmaps.figure()
+heatmap_layer = gmaps.heatmap_layer(locations, weights = weight)
+fig.add_layer(heatmap_layer)
+
 # print(findNonFunctional(client))
+embed_minimal_html('export.html', views=[fig])
