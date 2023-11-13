@@ -112,3 +112,5 @@ def generateHeatMap(client, data, method):
 
 client = quantaq.QuantAQAPIClient(api_key = apiKey)
 devices = to_dataframe(client.devices.list())
+data = fetchData(client)
+print(notFunctional(client, data))
