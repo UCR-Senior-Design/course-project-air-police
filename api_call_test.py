@@ -9,6 +9,7 @@ import requests
 from requests.auth import HTTPBasicAuth
 import json
 from ipywidgets.embed import embed_minimal_html
+from datetime import datetime, timedelta
 #input your apikey here... not sure if there is any safety issues of putting the api key into github, will look
 ## into but for now im not gonna put it in.
 apiKey = 'AOSIIFR5L7HM6KUISW2D4UFK'
@@ -38,7 +39,7 @@ def update():
 #return a df
 
 
-def fetchData(client, columns = ['geo.lat', 'geo.lon','sn','pm25','pm10']):
+def fetchData(client, columns = ['geo.lat', 'geo.lon','sn','pm25','pm10', 'timestamp']):
     ######################################################################################
     ## Inputs:                                                                          ##
     ##        client: quantaq api client                                                ##
@@ -71,10 +72,26 @@ def fetchData(client, columns = ['geo.lat', 'geo.lon','sn','pm25','pm10']):
 ## Not tested currently no internet rn
 def notFunctional(client, data):
     nonFunc = []
-    for index, row in data.iterrrows():
-        if row['pm25'] == None or row['pm10'] == None:
-            nonFunc.append(data.loc[index][row['sn']])
-    return nonFunc
+    reason = []
+    ind = []
+    for index, row in data.iterrows():
+        # print(row['pm25'])
+        
+        todays = datetime.today()
+        todays = todays - timedelta(days = 2)
+        if row['timestamp'] < todays:
+            ind.append(index)
+            nonFunc.append(row['sn'])
+            reason.append('data too old')
+        if pd.isna(row['pm25']) or pd.isna(row['pm10']):
+            ## check if the most recent none nan value is not less then say two days before current date before adding to list
+            # print("ERROR")
+            if row['sn'] not in nonFunc:
+                ind.append(index)
+                reason.append('pm2.5 or pm10 is not reading properly')
+                nonFunc.append(row['sn'])
+    nf = pd.DataFrame({'index': ind,'sn':nonFunc, 'reason': reason})
+    return nf
 
 
 #generate heat map function
@@ -113,4 +130,5 @@ def generateHeatMap(client, data, method):
 client = quantaq.QuantAQAPIClient(api_key = apiKey)
 devices = to_dataframe(client.devices.list())
 data = fetchData(client)
+print(data)
 print(notFunctional(client, data))
