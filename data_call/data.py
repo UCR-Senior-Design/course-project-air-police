@@ -39,7 +39,7 @@ def update():
 #return a df
 
 
-def fetchData(client, columns = ['geo.lat', 'geo.lon','sn','pm25','pm10', 'timestamp']):
+def fetchData(client= quantaq.QuantAQAPIClient(api_key = apiKey), columns = ['geo.lat', 'geo.lon','sn','pm25','pm10', 'timestamp']):
     ######################################################################################
     ## Inputs:                                                                          ##
     ##        client: quantaq api client                                                ##
@@ -69,7 +69,7 @@ def fetchData(client, columns = ['geo.lat', 'geo.lon','sn','pm25','pm10', 'times
 
 
 #find devices that are not outputting a pm2.5 or pm10 reading
-def notFunctional(client, data):
+def notFunctional(client=quantaq.QuantAQAPIClient(api_key = apiKey), data = fetchData(quantaq.QuantAQAPIClient(api_key = apiKey))):
     ######################################################################################
     ## Inputs:                                                                          ##
     ##        client: quantaq api client                                                ##
@@ -104,6 +104,9 @@ def notFunctional(client, data):
 
 
 #generate heat map function
+## might move this to javascript
+#https://developers.google.com/maps/documentation/javascript/heatmaplayer
+
 def generateHeatMap(client, data, method):
     #######################################################################################################
     ## inputs: client: the quantaq apiclient                                                             ##
@@ -136,8 +139,8 @@ def generateHeatMap(client, data, method):
 
 #get the client
 
-client = quantaq.QuantAQAPIClient(api_key = apiKey)
-devices = to_dataframe(client.devices.list())
-data = fetchData(client)
-print(data)
-print(notFunctional(client, data))
+# client = quantaq.QuantAQAPIClient(api_key = apiKey)
+# devices = to_dataframe(client.devices.list())
+# data = fetchData(client)
+# print(data)
+# print(notFunctional(client, data))
