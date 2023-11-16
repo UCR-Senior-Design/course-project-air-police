@@ -2,3 +2,9 @@
 export.html
 data.json
 exe.json
+data_call/__pycache__/data.cpython-311.pyc
+node_modules/.package-lock.json
+package-lock.json
+package.json
+temp.json
+test.py
