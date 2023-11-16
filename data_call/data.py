@@ -37,7 +37,7 @@ def update():
 #return a df
 
 
-def fetchData(client= quantaq.QuantAQAPIClient(api_key = apiKey), columns = ['geo.lat', 'geo.lon','sn','pm25','pm10', 'timestamp']):
+def fetchData(client= quantaq.QuantAQAPIClient(api_key = apiKey), columns = ['geo.lat', 'geo.lon','sn','pm25','pm10']):
     ######################################################################################
     ## Inputs:                                                                          ##
     ##        client: quantaq api client                                                ##
@@ -101,7 +101,7 @@ def notFunctional(client=quantaq.QuantAQAPIClient(api_key = apiKey), data = fetc
     return nf
 
 
-def toJson(data):
+def toJson(data,fileName):
     ######################################################################################
     ## Inputs:                                                                          ##
     ##        data: current data to find non functional                                 ##
@@ -109,8 +109,22 @@ def toJson(data):
     ##        jf: json file                                                             ##
     ######################################################################################
 
-    return data.to_json(orient="split")
+    ## shit box code will fix later but currently works. have a better version of writing to a json file. but currently do not feel like porting over.
+    datas = data.fillna('null')
+    d = datas.to_dict(orient='records')
+    length = len(d)
+    pos = 1
+    with open(fileName, 'w') as f:
+        f.write('[\n')
+        for record in d:
+            json.dump(record, f)
+            if pos == length:
+                f.write('\n')
+            else:
+                f.write(',\n')
+            pos += 1
+        f.write(']')
 
 #generate heat map function
 ## might move this to javascript
-#https://developers.google.com/maps/documentation/javascript/heatmaplayer
+#https://developers.google.com/maps/documentation/javascript/
