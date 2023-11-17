@@ -1,7 +1,5 @@
 #https://quant-aq.github.io/py-quantaq/ library documentation
 # eventually put this into a class
-import quantaq
-from quantaq.utils import to_dataframe
 import numpy as np
 import pandas as pd
 import requests
@@ -30,6 +28,7 @@ def update():
     req = requests.request("get","https://api.quant-aq.com/device-api/v1/orgs/1212/networks", headers = None, auth = auth)
     #loads the request into a json formatt
     data = req.json()
+    print(data)
     #gets the list of serialnumbers from the retrieved data
     sn = data["data"][0]["devices"]
     #returns the list
@@ -37,40 +36,43 @@ def update():
 #return a df
 
 
-def fetchData(client= quantaq.QuantAQAPIClient(api_key = apiKey), columns = ['geo.lat', 'geo.lon','sn','pm25','pm10']):
+def fetchData(columns = ['geo.lat', 'geo.lon','sn','pm25','pm10', 'timestamp']):
     ######################################################################################
     ## Inputs:                                                                          ##
-    ##        client: quantaq api client                                                ##
     ##        columns: list of columns the data should return                           ##
-    ##             default: ['geo.lat', 'geo.lon','sn','pm25','pm10']                   ##
+    ##             default: ['geo.lat', 'geo.lon','sn','pm25','pm10','timestamp']       ##
     ## Output:                                                                          ##
     ##        data: dataframe of the retrieved data                                     ##
     ######################################################################################
-    devices = to_dataframe(client.devices.list())
 
-    data = []
-    # get every serial number from devices
-    sn = update()
-    
-    # loop through each device and call data list limited to the most recent 1. 
-    # NOTE: timestamp should be desc not asc in order to retrieve the most recent
-    for i in sn:
-        data.append(to_dataframe(client.data.list( sn = i, sort = "timestamp,desc", limit = 1 ) ) )
-     
+    # apiKey
+    auth = HTTPBasicAuth(apiKey,"")
+    #uses requests to get data from our network
+    req = requests.request("get","https://api.quant-aq.com/device-api/v1/data/most-recent/?network_id=9", headers = None, auth = auth)
+    #loads the request into a json formatt
+    djson = req.json()
 
-    #concat depreciated warning but works
-    data = pd.concat(data, ignore_index=True)
-
-    #filters out the columns to the columns we need
-    data = data[columns]
+    #filters data for specific columns
+    edata = {col: [] for col in columns}
+    ##loops through all entries in djson data section
+    for entry in djson["data"]:
+        for col in columns: 
+            # since geo location is given in a list, this check is needed for our data to work properly
+            if col == "geo.lat":
+                edata[col].append(entry['geo']['lat'])
+            elif col == "geo.lon":
+                edata[col].append(entry['geo']['lon'])
+            else:
+                edata[col].append(entry[col])
+    #converts dictionary to dataframe object
+    data = pd.DataFrame(edata)
     return data
 
 
 #find devices that are not outputting a pm2.5 or pm10 reading
-def notFunctional(client=quantaq.QuantAQAPIClient(api_key = apiKey), data = fetchData(quantaq.QuantAQAPIClient(api_key = apiKey))):
+def notFunctional(data = fetchData(['geo.lat', 'geo.lon','sn','pm25','pm10', 'timestamp'])):
     ######################################################################################
     ## Inputs:                                                                          ##
-    ##        client: quantaq api client                                                ##
     ##        data: current data to find non functional                                 ##
     ##            data must include 'sn', 'pm25', 'pm10', and 'timestamp' columns       ##
     ## Output:                                                                          ##
@@ -82,7 +84,9 @@ def notFunctional(client=quantaq.QuantAQAPIClient(api_key = apiKey), data = fetc
     ind = []
     for index, row in data.iterrows():
         # print(row['pm25'])
-        
+        Ti = row['timestamp'].index("T")
+        t = row['timestamp'][::Ti-1] + ' ' +  row['timestamp'][Ti+1::]
+        timestamp = datetime.strptime(t,'%y-%m-%d %H:%M:%S')
         todays = datetime.today()
         todays = todays - timedelta(days = 2)
         ##checks if the data is outdated
@@ -101,7 +105,7 @@ def notFunctional(client=quantaq.QuantAQAPIClient(api_key = apiKey), data = fetc
     return nf
 
 
-def toJson(data,fileName):
+def toJson(data,fileName="temp.json"):
     ######################################################################################
     ## Inputs:                                                                          ##
     ##        data: current data to find non functional                                 ##
@@ -111,19 +115,22 @@ def toJson(data,fileName):
 
     ## shit box code will fix later but currently works. have a better version of writing to a json file. but currently do not feel like porting over.
     datas = data.fillna('null')
-    d = datas.to_dict(orient='records')
-    length = len(d)
-    pos = 1
+    db = datas.to_dict(orient='records')
     with open(fileName, 'w') as f:
-        f.write('[\n')
-        for record in d:
-            json.dump(record, f)
-            if pos == length:
-                f.write('\n')
-            else:
-                f.write(',\n')
-            pos += 1
-        f.write(']')
+        json.dump(db,f)
+    # d = datas.to_dict(orient='records')
+    # length = len(d)
+    # pos = 1
+    # with open(fileName, 'w') as f:
+    #     f.write('[\n')
+    #     for record in d:
+    #         json.dump(record, f)
+    #         if pos == length:
+    #             f.write('\n')
+    #         else:
+    #             f.write(',\n')
+    #         pos += 1
+    #     f.write(']')
 
 #generate heat map function
 ## might move this to javascript
