@@ -1,7 +1,5 @@
 #https://quant-aq.github.io/py-quantaq/ library documentation
 # eventually put this into a class
-import quantaq
-from quantaq.utils import to_dataframe
 import numpy as np
 import pandas as pd
 import requests
@@ -41,30 +39,11 @@ def update():
 def fetchData(columns = ['geo.lat', 'geo.lon','sn','pm25','pm10', 'timestamp']):
     ######################################################################################
     ## Inputs:                                                                          ##
-    ##        client: quantaq api client                                                ##
     ##        columns: list of columns the data should return                           ##
-    ##             default: ['geo.lat', 'geo.lon','sn','pm25','pm10']                   ##
+    ##             default: ['geo.lat', 'geo.lon','sn','pm25','pm10','timestamp']       ##
     ## Output:                                                                          ##
     ##        data: dataframe of the retrieved data                                     ##
     ######################################################################################
-    # devices = to_dataframe(client.devices.list())
-
-    # data = []
-    # # get every serial number from devices
-    # sn = update()
-    
-    # # loop through each device and call data list limited to the most recent 1. 
-    # # NOTE: timestamp should be desc not asc in order to retrieve the most recent
-    # for i in sn:
-    #     data.append(to_dataframe(client.data.list( sn = i, sort = "timestamp,desc", limit = 1 ) ) )
-     
-
-    # #concat depreciated warning but works
-    # data = pd.concat(data, ignore_index=True)
-
-    # #filters out the columns to the columns we need
-    # data = data[columns]
-    # return data
 
     # apiKey
     auth = HTTPBasicAuth(apiKey,"")
@@ -75,27 +54,25 @@ def fetchData(columns = ['geo.lat', 'geo.lon','sn','pm25','pm10', 'timestamp']):
 
     #filters data for specific columns
     edata = {col: [] for col in columns}
+    ##loops through all entries in djson data section
     for entry in djson["data"]:
         for col in columns: 
+            # since geo location is given in a list, this check is needed for our data to work properly
             if col == "geo.lat":
                 edata[col].append(entry['geo']['lat'])
             elif col == "geo.lon":
                 edata[col].append(entry['geo']['lon'])
             else:
                 edata[col].append(entry[col])
-
+    #converts dictionary to dataframe object
     data = pd.DataFrame(edata)
-    # data = data["data"][0][columns]
-    #gets the list of serialnumbers from the retrieved data
-    # sn = data["data"][0]["devices"]
     return data
 
 
 #find devices that are not outputting a pm2.5 or pm10 reading
-def notFunctional(client=quantaq.QuantAQAPIClient(api_key = apiKey), data = fetchData(quantaq.QuantAQAPIClient(api_key = apiKey))):
+def notFunctional(data = fetchData(['geo.lat', 'geo.lon','sn','pm25','pm10', 'timestamp'])):
     ######################################################################################
     ## Inputs:                                                                          ##
-    ##        client: quantaq api client                                                ##
     ##        data: current data to find non functional                                 ##
     ##            data must include 'sn', 'pm25', 'pm10', and 'timestamp' columns       ##
     ## Output:                                                                          ##
@@ -107,7 +84,9 @@ def notFunctional(client=quantaq.QuantAQAPIClient(api_key = apiKey), data = fetc
     ind = []
     for index, row in data.iterrows():
         # print(row['pm25'])
-        
+        Ti = row['timestamp'].index("T")
+        t = row['timestamp'][::Ti-1] + ' ' +  row['timestamp'][Ti+1::]
+        timestamp = datetime.strptime(t,'%y-%m-%d %H:%M:%S')
         todays = datetime.today()
         todays = todays - timedelta(days = 2)
         ##checks if the data is outdated
