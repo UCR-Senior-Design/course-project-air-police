@@ -4,7 +4,7 @@ const User = require('../models/user')
 
 // Getting all
 router.get('/', (req,res) => {
-    res.send('Hello World')
+    res.send('Welcome to the home page!')
 })
 
 router.get('/:id', (req, res) => {

@@ -5,7 +5,7 @@
     "mongoose": "^8.0.1"
   },
   "scripts": {
-    "devStart": "nodemon server.js"
+    "start": "nodemon server.js"
   },
   "name": "course-project-air-police",
   "description": "Over the years, the Salton Sea in Riverside has shrunk, exposing a bed of toxic waste and pesticide-runoff to the atmosphere. As it dries, toxic dust is blown with the wind so researchers and nearby residents wish to monitor the local air quality.",
