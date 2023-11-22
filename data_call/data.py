@@ -79,6 +79,7 @@ def notFunctional(data=fetchData(['geo.lat', 'geo.lon', 'sn', 'pm25', 'pm10', 't
     ##        nf: dataframe of the list of sn, reason, and index                        ##
     ##            indicates there is a problem with the device                          ##
     ######################################################################################
+    # added try
     nonFunc = []
     reason = []
     ind = []
