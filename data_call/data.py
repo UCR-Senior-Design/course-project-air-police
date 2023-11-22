@@ -70,7 +70,7 @@ def fetchData(columns = ['geo.lat', 'geo.lon','sn','pm25','pm10', 'timestamp']):
 
 
 #find devices that are not outputting a pm2.5 or pm10 reading
-def notFunctional(data = fetchData(['geo.lat', 'geo.lon','sn','pm25','pm10', 'timestamp'])):
+def notFunctional(data=fetchData(['geo.lat', 'geo.lon', 'sn', 'pm25', 'pm10', 'timestamp'])):
     ######################################################################################
     ## Inputs:                                                                          ##
     ##        data: current data to find non functional                                 ##
@@ -83,25 +83,24 @@ def notFunctional(data = fetchData(['geo.lat', 'geo.lon','sn','pm25','pm10', 'ti
     reason = []
     ind = []
     for index, row in data.iterrows():
-        # print(row['pm25'])
-        Ti = row['timestamp'].index("T")
-        t = row['timestamp'][::Ti-1] + ' ' +  row['timestamp'][Ti+1::]
-        timestamp = datetime.strptime(t,'%y-%m-%d %H:%M:%S')
+        Ti = row['timestamp'].index(" ")
+        t = row['timestamp'][::Ti] + ' ' + row['timestamp'][Ti + 1::]
+        timestamp = datetime.strptime(t, '%y%m%d %H:%M:%S')  # Adjusted the timestamp format
         todays = datetime.today()
-        todays = todays - timedelta(days = 2)
+        todays = todays - timedelta(days=2)
         ##checks if the data is outdated
-        if row['timestamp'] < todays:
+        if timestamp < todays:
             ind.append(index)
             nonFunc.append(row['sn'])
             reason.append('data too old')
         ##checks if the data does not display properly
-        ## NOTE: we may change to check if there was a properly read data recently.  but currently just current data. 
+        ## NOTE: we may change to check if there was a properly read data recently.  but currently just current data.
         if pd.isna(row['pm25']) or pd.isna(row['pm10']):
             if row['sn'] not in nonFunc:
                 ind.append(index)
                 reason.append('pm2.5 or pm10 is not reading properly')
                 nonFunc.append(row['sn'])
-    nf = pd.DataFrame({'index': ind,'sn':nonFunc, 'reason': reason})
+    nf = pd.DataFrame({'index': ind, 'sn': nonFunc, 'reason': reason})
     return nf
 
 
