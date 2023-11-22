@@ -6,9 +6,5 @@ exe.json
 node_modules
 .DS_Store
 data_call/__pycache__/data.cpython-311.pyc
-node_modules/.package-lock.json
-package-lock.json
-package.json
 temp.json
 test.py
-
