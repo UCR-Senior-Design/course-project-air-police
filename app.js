@@ -32,10 +32,28 @@ run().catch(console.dir);
 
 // --------------- code for routing to pages ---------------
 
+// dependancies
 const express = require('express')
+const hbs = require('express-handlebars');
 const app = express()
-app.use(express.json())
 
+app.use(express.json())
+app.set('view engine', 'hbs')
+
+// Templating Engine 
+app.engine(
+  'hbs',
+  hbs.engine({
+    extname: 'hbs',
+    defaultLayout: 'index',
+    layoutsDir: __dirname + '/views/layouts/'
+  })
+)
+
+app.use(express.static('public')); // apparently easier to acccess this way
+app.set('index', './layouts/home')
+
+//
 // creates homePage
 const homeRouter = require('./routes/home')
 app.use('/home', homeRouter)
@@ -45,7 +63,7 @@ app.use('/home', homeRouter)
 // --------------- end of code for routing to pages ---------------
 
 app.get('', (req,res) => {
-    res.send("Hello World");
+    res.send("On main we page from app.js");
 });
 
 // export to server... important to never remove this from the bottom!

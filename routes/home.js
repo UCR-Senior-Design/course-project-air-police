@@ -4,15 +4,9 @@ const User = require('../models/user')
 
 // Getting all
 router.get('/', (req,res) => {
-    res.send('Welcome to the home page!')
+    //res.send('Welcome to the home page!')
+    res.render('home', {layout : 'index'});
 })
 
-router.get('/:id', (req, res) => {
-
-})
-
-router.post('/', (req, res) => {
-
-})
 
 module.exports = router
