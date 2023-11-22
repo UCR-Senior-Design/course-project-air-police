@@ -83,9 +83,14 @@ def notFunctional(data=fetchData(['geo.lat', 'geo.lon', 'sn', 'pm25', 'pm10', 't
     reason = []
     ind = []
     for index, row in data.iterrows():
-        Ti = row['timestamp'].index(" ")
-        t = row['timestamp'][::Ti] + ' ' + row['timestamp'][Ti + 1::]
-        timestamp = datetime.strptime(t, '%y%m%d %H:%M:%S')  # Adjusted the timestamp format
+        try:
+            Ti = row['timestamp'].index(" ")
+            t = row['timestamp'][::Ti] + ' ' + row['timestamp'][Ti + 1::]
+            timestamp = datetime.strptime(t, '%y%m%d %H:%M:%S')  # Adjusted the timestamp format
+        except ValueError:
+            # Handle the case where the space character is not found in the timestamp
+            timestamp = datetime.now()  # You might want to set it to an appropriate default value
+
         todays = datetime.today()
         todays = todays - timedelta(days=2)
         ##checks if the data is outdated
