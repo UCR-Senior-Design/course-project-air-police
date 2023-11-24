@@ -19,11 +19,22 @@ def pushDB(data, schemas):
     # pushes data into the database                                     #
     # Parameters:                                                       #
     #   data: pandas dataframe from fetchData() check data.py           #
-    #   schemas: the specific schema to upload data                     #
+    #   schemas: the specific schema/ dictionery to upload data         #
     #       Default: name is probably gonna be schema which stores in   #
     #           the default columns of sn lon lat pm25 pm10 timestamp   #
     # Return:                                                           #   
     #####################################################################
+    newDict = schemas
+    keyList = list( newDict.keys())
+    
+    for i, rdata in data.iterrows():
+        newDict["_id"] = i
+        for j in keyList:
+            if j == "_id":
+                continue
+            #need to add error catching here
+            newDict[j] = rdata[j]
+        collection.insert_one(newDict)
     return
 
 def pullData(serialNumber):
@@ -47,9 +58,13 @@ def updateData(serialNumber, newData):
     ######################################################################
     return
 
-def updateAllData():
+def updateAllData(columns):
     ######################################################################
     # updates everything                                                 #
     # Parameters:                                                        #
     # Return:                                                            #
     ######################################################################
+    data = dc.fetchData(columns)
+    for i, nd in data.iterrows():
+        updateData(nd["sn"], nd)
+    return
