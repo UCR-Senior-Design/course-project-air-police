@@ -1,6 +1,9 @@
 #https://quant-aq.github.io/py-quantaq/ library documentation
 # eventually put this into a class
 import numpy as np
+import os
+from dotenv import load_dotenv
+load_dotenv()
 import pandas as pd
 import requests
 from requests.auth import HTTPBasicAuth
@@ -8,8 +11,8 @@ import json
 from datetime import datetime, timedelta
 #input your apikey here... not sure if there is any safety issues of putting the api key into github, will look
 ## into but for now im not gonna put it in.
-apiKey = 'AOSIIFR5L7HM6KUISW2D4UFK'
-mapKey = 'AIzaSyC3MDZ1-SOhalWrHhcz_o9WlgePVL_NYTI'
+apiKey = os.environ['api_key']
+mapKey = os.environ['map_key']
 
 
 def fetchData(columns = ['geo.lat', 'geo.lon','sn','pm25','pm10', 'timestamp']):
