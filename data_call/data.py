@@ -11,30 +11,6 @@ from datetime import datetime, timedelta
 apiKey = 'AOSIIFR5L7HM6KUISW2D4UFK'
 mapKey = 'AIzaSyC3MDZ1-SOhalWrHhcz_o9WlgePVL_NYTI'
 
-#updates the list of devices in the area. 
-def update():
-    ######################################################################################
-    ## Inputs:                                                                          ##
-    ##                                                                                  ##
-    ## Output:                                                                          ##
-    ##        sn: list of all the serial numbers in our network                         ##
-    ######################################################################################
-
-    #note we have to use pythons request function b/c py-quantaq has not updated theirs for the new organizations quant aq update
-
-    #passes in our api key
-    auth = HTTPBasicAuth(apiKey,"")
-    #uses requests to get our network
-    req = requests.request("get","https://api.quant-aq.com/device-api/v1/orgs/1212/networks", headers = None, auth = auth)
-    #loads the request into a json formatt
-    data = req.json()
-    print(data)
-    #gets the list of serialnumbers from the retrieved data
-    sn = data["data"][0]["devices"]
-    #returns the list
-    return sn
-#return a df
-
 
 def fetchData(columns = ['geo.lat', 'geo.lon','sn','pm25','pm10', 'timestamp']):
     ######################################################################################
