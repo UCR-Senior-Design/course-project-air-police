@@ -167,16 +167,19 @@ def mapGeneration(data=None):
     for index, row in data.dropna(subset=['geo.lat', 'geo.lon']).iterrows():
         latitude = row['geo.lat']
         longitude = row['geo.lon']
-        monitor_info = f"Monitor {index + 1}"
-
-        ##folium.Marker(location=[latitude, longitude], popup=monitor_info).add_to(m)
+        monitor_info = f"""
+            <b>Monitor {index + 1}</b><br>
+            Serial Number: {row['sn']}<br>
+            PM2.5: {row['pm25']}<br>
+            PM10: {row['pm10']}<br>
+            Timestamp: {row['timestamp']}<br>
+        """
 
         # Create a custom icon with a smaller size
-        icon = folium.Icon(icon='glyphicon-map-marker', color='blue', prefix='glyphicon', icon_size=(5, 5), shadow = False)
-        
-        marker = folium.Marker(location=[latitude, longitude], popup=monitor_info, icon=icon)
-        marker.add_to(m)
+        icon = folium.Icon(icon='glyphicon-map-marker', color='blue', prefix='glyphicon', icon_size=(5, 5), shadow=False)
 
+        marker = folium.Marker(location=[latitude, longitude], popup=folium.Popup(html=monitor_info, max_width=300), icon=icon)
+        marker.add_to(m)
 
     # Create a HeatMap layer based on PM2.5 values
     heat_data = [[row['geo.lat'], row['geo.lon'], row['pm25']] for index, row in data.dropna(subset=['geo.lat', 'geo.lon', 'pm25']).iterrows()]
@@ -188,6 +191,3 @@ def mapGeneration(data=None):
 
     # Open the HTML file in the default web browser
     webbrowser.open(html_file_path)
-
-# Example usage:
-# mapGeneration()  # This assumes you have a function fetchData() that retrieves your data
