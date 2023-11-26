@@ -62,14 +62,12 @@ app.set('view engine', 'hbs')
 // creates homePage
 const homeRouter = require('./routes/home.js')
 app.use('/home', homeRouter)
-
+app.use('', homeRouter)
 
 
 // --------------- end of code for routing to pages ---------------
 
-app.get('', (req,res) => {
-    res.send("On main web page from app.js");
-});
+
 
 // export to server... important to never remove this from the bottom!
 module.exports = app;
