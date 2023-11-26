@@ -190,4 +190,4 @@ def mapGeneration(data=None):
     m.save(html_file_path)
 
     # Open the HTML file in the default web browser
-    webbrowser.open(html_file_path)
+    webbrowser.open(html_file_path
