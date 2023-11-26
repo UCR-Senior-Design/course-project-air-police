@@ -8,7 +8,7 @@ import json
 from datetime import datetime, timedelta
 #input your apikey here... not sure if there is any safety issues of putting the api key into github, will look
 ## into but for now im not gonna put it in.
-apiKey = 'AOSIIFR5L7HM6KUISW2D4UFK'
+apiKey = 'NSUIQ00X1EQNUGRGE7SYXNTY'
 mapKey = 'AIzaSyC3MDZ1-SOhalWrHhcz_o9WlgePVL_NYTI'
 
 #updates the list of devices in the area. 
@@ -49,9 +49,12 @@ def fetchData(columns = ['geo.lat', 'geo.lon','sn','pm25','pm10', 'timestamp']):
     auth = HTTPBasicAuth(apiKey,"")
     #uses requests to get data from our network
     req = requests.request("get","https://api.quant-aq.com/device-api/v1/data/most-recent/?network_id=9", headers = None, auth = auth)
+    ##print (req)
     #loads the request into a json formatt
     djson = req.json()
+    ##print (djson)
 
+    
     #filters data for specific columns
     edata = {col: [] for col in columns}
     ##loops through all entries in djson data section
@@ -141,3 +144,50 @@ def toJson(data,fileName="temp.json"):
 #generate heat map function
 ## might move this to javascript
 #https://developers.google.com/maps/documentation/javascript/
+
+
+
+
+import folium
+import webbrowser
+import pandas as pd
+from folium.plugins import HeatMap
+
+def mapGeneration(data=None):
+    if data is None:
+        data = fetchData(['geo.lat', 'geo.lon', 'sn', 'pm25', 'pm10', 'timestamp'])
+
+    # Create a map with a central location and an appropriate zoom level
+    central_latitude = data['geo.lat'].mean()
+    central_longitude = data['geo.lon'].mean()
+    m = folium.Map(location=[central_latitude, central_longitude], zoom_start=10,  tiles='https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attr = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> '
+    'contributors, &copy; <a href="https://cartodb.com/attributions">CartoDB</a>')
+
+    # Add markers for each monitor to the map
+    for index, row in data.dropna(subset=['geo.lat', 'geo.lon']).iterrows():
+        latitude = row['geo.lat']
+        longitude = row['geo.lon']
+        monitor_info = f"Monitor {index + 1}"
+
+        ##folium.Marker(location=[latitude, longitude], popup=monitor_info).add_to(m)
+
+        # Create a custom icon with a smaller size
+        icon = folium.Icon(icon='glyphicon-map-marker', color='blue', prefix='glyphicon', icon_size=(5, 5), shadow = False)
+        
+        marker = folium.Marker(location=[latitude, longitude], popup=monitor_info, icon=icon)
+        marker.add_to(m)
+
+
+    # Create a HeatMap layer based on PM2.5 values
+    heat_data = [[row['geo.lat'], row['geo.lon'], row['pm25']] for index, row in data.dropna(subset=['geo.lat', 'geo.lon', 'pm25']).iterrows()]
+    HeatMap(heat_data, radius=15).add_to(m)
+
+    # Save the map as an HTML file
+    html_file_path = 'all_monitors_map.html'
+    m.save(html_file_path)
+
+    # Open the HTML file in the default web browser
+    webbrowser.open(html_file_path)
+
+# Example usage:
+# mapGeneration()  # This assumes you have a function fetchData() that retrieves your data
