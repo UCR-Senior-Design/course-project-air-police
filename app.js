@@ -36,9 +36,9 @@ run().catch(console.dir);
 const express = require('express')
 const hbs = require('express-handlebars');
 const app = express()
+const path = require('node:path');
 
 app.use(express.json())
-app.set('view engine', 'hbs')
 
 // Templating Engine 
 app.engine(
@@ -50,12 +50,17 @@ app.engine(
   })
 )
 
-app.use(express.static('public')); // apparently easier to acccess this way
-app.set('index', './layouts/home')
+app.use(express.static(path.join(__dirname, 'public'))) 
 
-//
+app.set('views', path.join(__dirname, 'views'))
+app.set('view engine', 'hbs')
+
+//app.use(express.static('public')); // apparently easier to acccess this way
+//app.set('index', './layouts/home')
+
+
 // creates homePage
-const homeRouter = require('./routes/home')
+const homeRouter = require('./routes/home.js')
 app.use('/home', homeRouter)
 
 
