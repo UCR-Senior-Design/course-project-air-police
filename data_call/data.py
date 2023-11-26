@@ -189,5 +189,3 @@ def mapGeneration(data=None):
     # Open the HTML file in the default web browser
     webbrowser.open(html_file_path)
 
-# Example usage:
-# mapGeneration()  # This assumes you have a function fetchData() that retrieves your data
