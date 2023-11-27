@@ -59,10 +59,15 @@ app.set('view engine', 'hbs')
 //app.set('index', './layouts/home')
 
 
-// creates homePage
+// creates home page
 const homeRouter = require('./routes/home.js')
 app.use('/home', homeRouter)
 app.use('', homeRouter)
+
+
+// creates map page
+const mapRouter = require('./routes/map.js')
+app.use('/map', mapRouter)
 
 
 // --------------- end of code for routing to pages ---------------
