@@ -194,7 +194,7 @@ def mapGeneration(data=None):
     HeatMap(heat_data, radius=15).add_to(m)
 
     # Save the map as an HTML file
-    html_file_path = 'all_monitors_map.html'
+    html_file_path = 'views/map.hbs'
     m.save(html_file_path)
 
     # Open the HTML file in the default web browser

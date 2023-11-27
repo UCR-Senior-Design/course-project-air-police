@@ -8,3 +8,4 @@ node_modules
 data_call/__pycache__/data.cpython-311.pyc
 temp.json
 test.py
+views/map.hbs
