@@ -199,8 +199,3 @@ def mapGeneration(data=None):
 
     # Open the HTML file in the default web browser
     webbrowser.open(html_file_path)
-
-
-    # Return HTML file path
-    #return html_file_path
-
