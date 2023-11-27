@@ -17,7 +17,7 @@ load_dotenv()
 # add schemas here probably
 
 def connect():
-    connection = os.environ['c_URI'] or os.eviron['DATABASE_URL'].to_str()
+    connection = os.environ['c_URI']
     client = MongoClient(connection)
     db = client["SSProject"]
     collection = db["Devices"]
@@ -37,24 +37,35 @@ def pushDB(data):
     db, collection = connect()
     # newDict = schemas
     # keyList = list( newDict.keys())
-    
+    print(data)
     for i, rdata in data.iterrows():
         
         #add try and catch
         nd = rdata
         newDict = nd.to_dict()
         newDict['_id'] = i
+        # print(newDict.keys)
         # this should check if the serial number already exists
         #if it does update the data instead
-        if newDict['sn'] == collection.find({'sn':newDict['sn']}):
-            print("data already stored calling update()")
-            updateData(newDict['sn'],newDict)
-            continue
+        
+        stuff = collection.find({'sn':newDict['sn']})
+        ds = pd.DataFrame(list(stuff))
+        # print(ds)
+        if len(list(ds)) !=0:
+            # print(stuff)
+            
+            if newDict['sn'] == ds.at[0,'sn']:
+                print("data already stored calling update()")
+                updateData(newDict['sn'],newDict)
+                continue
         #iterates through the collection to find the next available _id
-        while i != collection.find({'_id':i}):
-            i += 1
-        #adds
-        newDict['_id'] = i
+        j = i
+
+        # len(list(doc_list))
+        while  len(list(collection.find({'_id':j}))) != 0:
+            j += 1
+        # adds
+        newDict['_id'] = j
         collection.insert_one(newDict)
         
         # for j in keyList:
@@ -98,8 +109,10 @@ def updateData(serialNumber, newData):
     ## need to add some error checking to make sure keys match with previous data
     keys = list(newData.keys())
     for i,data in enumerate(newData):
+        if keys[i] == "_id" or keys[i] == 'geo.lat' or keys[i] == 'geo.lon':
+            continue
         collection.update_one({"sn": serialNumber},
-                          {"$set": {
+                              {"$set": {
                              keys[i]:newData[keys[i]]
                           }})
         # 
@@ -117,18 +130,3 @@ def updateAllData(columns):
         updateData(nd["sn"], nd)
     return
 
-data = dc.fetchData()
-# pushDB(data)
-# print(pullData())
-print(pullData('MOD-PM-00711'))
-
-# newDict = {
-#     'pm25': 255,
-#     'pm10': 255,
-#     'timestamp':'2023-11-27T00:05:22'
-# }
-# updateData('MOD-PM-00645',newDict)
-# print(pullData())
-
-# updateAllData(['sn','pm25','pm10','timestamp'])
-# print(pullData())
