@@ -2,7 +2,7 @@ import sys
 sys.path.append('../')
 import os
 from dotenv import load_dotenv
-from data_call import dc
+from data_call import data as dc
 from pymongo import MongoClient
 import pandas as pd
 load_dotenv()
@@ -17,13 +17,13 @@ load_dotenv()
 # add schemas here probably
 
 def connect():
-    connection = os.environ['c_URI']
+    connection = os.environ['c_URI'] or os.eviron['DATABASE_URL'].to_str()
     client = MongoClient(connection)
     db = client["SSProject"]
     collection = db["Devices"]
     return db, collection
 
-
+#works like a charm
 def pushDB(data):
     #####################################################################
     # pushes data into the database                                     #
@@ -39,8 +39,21 @@ def pushDB(data):
     # keyList = list( newDict.keys())
     
     for i, rdata in data.iterrows():
+        
+        #add try and catch
         nd = rdata
         newDict = nd.to_dict()
+        newDict['_id'] = i
+        # this should check if the serial number already exists
+        #if it does update the data instead
+        if newDict['sn'] == collection.find({'sn':newDict['sn']}):
+            print("data already stored calling update()")
+            updateData(newDict['sn'],newDict)
+            continue
+        #iterates through the collection to find the next available _id
+        while i != collection.find({'_id':i}):
+            i += 1
+        #adds
         newDict['_id'] = i
         collection.insert_one(newDict)
         
@@ -53,7 +66,9 @@ def pushDB(data):
         # collection.insert_one(newDict)
     return
 
-def pullData():
+
+#tested and works
+def pullData(serialNumber=None):
     ######################################################################
     # pulls all data from database                                       #
     # PARAMETERS:                                                        #
@@ -61,10 +76,16 @@ def pullData():
     #   data: returns a dson/ dataframe/ list / dataframe  of the data   #
     ######################################################################
     db, collection = connect()
-    datas = collection.find()
-    data = pd.DataFrame(datas)
-    return data
+    if serialNumber != None:
+        datas = collection.find({'sn':serialNumber})
+        data = pd.DataFrame(datas)
+        return data
+    else:
+        datas = collection.find()
+        data = pd.DataFrame(datas)
+        return data
 
+#works
 def updateData(serialNumber, newData):
     ######################################################################
     # updates the data of a specific database                            #
@@ -76,13 +97,15 @@ def updateData(serialNumber, newData):
     db, collection = connect()
     ## need to add some error checking to make sure keys match with previous data
     keys = list(newData.keys())
-    for i in range(0, len(keys)):
-        collection.update({"sn": serialNumber},
+    for i,data in enumerate(newData):
+        collection.update_one({"sn": serialNumber},
                           {"$set": {
-                              keys[i]:newData[i] 
+                             keys[i]:newData[keys[i]]
                           }})
+        # 
     return
 
+#works but really slow
 def updateAllData(columns):
     ######################################################################
     # updates everything                                                 #
@@ -95,5 +118,17 @@ def updateAllData(columns):
     return
 
 data = dc.fetchData()
-pushDB(data)
-print(pullData())
+# pushDB(data)
+# print(pullData())
+print(pullData('MOD-PM-00711'))
+
+# newDict = {
+#     'pm25': 255,
+#     'pm10': 255,
+#     'timestamp':'2023-11-27T00:05:22'
+# }
+# updateData('MOD-PM-00645',newDict)
+# print(pullData())
+
+# updateAllData(['sn','pm25','pm10','timestamp'])
+# print(pullData())
