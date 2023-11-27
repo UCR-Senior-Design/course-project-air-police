@@ -4,7 +4,7 @@ from data_call import data as dc
 import json
 
 data = dc.fetchData()
-#data = dc.notFunctional()
+data = dc.notFunctional()
 print(data)
 dc.mapGeneration()
 # dc.toJson(data)
