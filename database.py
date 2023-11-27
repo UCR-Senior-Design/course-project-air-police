@@ -53,7 +53,7 @@ def pushDB(data):
         # collection.insert_one(newDict)
     return
 
-def pullData(serialNumber):
+def pullData():
     ######################################################################
     # pulls all data from database                                       #
     # PARAMETERS:                                                        #
@@ -96,3 +96,4 @@ def updateAllData(columns):
 
 data = dc.fetchData()
 pushDB(data)
+print(pullData())
