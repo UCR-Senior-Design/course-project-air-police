@@ -119,14 +119,15 @@ def updateData(serialNumber, newData):
     return
 
 #works but really slow
-def updateAllData(columns):
-    ######################################################################
-    # updates everything                                                 #
-    # Parameters:                                                        #
-    # Return:                                                            #
-    ######################################################################
-    data = dc.fetchData(columns)
-    for i, nd in data.iterrows():
-        updateData(nd["sn"], nd)
-    return
+#just use pushDB does the same thing give it the data from fetchdata
+# def updateAllData(columns):
+#     ######################################################################
+#     # updates everything                                                 #
+#     # Parameters:                                                        #
+#     # Return:                                                            #
+#     ######################################################################
+#     data = dc.fetchData(columns)
+#     for i, nd in data.iterrows():
+#         updateData(nd["sn"], nd)
+#     return
 
