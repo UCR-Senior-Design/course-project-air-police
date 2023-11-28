@@ -69,6 +69,10 @@ app.use('', homeRouter)
 const mapRouter = require('./routes/map.js')
 app.use('/map', mapRouter)
 
+//creates provisional in-progress data viewing page
+const viewDataRouter = require('./routes/viewData.js')
+app.use('/view-data', viewDataRouter);
+
 
 // --------------- end of code for routing to pages ---------------
 
