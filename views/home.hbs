@@ -1,3 +1,7 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
 <section>
   <div class="px-4 py-5 my-5 text-center">
     <img class="d-block mx-auto mb-4" src="images/modular-pm.jpeg" alt="" width="700" height="330">
@@ -5,9 +9,24 @@
     <div class="col-lg-6 mx-auto">
       <p class="lead mb-4">Quickly design and customize responsive mobile-first sites with Bootstrap, the world’s most popular front-end open source toolkit, featuring Sass variables and mixins, responsive grid system, extensive prebuilt components, and powerful JavaScript plugins. Note from Harrison: this template is from https://getbootstrap.com/docs/5.1/examples/heroes/</p>
       <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-        <button type="button" class="btn btn-primary btn-lg px-4 gap-3">Primary button</button>
-        <button type="button" class="btn btn-outline-secondary btn-lg px-4">Secondary</button>
+         <!-- Add the button with the ID 'viewMapButton' -->
+                    <button id="viewMapButton" type="button" class="btn btn-primary btn-lg px-4 gap-3">View Map</button>
+                    <button type="button" class="btn btn-outline-secondary btn-lg px-4">Secondary</button>
       </div>
     </div>
   </div>
 </section>
+    
+
+    <!--Includes the script to handle the button click -->
+    <script src="/js/homeScript.js"></script>
+</body>
+</html>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('viewMapButton').addEventListener('click', function () {
+      window.location.href = '/map';
+    });
+  });
+</script>
