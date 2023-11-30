@@ -1,6 +1,9 @@
 #https://quant-aq.github.io/py-quantaq/ library documentation
 # eventually put this into a class
 import numpy as np
+import os
+from dotenv import load_dotenv
+load_dotenv()
 import pandas as pd
 import requests
 from requests.auth import HTTPBasicAuth
@@ -8,32 +11,10 @@ import json
 from datetime import datetime, timedelta
 #input your apikey here... not sure if there is any safety issues of putting the api key into github, will look
 ## into but for now im not gonna put it in.
-apiKey = 'NSUIQ00X1EQNUGRGE7SYXNTY'
-mapKey = 'AIzaSyC3MDZ1-SOhalWrHhcz_o9WlgePVL_NYTI'
 
-#updates the list of devices in the area. 
-def update():
-    ######################################################################################
-    ## Inputs:                                                                          ##
-    ##                                                                                  ##
-    ## Output:                                                                          ##
-    ##        sn: list of all the serial numbers in our network                         ##
-    ######################################################################################
+apiKey = os.environ['api_key']
+mapKey = os.environ['map_key']
 
-    #note we have to use pythons request function b/c py-quantaq has not updated theirs for the new organizations quant aq update
-
-    #passes in our api key
-    auth = HTTPBasicAuth(apiKey,"")
-    #uses requests to get our network
-    req = requests.request("get","https://api.quant-aq.com/device-api/v1/orgs/1212/networks", headers = None, auth = auth)
-    #loads the request into a json formatt
-    data = req.json()
-    print(data)
-    #gets the list of serialnumbers from the retrieved data
-    sn = data["data"][0]["devices"]
-    #returns the list
-    return sn
-#return a df
 
 
 def fetchData(columns = ['geo.lat', 'geo.lon','sn','pm25','pm10', 'timestamp']):
