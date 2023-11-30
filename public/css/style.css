@@ -2,3 +2,25 @@ body{
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     background-color: aqua;
 }
+.dif{
+    width:500px;
+    
+    margin: 10px;
+    margin-left: 550px;
+
+}
+.et{
+    border: 3px solid black;
+}
+.temp{
+    margin: 10px;
+    margin-left: 150px;
+}
+.burt{
+    border: 5px transparent;
+    background-color: gray;
+    margin: 5px;
+    width:285px;
+    margin-left: 100px;
+    
+}
