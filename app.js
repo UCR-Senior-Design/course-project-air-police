@@ -73,8 +73,10 @@ app.use('/map', mapRouter)
 const viewDataRouter = require('./routes/viewData.js')
 app.use('/view-data', viewDataRouter);
 
-const researcherLogin = require('./routes/rlogin.js')
+const researcherLogin = require('./routes/rlogin.js');
 app.use('/rlogin', researcherLogin);
+const test = require('./routes/test.js');
+app.use('/test',test);
 // --------------- end of code for routing to pages ---------------
 
 
