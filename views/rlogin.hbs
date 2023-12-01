@@ -23,9 +23,17 @@
               username_msg.style.visibility = "visible";
               username_msg.innerHTML = "<span style=color:red>Username does not exist</span>";
             }
+            if(error.includes("usr2")){
+              username_msg.style.visibility = "visible";
+              username_msg.innerHTML = "<span style=color:red>Username is needed</span>";
+            }
             if(error.includes("pw1")){
               psd_msg.style.visibility = "visible";
               psd_msg.innerHTML = "<span style=color:red>Password does not match</span>";
+            }
+            if(error.includes("pw2")){
+              psd_msg.style.visibility = "visible";
+              psd_msg.innerHTML = "<span style=color:red>Password field cannot be blank</span>";
             }
           })
         </script>

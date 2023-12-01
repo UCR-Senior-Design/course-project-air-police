@@ -115,30 +115,39 @@ app.route('/rlogin').post( async (req,res) => {
   const user  = await User.findOne({username: username})
   errorpage = '/rlogin?error='
   haserror = false;
+  if(!username){
+    errorpage+= 'usr2'
+    haserror = true
+  }
   if(!user){
 
     // return res.redirect('/home') // temporary insert error shit here
     // return res.redirect('/rlogin?error=usr1')
-    errorpage += 'usr1'
+    errorpage += 'usr1';
     haserror = true;
-  }
+  } 
   else {
-
-    const response =  bcrypt.compareSync(password,user.password)
-      if(response == true){
-        if(!haserror){
-          req.session.logged_in = true
-          res.redirect('/test');
+    if(!password){
+      errorpage += 'pw2';
+      haserror = true;
+    }
+      const response =  bcrypt.compareSync(password,user.password)
+        if(response == true){
+          if(!haserror){
+            req.session.logged_in = true
+            res.redirect('/test');
+          }
         }
-      }
-      if(response == false){
-        errorpage += 'pw1'
-        haserror = true;
-      }
-  }
-  if(haserror){
-    res.redirect(errorpage)
-  }
+        if(response == false){
+          errorpage += 'pw1'
+          haserror = true;
+        }
+    }
+    
+    if(haserror){
+      res.redirect(errorpage)
+    }
+  
   // res.redirect('/rlogin?error=pw1')
 });
 
