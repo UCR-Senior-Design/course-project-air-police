@@ -3,10 +3,15 @@ const router = express.Router()
 
 // Getting all
 router.get('/', (req,res) => {
-    res.render('test', {
-        title: 'AirPolice Map',
-        body: 'success'
-    });
+    if(req.session.logged_in){
+        res.render('test', {
+            title: 'AirPolice Map',
+            body: 'success'
+        });
+    }
+    else{
+        res.redirect('/rlogin?error=ngl');
+    }
 })
 
 

@@ -1,54 +1,50 @@
 <!DOCTYPE html>
 <html lang="en"> <!-- this file is essentially a template that all the other handlebars (hbs) pages build off -->
   <body>
-    <h1 class= "display-5 fw-bold">
-        
-    </h1>
     <div class="dif">
         <p class = "display-5 fw-bold"> Researcher Login </p>
-        <div class = "et">
-            
-            <input class = "temp" name="userName" placeholder="Enter UserName here"/>
-            <div class = "temp">
-                <input name="Password" placeholder="Enter PasswordHere" type="password"/>
-            </div>
-            <div>
-                <button id = "submit",type="button" class="burt">Submit</button>
-            </div>
-            <script>
-                //{{!-- test ID: pyTest Password: 1234 currently no hashing yet. --}}
-                const { MongoClient, ServerApiVersion } = require('mongodb');
-                import user from './models/user'
-                document.getElementById("submit").addEventListener("click", function () {
-                  const client = new MongoClient(process.env.DATABASE_URL, {
-                  serverApi: {
-                    version: ServerApiVersion.v1,
-                    strict: true,
-                    deprecationErrors: true,
-                  }
-                  });
-                  await client.connect();
-                  //{{!-- c = client.db("SSProject").collection("UserName Passwords") --}}
-                  const testUser = await user.create({
-                    username:"pyTest",
-                    password:"1234",
-                    dateofEntry:date.now()
-                  })
+        <form action="/rlogin" method="POST" id="login-form">
+        <script>
+          const queryString = window.location.search;
+          const urlParams = new URLSearchParams(queryString);
+          const error = urlParams.get('error');
+          window.addEventListener('load',function() {
+            var psd_msg = document.getElementById('incorrect_password');
+            var username_msg = document.getElementById('incorrect_username');
+            var lgn_msg = document.getElementById('ngl');
+            lgn_msg.style.visibility = "hidden";
+            psd_msg.style.visibility = "hidden";
+            username_msg.style.visibility = "hidden";
+            if(error.includes("ngl")){
+              lgn_msg.style.visibility = "visible";
+              lgn_msg.innerHTML = "<span style=color:red> Must be logged in to view this sight</span>"
+            }
+            if(error.includes("usr1")){
+              username_msg.style.visibility = "visible";
+              username_msg.innerHTML = "<span style=color:red>Username does not exist</span>";
+            }
+            if(error.includes("pw1")){
+              psd_msg.style.visibility = "visible";
+              psd_msg.innerHTML = "<span style=color:red>Password does not match</span>";
+            }
+          })
+        </script>
 
-                  const user = c.findOne({username: document.getElementById("userName").value})
-                  if(user){
-                    if(user.password == document.getElementById("Password")){
-                      window.location.href = '/test'
-                    }
-                  }
-                  
-                  //{{!-- get password and username here. --}}
-                  //{{!-- check whether or not it exists --}}
-                  //{{!-- check is password is correct --}}
-                  {{!-- window.location.href = '/test' --}}
-                })
-            </script>
-        </div>
+          <p id = "ngl", name = "ngl"></p>
+          <div class="form-group">   
+                <label for="username">username</label>
+                <input class="form-control" id="username" type="username" name="username" placeholder="Enter username"/><br>
+                <p id = "incorrect_username", name = "incorrect_username"></p>
+          </div>
+          <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" class="form-control" name="password" placeholder="Enter Password">
+                <p id ="incorrect_password", name = "incorrect_password"></p>
+          </div>
+          <div>
+            <button type="submit" id = "submit" class="btn btn-primary">Submit</button> 
+          </div>
+        </form>
     </div>
   </body>
 </html>
