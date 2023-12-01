@@ -120,9 +120,6 @@ app.route('/rlogin').post( async (req,res) => {
     haserror = true
   }
   if(!user){
-
-    // return res.redirect('/home') // temporary insert error shit here
-    // return res.redirect('/rlogin?error=usr1')
     errorpage += 'usr1';
     haserror = true;
   } 

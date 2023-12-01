@@ -2,20 +2,35 @@ body{
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     background-color: aqua;
 }
-.dif{
+.loginTitle{
+    font-size: 50px;
+    font-weight: bold;
+    color: white;
+}
+.jbtn{
+    width: 100px;
+    border:none;
+    background-color:chocolate;
+}
+.loginBackground{
+    background: rgb(2,0,36);
+    background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(9,9,121,1) 38%, rgba(0,212,255,1) 100%);
+}
+.d1{
+    margin-left: 200px;
+}
+.corner{
+    width: 500px;
+    margin:10px;
+}
+.claln{
     width:500px;
     
     margin: 10px;
     margin-left: 550px;
 
 }
-.et{
-    border: 3px solid black;
-}
-.temp{
-    margin: 10px;
-    margin-left: 150px;
-}
+
 .burt{
     border: 5px transparent;
     background-color: gray;
