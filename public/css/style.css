@@ -6,6 +6,7 @@ body{
     font-size: 50px;
     font-weight: bold;
     color: white;
+    margin-left: 50px;
 }
 .jbtn{
     width: 100px;
@@ -27,8 +28,8 @@ body{
     width:500px;
     
     margin: 10px;
-    margin-left: 550px;
-
+    margin-left: 500px;
+    margin-right: 500px;
 }
 
 .burt{
