@@ -6,9 +6,9 @@ const mg = require('mongoose');
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const User = require("./models/user.js")
 const bodyParser = require('body-parser')
+var bcrypt = require('bcryptjs');
 
-
-
+const hash = process.env.hash;
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(process.env.DATABASE_URL, {
   serverApi: {
@@ -23,11 +23,17 @@ const { request } = require('http')
 async function createNewUser(usr, pswd){
   const usrs = await User.findOne({ username: usr}).lean();
   if(!usrs){
-    const test =  new User({ 
-      username: usr,
-      password: pswd
-    });
-    await test.save()
+    // const hashs = bcrypt.hashSync(pswd, hash);
+    bcrypt.genSalt(hash, function(err, salt) {
+      bcrypt.hash(pswd, salt, function(err, hashs) {
+        const test =  new User({ 
+          username: usr,
+          password: hashs
+        });
+        test.save();
+      });
+  });
+    
   }
   //add error things here
 }
@@ -117,18 +123,18 @@ app.route('/rlogin').post( async (req,res) => {
     haserror = true;
   }
   else {
-    if(password == user.password){
-      // res.redirect('/test')
-      if(!haserror){
-        req.session.logged_in = true
-        res.redirect('/test');
-      }
-    }
 
-    if(password != user.password){
-      errorpage += 'pw1'
-      haserror = true;
-    }
+    const response =  bcrypt.compareSync(password,user.password)
+      if(response == true){
+        if(!haserror){
+          req.session.logged_in = true
+          res.redirect('/test');
+        }
+      }
+      if(response == false){
+        errorpage += 'pw1'
+        haserror = true;
+      }
   }
   if(haserror){
     res.redirect(errorpage)
