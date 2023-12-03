@@ -4,7 +4,7 @@ const router = express.Router()
 // Getting all
 router.get('/', (req,res) => {
     if(req.session.logged_in){
-        res.render('test', {
+        res.render('table', {
             title: 'AirPolice Map',
             body: 'success'
         });
