@@ -157,12 +157,15 @@ def mapGeneration(data=None):
         latitude = row['geo.lat']
         longitude = row['geo.lon']
         monitor_info = f"""
-            <b>Monitor {index + 1}</b><br>
-            Serial Number: {row['sn']}<br>
-            PM2.5: {row['pm25']}<br>
-            PM10: {row['pm10']}<br>
-            Timestamp: {row['timestamp']}<br>
+    <b>Monitor {index + 1}</b><br>
+    Serial Number: {row['sn']}<br>
+    Latitude: {row['geo.lat']}<br>  
+    Longitude: {row['geo.lon']}<br>  
+    PM2.5: {row['pm25']}<br>
+    PM10: {row['pm10']}<br>
+    Timestamp: {row['timestamp']}<br>
         """
+
 
         # Create a custom icon with a smaller size (did this to better see the heatmap)
         icon = folium.Icon(icon='glyphicon-map-marker', color='blue', prefix='glyphicon', icon_size=(5, 5), shadow=False)
