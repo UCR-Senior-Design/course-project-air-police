@@ -10,6 +10,7 @@ from requests.auth import HTTPBasicAuth
 import json
 from datetime import datetime, timedelta
 from pymongo import MongoClient
+from pymongo import UpdateOne
 #input your apikey here... not sure if there is any safety issues of putting the api key into github, will look
 ## into but for now im not gonna put it in.
 
@@ -79,7 +80,7 @@ def pushDB(data):
     # keyList = list( newDict.keys())
     dic = data
     dic['_id'] = dic['sn']
-    print(dic)
+    # print(dic)
     bu = [
         UpdateOne({"_id":doc.to_dict()["_id"]}, {"$set": doc.to_dict()},upsert=True) for i,doc in dic.iterrows()
     ]
@@ -99,14 +100,20 @@ def pullData(serialNumber=None):
     if serialNumber != None:
         datas = collection.find({'sn':serialNumber})
         data = pd.DataFrame(datas)
+        data['geo.lat'] = data['geo'].apply(lambda x: x['lat'])
+        data['geo.lon'] = data['geo'].apply(lambda x: x['lon'])
+        # print(data)
+        data = data.drop('geo',axis=1)
         return data
     else:
         datas = collection.find()
         data = pd.DataFrame(datas)
+        # print(data)
         data['geo.lat'] = data['geo'].apply(lambda x: x['lat'])
         data['geo.lon'] = data['geo'].apply(lambda x: x['lon'])
+        # print(data)
+        data = data.drop('geo',axis=1)
         return data
-
 
 
 
@@ -117,7 +124,7 @@ def pullData(serialNumber=None):
 
 
 #find devices that are not outputting a pm2.5 or pm10 reading
-def notFunctional(data=pullData()):
+def notFunctional(data=None):
     ######################################################################################
     ## Inputs:                                                                          ##
     ##        data: current data to find non functional                                 ##
@@ -127,6 +134,8 @@ def notFunctional(data=pullData()):
     ##            indicates there is a problem with the device                          ##
     ######################################################################################
     # added try
+    if(data==None):
+        data = pullData()
     nonFunc = []
     reason = []
     ind = []
@@ -152,6 +161,11 @@ def notFunctional(data=pullData()):
             if row['sn'] not in nonFunc:
                 ind.append(index)
                 reason.append('pm2.5 or pm10 is not reading properly')
+                nonFunc.append(row['sn'])
+        if pd.isna(row['geo.lat']) or pd.isna(row['geo.lon']):
+            if row['sn'] not in nonFunc:
+                ind.append(index)
+                reason.append('geo.lat or geo.lon not reading properly')
                 nonFunc.append(row['sn'])
     nf = pd.DataFrame({'index': ind, 'sn': nonFunc, 'reason': reason})
     return nf
