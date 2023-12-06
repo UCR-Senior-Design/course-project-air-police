@@ -53,11 +53,10 @@ async function run() {
   }
 }
 run().catch(console.dir);
-
 // --------------- end of code for connecting to the mongoDB cloud ---------------
 
-// --------------- code for routing to pages ---------------
 
+// --------------- code for setting up the application ---------------
 // dependancies
 const express = require('express')
 const hbs = require('express-handlebars');
@@ -91,11 +90,10 @@ app.use(
     saveUninitialized: true
   })
 )
-
-//app.use(express.static('public')); // apparently easier to acccess this way
-//app.set('index', './layouts/home')
+// --------------- end of code for setting up the application ---------------
 
 
+// --------------- code for routing to pages ---------------
 // creates home page
 const homeRouter = require('./routes/home.js')
 app.use('/home', homeRouter)
@@ -132,7 +130,7 @@ app.route('/rlogin').post( async (req,res) => {
         if(response == true){
           if(!haserror){
             req.session.logged_in = true
-            res.redirect('/test');
+            res.redirect('/table');
           }
         }
         if(response == false){
@@ -148,11 +146,11 @@ app.route('/rlogin').post( async (req,res) => {
   // res.redirect('/rlogin?error=pw1')
 });
 
-const researcherLogin = require('./routes/rlogin.js');
-app.use('/rlogin',researcherLogin);
+const rloginRouter = require('./routes/rlogin.js');
+app.use('/rlogin',rloginRouter);
 
-const test = require('./routes/test.js');
-app.use('/test',test);
+const tableRouter = require('./routes/table.js');
+app.use('/table',tableRouter);
 // --------------- end of code for routing to pages ---------------
 
 
