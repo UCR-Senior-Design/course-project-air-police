@@ -12,3 +12,10 @@
 * Node.js - https://nodejs.org
 * pip install folium
 * pip install python-dotenv
+* pip install -U py-quantaq
+
+# Install node js
+* Please have node js installed to compile our project. Instructions to install node js are on this website: https://nodejs.org
+
+# How to access our local host website
+* In order to access our localhost:3000 website, run npm start on your machine. This redirects you to our website.
