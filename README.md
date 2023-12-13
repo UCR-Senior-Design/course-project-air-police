@@ -22,6 +22,17 @@
 # Install node js
 * Please have node js installed to compile our project. Instructions to install node js are on this website: https://nodejs.org
 
+# Set up .env
+* create a .env file to the main directory and add
+  ```
+  c_URI = ""
+  api_key =""
+  DataBase_URL =
+  
+  ```
+  Make sure c_URI and DataBase_URL is your mongoDB api key
+  and api_key is the quantaq, api_key
+  
 # How to access our local host website
 * In order to access our http://localhost:3000 website, run
   ```npm start```
