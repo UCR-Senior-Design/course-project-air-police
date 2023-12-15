@@ -7,7 +7,13 @@
  
   We will rely on pre-existing air quality monitors installed in various residences around the Salton Sea for real-time data collection. Python serves as our primary tool to process and evaluate the data. Additionally, we sre using MongoDB for easy retrieval of data.
   We are constructing the website with Handlebars (HTML), CSS, and node.js (javascript).
-  
+# System Architecture
+!["Sys arch"](./readme_img/sysarch.png)
+# Wire Frame
+!["wire frame"](./readme_img/wireframe.png)
+# Use Case
+!["use case"](./readme_img/usecase.png)
+
 # Dependencies
 * Node.js - https://nodejs.org
   ```
@@ -17,8 +23,15 @@
   pip install python-dotenv
   ```
   ```
-  pip install -U py-quantaq
+  pip install requests
   ```
+  ```
+  pip install pandas
+  ```
+  ```
+  pip install pymongo
+  ```
+  
 # Install node js
 * Please have node js installed to compile our project. Instructions to install node js are on this website: https://nodejs.org
 
@@ -34,6 +47,9 @@
   and api_key is the quantaq, api_key
   
 # How to access our local host website
+* run ```npm ci```
 * In order to access our http://localhost:3000 website, run
   ```npm start```
   on your machine. This redirects you to our website.
+
+
