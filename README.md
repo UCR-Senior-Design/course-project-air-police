@@ -5,10 +5,10 @@
 
   Our project is important because it will help residents better understand their local air quality, and find out if their air filters are effective or not. Our project will also provide tools to researchers so that they are to do their jobs more efficiently.
  
-  We will rely on pre-existing air quality monitors installed in various residences around the Salton Sea for real-time data collection. Python serves as our primary tool to process and evaluate the data. Additionally, we sre using MongoDB for easy retrieval of data.
+  We will rely on pre-existing air quality monitors installed in various residences around the Salton Sea for real-time data collection. Python serves as our primary tool to process and evaluate the data. Additionally, we are using MongoDB for easy retrieval of data.
   We are constructing the website with Handlebars (HTML), CSS, and node.js (javascript).
 # System Architecture
-!["Sys arch"](./readme_img/sysarch.png)
+!["system architecture"](./readme_img/systemarchitecture.png)
 # Wire Frame
 !["wire frame"](./readme_img/wireframe.png)
 # Use Case
