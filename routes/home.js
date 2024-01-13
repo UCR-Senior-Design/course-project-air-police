@@ -10,6 +10,19 @@ router.get('/', (req,res) => {
     });
 })
 
+let {PythonShell} = require('python-shell')
+
+let options = {
+    mode: 'text',
+    pythonPath: '.venv/bin/python3',
+    pythonOptions: ['-u'], // get print results in real-time
+  };
+  
+  PythonShell.run('test.py', options).then(messages=>{
+    console.log('finished');
+  });
+
+
 
 
 module.exports = router
