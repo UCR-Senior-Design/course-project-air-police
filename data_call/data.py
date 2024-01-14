@@ -9,6 +9,8 @@ import requests
 from requests.auth import HTTPBasicAuth
 import json
 from datetime import datetime, timedelta
+from pymongo import MongoClient
+from pymongo import UpdateOne
 #input your apikey here... not sure if there is any safety issues of putting the api key into github, will look
 ## into but for now im not gonna put it in.
 
@@ -53,8 +55,76 @@ def fetchData(columns = ['geo.lat', 'geo.lon','sn','pm25','pm10', 'timestamp']):
     return data
 
 
+# database stuff cant do it in its own folder
+# connect to mongoclient
+def connect():
+    connection = os.environ['c_URI']
+    client = MongoClient(connection)
+    db = client["SSProject"]
+    collection = db["Devices"]
+    return db, collection
+
+#works like a charm
+def pushDB(data):
+    #####################################################################
+    # pushes data into the database                                     #
+    # Parameters:                                                       #
+    #   data: pandas dataframe from fetchData() check data.py           #
+    #   schemas: the specific schema/ dictionery to upload data         #
+    #       Default: name is probably gonna be schema which stores in   #
+    #           the default columns of sn lon lat pm25 pm10 timestamp   #
+    # Return:                                                           #
+    #####################################################################
+    db, collection = connect()
+    # newDict = schemas
+    # keyList = list( newDict.keys())
+    dic = data
+    dic['_id'] = dic['sn']
+    # print(dic)
+    bu = [
+        UpdateOne({"_id":doc.to_dict()["_id"]}, {"$set": doc.to_dict()},upsert=True) for i,doc in dic.iterrows()
+    ]
+    collection.bulk_write(bu)
+    return
+
+
+#tested and works a little slow but works
+def pullData(serialNumber=None):
+    ######################################################################
+    # pulls all data from database                                       #
+    # PARAMETERS:                                                        #
+    # Return:                                                            #
+    #   data: returns a dson/ dataframe/ list / dataframe  of the data   #
+    ######################################################################
+    db, collection = connect()
+    if serialNumber != None:
+        datas = collection.find({'sn':serialNumber})
+        data = pd.DataFrame(datas)
+        data['geo.lat'] = data['geo'].apply(lambda x: x['lat'])
+        data['geo.lon'] = data['geo'].apply(lambda x: x['lon'])
+        # print(data)
+        data = data.drop('geo',axis=1)
+        return data
+    else:
+        datas = collection.find()
+        data = pd.DataFrame(datas)
+        # print(data)
+        data['geo.lat'] = data['geo'].apply(lambda x: x['lat'])
+        data['geo.lon'] = data['geo'].apply(lambda x: x['lon'])
+        # print(data)
+        data = data.drop('geo',axis=1)
+        return data
+
+
+
+
+
+
+
+
+
 #find devices that are not outputting a pm2.5 or pm10 reading
-def notFunctional(data=fetchData(['geo.lat', 'geo.lon', 'sn', 'pm25', 'pm10', 'timestamp'])):
+def notFunctional(data=None):
     ######################################################################################
     ## Inputs:                                                                          ##
     ##        data: current data to find non functional                                 ##
@@ -64,6 +134,8 @@ def notFunctional(data=fetchData(['geo.lat', 'geo.lon', 'sn', 'pm25', 'pm10', 't
     ##            indicates there is a problem with the device                          ##
     ######################################################################################
     # added try
+    if(data==None):
+        data = pullData()
     nonFunc = []
     reason = []
     ind = []
@@ -89,6 +161,11 @@ def notFunctional(data=fetchData(['geo.lat', 'geo.lon', 'sn', 'pm25', 'pm10', 't
             if row['sn'] not in nonFunc:
                 ind.append(index)
                 reason.append('pm2.5 or pm10 is not reading properly')
+                nonFunc.append(row['sn'])
+        if pd.isna(row['geo.lat']) or pd.isna(row['geo.lon']):
+            if row['sn'] not in nonFunc:
+                ind.append(index)
+                reason.append('geo.lat or geo.lon not reading properly')
                 nonFunc.append(row['sn'])
     nf = pd.DataFrame({'index': ind, 'sn': nonFunc, 'reason': reason})
     return nf
@@ -144,7 +221,7 @@ from folium.plugins import HeatMap
 
 def mapGeneration(data=None):
     if data is None:
-        data = fetchData(['geo.lat', 'geo.lon', 'sn', 'pm25', 'pm10', 'timestamp'])
+        data = pullData()
 
     # Generate a map with a central location of the Salton Sea area
     central_latitude = data['geo.lat'].mean()
@@ -157,12 +234,15 @@ def mapGeneration(data=None):
         latitude = row['geo.lat']
         longitude = row['geo.lon']
         monitor_info = f"""
-            <b>Monitor {index + 1}</b><br>
-            Serial Number: {row['sn']}<br>
-            PM2.5: {row['pm25']}<br>
-            PM10: {row['pm10']}<br>
-            Timestamp: {row['timestamp']}<br>
+    <b>Monitor {index + 1}</b><br>
+    Serial Number: {row['sn']}<br>
+    Latitude: {row['geo.lat']}<br>  
+    Longitude: {row['geo.lon']}<br>  
+    PM2.5: {row['pm25']}<br>
+    PM10: {row['pm10']}<br>
+    Timestamp: {row['timestamp']}<br>
         """
+
 
         # Create a custom icon with a smaller size (did this to better see the heatmap)
         icon = folium.Icon(icon='glyphicon-map-marker', color='blue', prefix='glyphicon', icon_size=(5, 5), shadow=False)
