@@ -10,6 +10,7 @@ router.get('/', (req,res) => {
     });
 })
 
+// Runs test.py once the website starts running
 let {PythonShell} = require('python-shell')
 
 let options = {
@@ -19,10 +20,8 @@ let options = {
   };
   
   PythonShell.run('test.py', options).then(messages=>{
-    console.log('finished');
+    console.log('executed test.py');
   });
-
-
 
 
 module.exports = router
