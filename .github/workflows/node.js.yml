@@ -21,16 +21,17 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+
     - name: Set up Python Environment
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.11
-      - name: Run Python commands
-        run: |
-          pip install -r requirements.txt
-          python3.11 -m venv env
-          source env/bin/activate
-          echo "VIRTUAL ENV:" $VIRTUAL_ENV
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.x
+    - name: Run Python commands
+      run: |
+        pip install -r requirements.txt
+        python3.x -m venv env
+        source env/bin/activate
+        echo "VIRTUAL ENV:" $VIRTUAL_ENV
 
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
