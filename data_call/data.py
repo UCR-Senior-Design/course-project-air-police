@@ -244,11 +244,16 @@ def mapGeneration(data=None):
         """
 
 
-        # Create a custom icon with a smaller size (did this to better see the heatmap)
-        icon = folium.Icon(icon='glyphicon-map-marker', color='blue', prefix='glyphicon', icon_size=(5, 5), shadow=False)
+        # Change the current markers to dots per Porter’s request
+        folium.CircleMarker(
+        location=[latitude, longitude],
+        radius=5,
+        popup=folium.Popup(html=monitor_info, max_width=300),
+        color='blue',
+        fill=True,
+        fill_color='blue' 
+        ).add_to(m)
 
-        marker = folium.Marker(location=[latitude, longitude], popup=folium.Popup(html=monitor_info, max_width=300), icon=icon)
-        marker.add_to(m)
 
     # Create a HeatMap layer based on PM2.5 values
     heat_data = [[row['geo.lat'], row['geo.lon'], row['pm25']] for index, row in data.dropna(subset=['geo.lat', 'geo.lon', 'pm25']).iterrows()]
