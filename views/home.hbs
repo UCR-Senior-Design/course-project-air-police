@@ -14,6 +14,7 @@
          <!-- Add the button with the ID 'viewMapButton' -->
                     <button id="viewMapButton" type="button" class="btn btn-primary btn-lg px-4 gap-3">View Map</button>
                     <button id="viewDataButton" type="button" class="btn btn-outline-secondary btn-lg px-4">View Data</button>
+                    <button id="researcherloginbutton" type="button" class="btn btn-outline-secondary btn-lg px-4">Researcher Login</button>
       </div>
     </div>
   </div>
@@ -34,5 +35,11 @@
     document.getElementByID('viewDataButton').addEventListener('click', function() {
       window.location.href = '/view-data';
     });
+    
   });
+  document.addEventListener('DOMContentLoaded',function () {
+    document.getElementById('researcherloginbutton').addEventListener('click', function () {
+      window.location.href = '/rlogin';
+    });
+  })
 </script>

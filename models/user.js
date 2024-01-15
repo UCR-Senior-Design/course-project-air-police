@@ -11,12 +11,12 @@ const userSchema = new Schema({
     type: String,
     required: true,
     default: 'username'
-  },
-  dateOfEntry: {
-    type: Date,
-    required: true,
-    default: Date.now()
   }
+  // dateOfEntry: {
+  //   type: Date,
+  //   required: true,
+  //   default: Date.now()
+  // }
 })
 
 module.exports = Item = mongoose.model('user', userSchema)
