@@ -15,7 +15,7 @@ from pymongo import UpdateOne
 ## into but for now im not gonna put it in.
 
 apiKey = os.environ['api_key']
-mapKey = os.environ['map_key']
+#mapKey = os.environ['map_key']
 
 
 
@@ -247,7 +247,7 @@ def mapGeneration(data=None):
         # Change the current markers to dots per Porter’s request
         folium.CircleMarker(
         location=[latitude, longitude],
-        radius=5,
+        radius=1,
         popup=folium.Popup(html=monitor_info, max_width=300),
         color='blue',
         fill=True,
