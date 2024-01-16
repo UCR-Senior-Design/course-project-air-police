@@ -70,22 +70,44 @@ def pushDB(data):
     # pushes data into the database                                     #
     # Parameters:                                                       #
     #   data: pandas dataframe from fetchData() check data.py           #
-    #   schemas: the specific schema/ dictionery to upload data         #
-    #       Default: name is probably gonna be schema which stores in   #
-    #           the default columns of sn lon lat pm25 pm10 timestamp   #
     # Return:                                                           #
     #####################################################################
     db, collection = connect()
     # newDict = schemas
     # keyList = list( newDict.keys())
     dic = data
-    dic['_id'] = dic['sn']
+    collection.insert_many(dic)
     # print(dic)
-    bu = [
-        UpdateOne({"_id":doc.to_dict()["_id"]}, {"$set": doc.to_dict()},upsert=True) for i,doc in dic.iterrows()
-    ]
-    collection.bulk_write(bu)
+    # this shit is used to update
     return
+
+def getUniqueDevices():
+    ######################################################################
+    # gets all of the unique devices                                     #
+    # PARAMETERS:                                                        #
+    # Return:                                                            #
+    #   collection.distinct('Device'): list of unique device names       #
+    ######################################################################
+    db, collection = connect()
+    return collection.distinct('Device')
+
+
+#should  work like how pullData used to work. 
+def getAllRecent():
+    ######################################################################
+    # pulls Most recent data from database for each unique sn            #
+    # PARAMETERS:                                                        #
+    # Return:                                                            #
+    #   data: returns a dson/ dataframe/ list / dataframe  of recent data#
+    ######################################################################
+    db, collection = connect()
+    devices = getUniqueDevices()
+    recent = []
+    for device in devices:
+        query = {'sn': device}
+        recent.append(collection.find_one(query, sort=[('timestamp', -1)]))
+    recents = pd.DataFrame(recent)
+    return recents
 
 
 #tested and works a little slow but works
@@ -95,6 +117,7 @@ def pullData(serialNumber=None):
     # PARAMETERS:                                                        #
     # Return:                                                            #
     #   data: returns a dson/ dataframe/ list / dataframe  of the data   #
+    #         of all Data historical too.                                #
     ######################################################################
     db, collection = connect()
     if serialNumber != None:
@@ -135,7 +158,7 @@ def notFunctional(data=None):
     ######################################################################################
     # added try
     if(data==None):
-        data = pullData()
+        data = getAllRecent()
     nonFunc = []
     reason = []
     ind = []
@@ -221,7 +244,7 @@ from folium.plugins import HeatMap
 
 def mapGeneration(data=None):
     if data is None:
-        data = pullData()
+        data = getAllRecent()
 
     # Generate a map with a central location of the Salton Sea area
     central_latitude = data['geo.lat'].mean()
