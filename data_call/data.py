@@ -31,13 +31,16 @@ def fetchData(columns = ['geo.lat', 'geo.lon','sn','pm25','pm10', 'timestamp']):
     # apiKey
     auth = HTTPBasicAuth(apiKey,"")
     #uses requests to get data from our network
-    req = requests.request("get","https://api.quant-aq.com/device-api/v1/data/most-recent/?network_id=9", headers = None, auth = auth)
-    ##print (req)
+    # uses try except for error handling
+    try:
+        req = requests.request("get","https://api.quant-aq.com/device-api/v1/data/most-recent/?network_id=9", headers = None, auth = auth)
+    except:
+        print("Error Incorrect API Key")
+        return None
+
+
     #loads the request into a json formatt
     djson = req.json()
-    ##print (djson)
-
-    
     #filters data for specific columns
     edata = {col: [] for col in columns}
     ##loops through all entries in djson data section
@@ -66,76 +69,76 @@ def connect():
 
 #works like a charm
 def pushDB(data):
-    #####################################################################
-    # pushes data into the database                                     #
-    # Parameters:                                                       #
-    #   data: pandas dataframe from fetchData() check data.py           #
-    # Return:                                                           #
-    #####################################################################
+    ######################################################################
+    ## pushes data into the database                                    ##
+    ## Parameters:                                                      ##
+    ##   data: pandas dataframe from fetchData() check data.py          ##
+    ## Return:                                                          ##
+    ######################################################################
     db, collection = connect()
-    # newDict = schemas
-    # keyList = list( newDict.keys())
-    dic = data
-    collection.insert_many(dic)
-    # print(dic)
-    # this shit is used to update
-    return
+    for i, d in data.iterrows():
+        collection.insert_one(d.to_dict())
+    # collection.insert_one(data.to_dict())
 
 def getUniqueDevices():
-    ######################################################################
-    # gets all of the unique devices                                     #
-    # PARAMETERS:                                                        #
-    # Return:                                                            #
-    #   collection.distinct('Device'): list of unique device names       #
-    ######################################################################
+    #######################################################################
+    ## gets all of the unique devices                                    ##
+    ## PARAMETERS:                                                       ##
+    ## Return:                                                           ##
+    ##   collection.distinct('Device'): list of unique device names      ##
+    #######################################################################
     db, collection = connect()
-    return collection.distinct('Device')
+    return collection.distinct('sn')
 
 
 #should  work like how pullData used to work. 
 def getAllRecent():
-    ######################################################################
-    # pulls Most recent data from database for each unique sn            #
-    # PARAMETERS:                                                        #
-    # Return:                                                            #
-    #   data: returns a dson/ dataframe/ list / dataframe  of recent data#
-    ######################################################################
+    #########################################################################
+    ## pulls Most recent data from database for each unique sn             ##
+    ## PARAMETERS:                                                         ##
+    ## Return:                                                             ##
+    ##   data: returns a dson/ dataframe/ list / dataframe  of recent data ##
+    #########################################################################
     db, collection = connect()
     devices = getUniqueDevices()
     recent = []
     for device in devices:
         query = {'sn': device}
         recent.append(collection.find_one(query, sort=[('timestamp', -1)]))
-    recents = pd.DataFrame(recent)
+
+    recents = pd.DataFrame(recent).drop('_id', axis=1)
+    # recents.drop('_id', axis=1)
     return recents
 
 
-#tested and works a little slow but works
+#tested and works a little slow but works unless your doing a data visualization you do not need to use this.
 def pullData(serialNumber=None):
-    ######################################################################
-    # pulls all data from database                                       #
-    # PARAMETERS:                                                        #
-    # Return:                                                            #
-    #   data: returns a dson/ dataframe/ list / dataframe  of the data   #
-    #         of all Data historical too.                                #
-    ######################################################################
+    #######################################################################
+    ## pulls all data from database                                      ##
+    ## PARAMETERS:                                                       ##
+    ## Return:                                                           ##
+    ##   data: returns a dson/ dataframe/ list / dataframe  of the data  ##
+    ##         of all Data historical too.                               ##
+    #######################################################################
     db, collection = connect()
     if serialNumber != None:
         datas = collection.find({'sn':serialNumber})
         data = pd.DataFrame(datas)
-        data['geo.lat'] = data['geo'].apply(lambda x: x['lat'])
-        data['geo.lon'] = data['geo'].apply(lambda x: x['lon'])
-        # print(data)
-        data = data.drop('geo',axis=1)
+        # data['geo.lat'] = data['geo'].apply(lambda x: x['lat'])
+        # data['geo.lon'] = data['geo'].apply(lambda x: x['lon'])
+        # # print(data)
+        # data = data.drop('geo',axis=1)
+        data = data.drop(columns=['_id'])
         return data
     else:
         datas = collection.find()
         data = pd.DataFrame(datas)
         # print(data)
-        data['geo.lat'] = data['geo'].apply(lambda x: x['lat'])
-        data['geo.lon'] = data['geo'].apply(lambda x: x['lon'])
-        # print(data)
-        data = data.drop('geo',axis=1)
+        # data['geo.lat'] = data['geo'].apply(lambda x: x['lat'])
+        # data['geo.lon'] = data['geo'].apply(lambda x: x['lon'])
+        # # print(data)
+        # data = data.drop('geo',axis=1)
+        data = data.drop(columns=['_id'])
         return data
 
 
@@ -195,36 +198,7 @@ def notFunctional(data=None):
 
 
 
-def toJson(data,fileName="temp.json"):
-    ######################################################################################
-    ## Inputs:                                                                          ##
-    ##        data: current data to find non functional                                 ##
-    ## Output:                                                                          ##
-    ##        jf: json file                                                             ##
-    ######################################################################################
 
-    ## Code currently works but will be fixed later. have a better version of writing to a json file. but currently do not feel like porting over.
-    datas = data.fillna('null')
-    db = datas.to_dict(orient='records')
-    with open(fileName, 'w') as f:
-        json.dump(db,f)
-    # d = datas.to_dict(orient='records')
-    # length = len(d)
-    # pos = 1
-    # with open(fileName, 'w') as f:
-    #     f.write('[\n')
-    #     for record in d:
-    #         json.dump(record, f)
-    #         if pos == length:
-    #             f.write('\n')
-    #         else:
-    #             f.write(',\n')
-    #         pos += 1
-    #     f.write(']')
-
-#generate heat map function
-## might move this to javascript
-#https://developers.google.com/maps/documentation/javascript/
 
 
 
