@@ -15,7 +15,6 @@ from pymongo import UpdateOne
 ## into but for now im not gonna put it in.
 
 apiKey = os.environ['api_key']
-mapKey = os.environ['map_key']
 
 
 
