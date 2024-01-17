@@ -1,4 +1,3 @@
-
 // --------------- code for connecting to the mongoDB cloud ---------------
 
 require('dotenv').config()
