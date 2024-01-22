@@ -11,6 +11,7 @@ import json
 from datetime import datetime, timedelta
 from pymongo import MongoClient
 from pymongo import UpdateOne
+import matplotlib.pyplot as plt
 #input your apikey here... not sure if there is any safety issues of putting the api key into github, will look
 ## into but for now im not gonna put it in.
 
@@ -265,3 +266,24 @@ def mapGeneration(data=None):
 
     # Open the HTML file in the default web browser
     webbrowser.open(html_file_path)
+
+#####Added function to perform data analysis on the distribution of PM2.5 values#####
+    
+###############################################################################################################
+####                                            dataAnalysis                                               ####
+####            Added function to perform data analysis on the distribution of PM2.5 value                 ####
+####    Will focus in the future on expanding on this data analysis to create visualizations that can be   #### 
+####            consistently updated and showing the distribution over time of PM2.5 values                ####
+###############################################################################################################
+
+def dataAnalysis():
+    
+
+    #makes plot of pm2.5 values
+    plt.figure(figsize=(10, 6))
+    plt.hist(data['pm25'].dropna(), bins=20, color='skyblue', edgecolor='black')
+    plt.title('Distribution of PM2.5 Values')
+    plt.xlabel('PM2.5')
+    plt.ylabel('Frequency')
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+    plt.show()
