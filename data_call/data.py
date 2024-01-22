@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 ## into but for now im not gonna put it in.
 
 apiKey = os.environ['api_key']
-mapKey = os.environ['map_key']
+#mapKey = os.environ['map_key']
 
 
 
@@ -277,7 +277,9 @@ def mapGeneration(data=None):
 ###############################################################################################################
 
 def dataAnalysis():
+    
 
+    #makes plot of pm2.5 values
     plt.figure(figsize=(10, 6))
     plt.hist(data['pm25'].dropna(), bins=20, color='skyblue', edgecolor='black')
     plt.title('Distribution of PM2.5 Values')
