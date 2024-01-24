@@ -6,7 +6,7 @@ const { MongoClient, ServerApiVersion } = require('mongodb');
 const User = require("./models/user.js")
 const bodyParser = require('body-parser')
 var bcrypt = require('bcryptjs');
-
+var jwt = require('jsonwebtoken');
 const hash = process.env.hash;
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(process.env.DATABASE_URL, {
@@ -129,6 +129,7 @@ app.route('/rlogin').post( async (req,res) => {
         if(response == true){
           if(!haserror){
             req.session.logged_in = true
+            req.session.token = jwt.sign({user: user.username}, process.env.private_key);
             res.redirect('/table');
           }
         }
