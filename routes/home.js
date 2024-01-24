@@ -19,9 +19,7 @@ let options = {
     pythonOptions: ['-u'], // get print results in real-time
   };
   
-  PythonShell.run('data_call/data.py', options).then(messages=>{
-    console.log('executed data.py');
-  });
+  PythonShell.run('test.py', options);
 
 
 module.exports = router
