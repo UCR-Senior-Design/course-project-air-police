@@ -19,8 +19,8 @@ const client = new MongoClient(process.env.DATABASE_URL, {
 const { request } = require('http')
 
 
-async function createNewUser(usr, pswd){
-  const usrs = await User.findOne({ username: usr}).lean();
+async function createNewUser(eml, usr, pswd){
+  const usrs = await User.findOne( {$or: [{ username: usr}, {email:eml}]}).lean();
   if(!usrs){
     // const hashs = bcrypt.hashSync(pswd, hash);
     bcrypt.genSalt(hash, function(err, salt) {
