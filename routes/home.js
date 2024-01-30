@@ -19,7 +19,7 @@ let options = {
     pythonOptions: ['-u'], // get print results in real-time
   };
   
-  PythonShell.run('test.py', options);
+  PythonShell.run('data_call/generateMap.py', options);
 
 
 module.exports = router
