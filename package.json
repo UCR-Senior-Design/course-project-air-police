@@ -6,6 +6,7 @@
     "express-handlebars": "^7.1.2",
     "express-session": "^1.17.3",
     "handlebars": "^4.7.8",
+    "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.2.0",
     "mongoose": "^8.0.1",
     "python-shell": "^5.0.0"

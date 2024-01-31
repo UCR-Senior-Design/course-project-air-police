@@ -107,6 +107,19 @@ app.use('/map', mapRouter)
 const viewDataRouter = require('./routes/viewData.js')
 app.use('/view-data', viewDataRouter);
 
+app.route('/invite').post( async (req, res) =>{
+
+})
+const inviteRouter = require('./routes/invite.js');
+app.use('/invite',inviteRouter);
+
+app.route('/register').post( async (req, res) => {
+
+})
+const registerRouter = require('./routes/register.js');
+app.use('/register',registerRouter);
+
+
 app.route('/rlogin').post( async (req,res) => {
   const {username, password} = req.body;
   const user  = await User.findOne({username: username})
