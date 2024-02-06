@@ -18,12 +18,12 @@
         <script>
           const queryString = window.location.search;
           const urlParams = new URLSearchParams(queryString);
-          const error = urlParams.get('error');
           
           window.addEventListener('DOMContentLoaded',function() {
             const token = urlParams.get('token');
             var tkninp = document.getElementById('tokenINP');
             tkninp.value = token;
+          const error = urlParams.get('error'); 
             var psd_msg = document.getElementById('incorrect_password');
             var username_msg = document.getElementById('incorrect_username');
             var lgn_msg = document.getElementById('ngl');
@@ -42,7 +42,7 @@
             }
             if(error.includes("pw1")){
               psd_msg.style.visibility = "visible";
-              psd_msg.innerHTML = "<span style=color:red>Password does not meet requirements</span>";
+              psd_msg.innerHTML = "<span style=color:red>Password does not meet requirements ( 1 lower 1 upper 1 number and 1 special character minimum of 8 characters</span>";
             }
             if(error.includes("pw2")){
               psd_msg.style.visibility = "visible";

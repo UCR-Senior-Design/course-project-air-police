@@ -26,6 +26,7 @@ async function createNewUser(eml, usr, pswd){
     bcrypt.genSalt(hash, function(err, salt) {
       bcrypt.hash(pswd, salt, function(err, hashs) {
         const test =  new User({ 
+          email: eml,
           username: usr,
           password: hashs
         });
@@ -148,10 +149,13 @@ app.use('/invite',inviteRouter);
 
 app.route('/register').post( async (req, res) => {
   const {token, username, password, retype} = req.body;
+  if(!token){
+    res.redirect('/home');
+  }
   // const urlParams = new URLSearchParams(window.location.search);
   // const myParam = urlParams.get('myParam');
   // const token = urlParams.get('token')[0];
-  var errorpage = "/register?token=" + token + "?error="
+  var errorpage = "/register?token=" + token + "&error="
   var haserror = false;
   if(!username){
     errorpage+='usr2';
@@ -168,13 +172,18 @@ app.route('/register').post( async (req, res) => {
       haserror = true;
     }
     //add regex checking here
+    const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if(!passwordPattern.test(password)){
+      haserror = true;
+      errorpage += 'pw1';
+    }
     if(password != retype){
       errorpage += 'pw3';
       haserror = true;
     }
     if(!token){
       haserror = true;
-      res.redirect('/home');
+      // res.redirect('/home');
     }
     if(!haserror){
       var email;
@@ -184,16 +193,17 @@ app.route('/register').post( async (req, res) => {
           if(error){
             haserror = true;
             //  add errors here redirecting
-            res.redirect('/home');
+            // res.redirect('/home');
           }
           email = decoded.email;
+          console.log(email);
         });
       await createNewUser(email, username, password);
       res.redirect('/rlogin');
     }
   }
   if(haserror){
-    res.redirect('/home');
+    res.redirect(errorpage);
   }
 })
 const registerRouter = require('./routes/register.js');
