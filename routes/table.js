@@ -8,9 +8,11 @@ router.get('/', (req,res) => {
             title: 'AirPolice Map',
             body: 'success'
         });
+        res.sendStatus(200); 
     }
     else{
         res.redirect('/rlogin?error=ngl');
+        res.sendStatus(400); 
     }
 })
 
