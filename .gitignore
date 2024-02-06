@@ -1,4 +1,3 @@
-
 export.html
 data.json
 exe.json
@@ -13,4 +12,4 @@ test.py
 data_call/pycache
 data_call/__pycache__
 views/map.hbs
-
+data_call/table.json

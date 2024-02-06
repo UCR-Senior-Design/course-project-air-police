@@ -9,16 +9,16 @@ from requests.auth import HTTPBasicAuth
 
 apiKey = os.environ['api_key']
 
-def fetchData(columns = ['geo.lat', 'geo.lon','sn','pm25','pm10', 'timestamp']):
+def fetchData(columns = ['sn','pm25','pm10', 'timestamp']):
     ######################################################################################
     ## Inputs:                                                                          ##
     ##        columns: list of columns the data should return                           ##
-    ##             default: ['geo.lat', 'geo.lon','sn','pm25','pm10','timestamp']       ##
+    ##             default: ['sn','pm25','pm10','timestamp']       ##
     ## Output:                                                                          ##
-    ##        data: dataframe of the retrieved data                                     ##
+    ##        data: json file with  the sensor data                ##
     ######################################################################################
 
-    # apiKey
+     # apiKey
     auth = HTTPBasicAuth(apiKey,"")
     #uses requests to get data from our network
     # uses try except for error handling
@@ -49,6 +49,6 @@ def fetchData(columns = ['geo.lat', 'geo.lon','sn','pm25','pm10', 'timestamp']):
         json.dump(edata, file)
 
     # prints after converting dictionary to dataframe object
-    print(pd.DataFrame(edata))
+    #print(pd.DataFrame(edata))
 
 fetchData()
