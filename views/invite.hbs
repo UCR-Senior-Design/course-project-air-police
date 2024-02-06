@@ -1,71 +1,22 @@
 <!DOCTYPE html>
 <html lang="en", class = "loginBackground">
-  <body class = "loginBackground">
-    <div class = "corner">
-      <button id = "back" class = "jbtn">back</button>
-      <script>
-        document.getElementById("back").addEventListener("click",function() {
-          window.location.href = '/home';
-        });
-      </script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
+  <script>
+    //{{!-- use this script to load the already invited users --}}
+  </script>
+  <body>
+    <div>
+      {{!-- this box is for the viewing the already invited users --}}
     </div>
-    <div class="claln">
-        <p class = "loginTitle"> Researcher Login </p>
-        {{!-- change class for styling --}}
-        <form action="/rlogin" method="POST" id="login-form">
-        {{!-- if logins were unsuccessful --}}
-        {{!-- based off harrisons old project --}}
-        <script>
-          const queryString = window.location.search;
-          const urlParams = new URLSearchParams(queryString);
-          const error = urlParams.get('error');
-          window.addEventListener('load',function() {
-            var psd_msg = document.getElementById('incorrect_password');
-            var username_msg = document.getElementById('incorrect_username');
-            var lgn_msg = document.getElementById('ngl');
-            lgn_msg.style.visibility = "hidden";
-            psd_msg.style.visibility = "hidden";
-            username_msg.style.visibility = "hidden";
-            if(error.includes("ngl")){
-            }
-            if(error.includes("usr1")){
-              username_msg.style.visibility = "visible";
-              username_msg.innerHTML = "<span style=color:red>Username does not exist</span>";
-            }
-            if(error.includes("usr2")){
-              username_msg.style.visibility = "visible";
-              username_msg.innerHTML = "<span style=color:red>Username is needed</span>";
-            }
-            if(error.includes("pw1")){
-              psd_msg.style.visibility = "visible";
-              psd_msg.innerHTML = "<span style=color:red>Password does not match</span>";
-            }
-            if(error.includes("pw2")){
-              psd_msg.style.visibility = "visible";
-              psd_msg.innerHTML = "<span style=color:red>Password field cannot be blank</span>";
-            }
-          })
-        </script>
-          {{!-- temporary error page maybe include if needed --}}
-          <p id = "ngl", name = "ngl"></p>
-          {{!-- username input group --}}
-          <div class="form-group">   
-                <label for="username" style = color:white>username</label>
-                <input class="form-control" id="username" type="username" name="username" placeholder="Enter username"/><br>
-                <p id = "incorrect_username", name = "incorrect_username"></p>
-          </div>
-          {{!-- password input group change class for styling --}}
-          <div class="form-group">
-                <label for="password" style=color:white>Password</label>
-                <input type="password" id="password" class="form-control" name="password" placeholder="Enter Password">
-                <p id ="incorrect_password", name = "incorrect_password"></p>
-          </div>
-          {{!-- submit button --}}
-          <div class = "d1">
-            <button type="submit" id = "submit" class="jbtn">Submit</button> 
-          </div>
-        </form>
+    <div>
+      <form id="invite" action="/invite" method="POST">
+        <input name="email" class="email"placeholder="Enter Email of Researcher">
+        <button type="submit" id = "submit" class="jbtn">Submit</button> 
+      </form>
     </div>
+    <script>
+    </script>
   </body>
 </html>
 

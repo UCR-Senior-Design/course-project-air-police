@@ -12,14 +12,18 @@
     <div class="claln">
         <p class = "loginTitle"> Researcher Login </p>
         {{!-- change class for styling --}}
-        <form action="/rlogin" method="POST" id="login-form">
+        <form action="/register" method="POST" id="login-form">
         {{!-- if logins were unsuccessful --}}
         {{!-- based off harrisons old project --}}
         <script>
           const queryString = window.location.search;
           const urlParams = new URLSearchParams(queryString);
           const error = urlParams.get('error');
-          window.addEventListener('load',function() {
+          
+          window.addEventListener('DOMContentLoaded',function() {
+            const token = urlParams.get('token');
+            var tkninp = document.getElementById('tokenINP');
+            tkninp.value = token;
             var psd_msg = document.getElementById('incorrect_password');
             var username_msg = document.getElementById('incorrect_username');
             var lgn_msg = document.getElementById('ngl');
@@ -30,7 +34,7 @@
             }
             if(error.includes("usr1")){
               username_msg.style.visibility = "visible";
-              username_msg.innerHTML = "<span style=color:red>Username does not exist</span>";
+              username_msg.innerHTML = "<span style=color:red>Username exists</span>";
             }
             if(error.includes("usr2")){
               username_msg.style.visibility = "visible";
@@ -38,14 +42,21 @@
             }
             if(error.includes("pw1")){
               psd_msg.style.visibility = "visible";
-              psd_msg.innerHTML = "<span style=color:red>Password does not match</span>";
+              psd_msg.innerHTML = "<span style=color:red>Password does not meet requirements</span>";
             }
             if(error.includes("pw2")){
               psd_msg.style.visibility = "visible";
               psd_msg.innerHTML = "<span style=color:red>Password field cannot be blank</span>";
             }
+            if(error.includes("pw3")){
+              psd_msg.style.visibility = "visible";
+              psd_msg.innerHTML = "<span style=color:red>Retyped password does not match</span>";
+            }
           })
         </script>
+          <div class = "form-group" id = "tkn">
+            <input style = "hidden" id="tokenINP" name = "token">
+          </div>
           {{!-- temporary error page maybe include if needed --}}
           <p id = "ngl", name = "ngl"></p>
           {{!-- username input group --}}
@@ -59,6 +70,11 @@
                 <label for="password" style=color:white>Password</label>
                 <input type="password" id="password" class="form-control" name="password" placeholder="Enter Password">
                 <p id ="incorrect_password", name = "incorrect_password"></p>
+          </div>
+          <div class="form-group">
+                <label for="retype" style=color:white>Retype Password</label>
+                <input type="retype" id="retype" class="form-control" name="retype" placeholder="Retype Password">
+                <p id ="notMatch", name = "notMatch"></p>
           </div>
           {{!-- submit button --}}
           <div class = "d1">

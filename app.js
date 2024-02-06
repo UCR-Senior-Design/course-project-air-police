@@ -108,13 +108,93 @@ const viewDataRouter = require('./routes/viewData.js')
 app.use('/view-data', viewDataRouter);
 
 app.route('/invite').post( async (req, res) =>{
+  const {email} = req.body;
+  const token = jwt.sign({ email: email },
+    process.env.key,
+    {
+      algorithm: 'HS256',
+      allowInsecureKeySizes: true,
+      expiresIn: 7200, // 24 hours
+    });
+  const registersite = "http://localhost:3000/register?token=";
+  const site = registersite + token;
+  var data = {
+    link: site
+  }
+  var message = `
+  Hello ${email},
 
+This email is to let you sign up for  your account on the Salton Sea Air Filtration Website.
+
+Please use this link 
+
+${site}
+
+If you have any questions please email Professor Porter.
+
+If you are not a part of his team, please ignore this message.
+
+Best wishes,
+EmailJS team
+  `
+  // email the message here
+  console.log(message);
+  res.redirect('/invite');
+  // emailjs.init({publicKey:process.env.emjs});
+  // emailjs.send(process.env.sid, process.env.tempid, data);
 })
 const inviteRouter = require('./routes/invite.js');
 app.use('/invite',inviteRouter);
 
 app.route('/register').post( async (req, res) => {
-
+  const {token, username, password, retype} = req.body;
+  // const urlParams = new URLSearchParams(window.location.search);
+  // const myParam = urlParams.get('myParam');
+  // const token = urlParams.get('token')[0];
+  var errorpage = "/register?token=" + token + "?error="
+  var haserror = false;
+  if(!username){
+    errorpage+='usr2';
+    haserror = true;
+  }
+  const user = await User.findOne({username:username});
+  if(user){
+    errorpage+= 'usr1';
+    haserror = true;
+  }
+  else{
+    if(!password){
+      errorpage+= 'pw2';
+      haserror = true;
+    }
+    //add regex checking here
+    if(password != retype){
+      errorpage += 'pw3';
+      haserror = true;
+    }
+    if(!token){
+      haserror = true;
+      res.redirect('/home');
+    }
+    if(!haserror){
+      var email;
+      jwt.verify(token, 
+        process.env.key,
+        (error, decoded)=>{
+          if(error){
+            haserror = true;
+            //  add errors here redirecting
+            res.redirect('/home');
+          }
+          email = decoded.email;
+        });
+      await createNewUser(email, username, password);
+      res.redirect('/rlogin');
+    }
+  }
+  if(haserror){
+    res.redirect('/home');
+  }
 })
 const registerRouter = require('./routes/register.js');
 app.use('/register',registerRouter);

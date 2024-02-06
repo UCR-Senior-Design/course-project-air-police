@@ -15,7 +15,7 @@ let {PythonShell} = require('python-shell')
 
 let options = {
     mode: 'text',
-    pythonPath: '.venv/bin/python3',
+    pythonPath: '.venv/bin/python',
     pythonOptions: ['-u'], // get print results in real-time
   };
   
