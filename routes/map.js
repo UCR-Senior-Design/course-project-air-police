@@ -7,6 +7,7 @@ router.get('/', (req,res) => {
         title: 'AirPolice Map'
         
     });
+    res.sendStatus(200); 
 })
 
 

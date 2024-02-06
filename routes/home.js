@@ -6,8 +6,8 @@ const User = require('../models/user')
 router.get('/', (req,res) => {
     res.render('home', {
         title: 'AirPolice'
-        //layout: 'home'
     });
+    res.sendStatus(200); 
 })
 
 // Runs test.py once the website starts running
@@ -19,7 +19,7 @@ let options = {
     pythonOptions: ['-u'], // get print results in real-time
   };
   
-  PythonShell.run('data_call/generateMap.py', options);
+PythonShell.run('data_call/generateMap.py', options);
 
 
 module.exports = router
