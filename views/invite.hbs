@@ -4,6 +4,17 @@
 
   <script>
     //{{!-- use this script to load the already invited users --}}
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const error = urlParams.get('error');
+    window.addEventListener('load',function() {
+        var existmsg = document.getElementById('emailAdded');
+        existmsg.style.visibility = "hidden";
+        if(error.includes("usrE")){
+          existmsg.style.visibility = "visible";
+          existmsg.innerHTML = "<span style=color:red>Researcher email already added</span>";
+        }
+    });
   </script>
   <body>
     <div>
@@ -13,6 +24,7 @@
       <form id="invite" action="/invite" method="POST">
         <input name="email" class="email"placeholder="Enter Email of Researcher">
         <button type="submit" id = "submit" class="jbtn">Submit</button> 
+        <p id ="emailAdded", name = "emailAdded"></p>
       </form>
     </div>
     <script>

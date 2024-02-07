@@ -23,7 +23,7 @@ async function createNewUser(eml, usr, pswd){
   const usrs = await User.findOne( {$or: [{ username: usr}, {email:eml}]}).lean();
   if(!usrs){
     // const hashs = bcrypt.hashSync(pswd, hash);
-    bcrypt.genSalt(hash, function(err, salt) {
+    bcrypt.genSalt(parseInt(process.env.rounds_num), function(err, salt) {
       bcrypt.hash(pswd, salt, function(err, hashs) {
         const test =  new User({ 
           email: eml,
@@ -110,6 +110,11 @@ app.use('/view-data', viewDataRouter);
 
 app.route('/invite').post( async (req, res) =>{
   const {email} = req.body;
+  const user = await User.findOne({email:email});
+  if(user){
+    res.redirect('/invite?error="usrE');
+    return;
+  }
   const token = jwt.sign({ email: email },
     process.env.key,
     {
@@ -172,7 +177,7 @@ app.route('/register').post( async (req, res) => {
       haserror = true;
     }
     //add regex checking here
-    const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&-])[A-Za-z\d@$!%*?&-]{8,}$/;
     if(!passwordPattern.test(password)){
       haserror = true;
       errorpage += 'pw1';
@@ -198,8 +203,14 @@ app.route('/register').post( async (req, res) => {
           email = decoded.email;
           console.log(email);
         });
-      await createNewUser(email, username, password);
-      res.redirect('/rlogin');
+      const user = await User.findOne({email: email});
+      if(!user){
+        await createNewUser(email, username, password);
+        res.redirect('/rlogin');
+      }
+      else{
+        res.redirect('/rlogin?error=ngl2');
+      }
     }
   }
   if(haserror){

@@ -27,6 +27,12 @@
             psd_msg.style.visibility = "hidden";
             username_msg.style.visibility = "hidden";
             if(error.includes("ngl")){
+              lgn_msg.style.visibility = "visible";
+              lgn_msg.innerHTML = "<span style=color:red>You need to be logged in</span>";
+            }
+            if(error.includes("ngl2")){
+              lgn_msg.style.visibility = "visible";
+              lgn_msg.innerHTML = "<span style=color:red>User already Exists</span>";
             }
             if(error.includes("usr1")){
               username_msg.style.visibility = "visible";
