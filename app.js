@@ -104,10 +104,21 @@ app.use('', homeRouter)
 const mapRouter = require('./routes/map.js')
 app.use('/map', mapRouter)
 
-//creates provisional in-progress data viewing page
-const viewDataRouter = require('./routes/viewData.js')
+
+app.get('/work-in-progress', (req, res) => {
+  res.render('work-in-progress', {
+      title: 'Work in Progress'
+  });
+});
+//////////
+
+///////////////////////////
+
+//viewDataRouter
+const viewDataRouter = require('./routes/viewData.js');
 app.use('/view-data', viewDataRouter);
 
+//////////////////////
 app.route('/invite').post( async (req, res) =>{
   const {email} = req.body;
   const user = await User.findOne({email:email});
@@ -265,6 +276,20 @@ app.use('/rlogin',rloginRouter);
 
 const tableRouter = require('./routes/table.js');
 app.use('/table',tableRouter);
+
+////////////////////////////////////////////////////////////////
+const router = express.Router();
+
+//route for the provisional page
+router.get('/work-in-progress', (req, res) => {
+    res.render('work-in-progress', {
+        title: 'Work in Progress'
+    });
+});
+
+//Export the router
+module.exports = router;
+/////////////////////////////////////////////////////////////
 // --------------- end of code for routing to pages ---------------
 
 
