@@ -7,7 +7,7 @@ router.get('/', (req,res) => {
     res.render('home', {
         title: 'AirPolice'
     });
-    res.sendStatus(200); 
+    res.status(200); 
 })
 
 // Runs test.py once the website starts running
