@@ -7,6 +7,6 @@ router.get('/', (req, res) => {
   }else{
     res.render('rlogin', { title: 'LOGIN ', displayText: 'researcher login test' });
   }
-  res.sendStatus(200); 
+  res.status(200); 
 })
 module.exports = router
