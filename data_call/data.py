@@ -196,6 +196,34 @@ def notFunctional(data=None):
     return nf
 
 
+# this should help with some of the data visualizations.
+def pullDataTime(serialNumber, time=30):
+    #########################################################################
+    ## pulls data from specific serialNumber within the last time days     ##
+    ## PARAMETERS:                                                         ##
+    ##          serialNumber: the serial number of the data needed         ##
+    ##          time: how far back do you want the data to pull in (days)  ##
+    ## Return:                                                             ##
+    ##   data: returns a dson/ dataframe/ list / dataframe  of recent data ##
+    #########################################################################
+    ## check if serialNumber is None
+    if(serialNumber == None):
+        return pd.DataFrame()
+    ## SELECT * FROM Collection WHERE SN = serialNumber AND timestamp > curDate - time;
+    ## Honestly regretting using MongoDB rather than mySQL
+    db, collection, client = connect()
+    curDate = datetime.now()
+    threshold = timedelta(days=time)
+    query = {
+        'sn':serialNumber, 
+        'timestamp': {
+            '$lt': (curDate - threshold).strftime('%y%m%d %H:%M:%S')
+        }
+    }
+    data = collection.find(query)
+    pdData = pd.DataFrame(data)
+    client.close()
+    return pdData
 
 
 
