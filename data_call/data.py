@@ -299,14 +299,42 @@ def mapGeneration(data=None):
 ####            consistently updated and showing the distribution over time of PM2.5 values                ####
 ###############################################################################################################
 
-def dataAnalysis():
+#def dataAnalysis():
     
 
     #makes plot of pm2.5 values
+   # plt.figure(figsize=(10, 6))
+   # plt.hist(data['pm25'].dropna(), bins=20, color='skyblue', edgecolor='black')
+  #  plt.title('Distribution of PM2.5 Values')
+  #  plt.xlabel('PM2.5')
+  #  plt.ylabel('Frequency')
+  #  plt.grid(axis='y', linestyle='--', alpha=0.7)
+   # plt.show()
+############################################
+    ######convert data analysis PM 2.5 to html
+def generate_pm25_graph():
+    pm25_values = np.random.normal(20, 5, 1000)  #1000 random PM2.5 values with mean 20 and standard deviation 5
+    
+    #creates histogram of PM2.5 values
     plt.figure(figsize=(10, 6))
-    plt.hist(data['pm25'].dropna(), bins=20, color='skyblue', edgecolor='black')
+    plt.hist(pm25_values, bins=20, color='skyblue', edgecolor='black')
     plt.title('Distribution of PM2.5 Values')
     plt.xlabel('PM2.5')
     plt.ylabel('Frequency')
     plt.grid(axis='y', linestyle='--', alpha=0.7)
-    plt.show()
+    
+    temp_file_path = 'pm25_graph.png'
+    plt.savefig(temp_file_path)
+    
+    with open(temp_file_path, 'rb') as file:
+        img_html = f'<img src="data:image/png;base64,{file.read().encode("base64").decode()}" alt="PM2.5 Graph">'
+    
+    return img_html
+
+def dataAnalysis():
+    pm25_plot_html = generate_pm25_graph()
+    
+    print(pm25_plot_html)
+
+dataAnalysis()
+
