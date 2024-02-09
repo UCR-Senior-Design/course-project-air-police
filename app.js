@@ -109,6 +109,7 @@ const viewDataRouter = require('./routes/viewData.js')
 app.use('/view-data', viewDataRouter);
 
 app.route('/invite').post( async (req, res) =>{
+  
   const {email} = req.body;
   const token = jwt.sign({ email: email },
     process.env.key,
@@ -172,7 +173,7 @@ app.route('/register').post( async (req, res) => {
       haserror = true;
     }
     //add regex checking here
-    const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&-])[A-Za-z\d@$!%*?&-]{8,}$/;
     if(!passwordPattern.test(password)){
       haserror = true;
       errorpage += 'pw1';
@@ -180,10 +181,6 @@ app.route('/register').post( async (req, res) => {
     if(password != retype){
       errorpage += 'pw3';
       haserror = true;
-    }
-    if(!token){
-      haserror = true;
-      // res.redirect('/home');
     }
     if(!haserror){
       var email;
@@ -232,7 +229,11 @@ app.route('/rlogin').post( async (req,res) => {
         if(response == true){
           if(!haserror){
             req.session.logged_in = true
-            req.session.token = jwt.sign({user: user.username}, process.env.private_key);
+            req.session.token = jwt.sign({username: user.username}, process.env.key,{
+              algorithm: 'HS256',
+              allowInsecureKeySizes: true,
+              expiresIn: 7200, // 24 hours
+            });
             res.redirect('/table');
           }
         }
