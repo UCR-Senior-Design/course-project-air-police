@@ -120,6 +120,7 @@ app.use('/view-data', viewDataRouter);
 
 //////////////////////
 app.route('/invite').post( async (req, res) =>{
+  
   const {email} = req.body;
   const user = await User.findOne({email:email});
   if(user){
@@ -197,10 +198,6 @@ app.route('/register').post( async (req, res) => {
       errorpage += 'pw3';
       haserror = true;
     }
-    if(!token){
-      haserror = true;
-      // res.redirect('/home');
-    }
     if(!haserror){
       var email;
       jwt.verify(token, 
@@ -254,7 +251,11 @@ app.route('/rlogin').post( async (req,res) => {
         if(response == true){
           if(!haserror){
             req.session.logged_in = true
-            req.session.token = jwt.sign({user: user.username}, process.env.private_key);
+            req.session.token = jwt.sign({username: user.username}, process.env.key,{
+              algorithm: 'HS256',
+              allowInsecureKeySizes: true,
+              expiresIn: 7200, // 24 hours
+            });
             res.redirect('/table');
           }
         }

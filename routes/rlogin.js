@@ -3,7 +3,7 @@ const router = express.Router()
 
 router.get('/', (req, res) => {
   if(req.session.logged_in){
-    res.redirect('/test')
+    res.redirect('/table')
   }else{
     res.render('rlogin', { title: 'LOGIN ', displayText: 'researcher login test' });
   }
