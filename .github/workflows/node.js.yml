@@ -16,11 +16,6 @@ jobs:
         node-version: [20.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
     
-    env: 
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      HASHS: ${{ secrets.HASHS }}
-      C_URI: ${{ secrets.C_URI }}
-      
     steps:
     - uses: actions/checkout@v3
 
