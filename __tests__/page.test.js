@@ -13,19 +13,19 @@ afterAll(async () => {
 });
 
 
-// describe("GET Home", () => {
-//   it("returns status code 200 if the home page loaded", async () => {
-//     const res = await request(app).get("/");
-//     expect(res.statusCode).toEqual(200);
-//   });
-// });
+describe("GET Home", () => {
+  it("returns status code 200 if the home page loaded", async () => {
+    const res = await request(app).get("/");
+    expect(res.statusCode).toEqual(200);
+  });
+});
 
-// describe("GET Map", () => {
-//   it("returns status code 200 if the map page loaded", async () => {
-//     const res = await request(app).get("/map");
-//     expect(res.statusCode).toEqual(200);
-//   });
-// });
+describe("GET Map", () => {
+  it("returns status code 200 if the map page loaded", async () => {
+    const res = await request(app).get("/map");
+    expect(res.statusCode).toEqual(200);
+  });
+});
 
 describe("GET loginPage", () => {
   it("returns status code 200 if the researcher login page loaded", async () => {
