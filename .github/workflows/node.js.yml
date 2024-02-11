@@ -21,8 +21,9 @@ jobs:
     
     env: 
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      HASHS: ${{ secrets.HASHS }}
-      C_URI: ${{ secrets.C_URI }}
+      HASHs: ${{ secrets.HASHS }}
+      c_URI: ${{ secrets.C_URI }}
+      api_key: ${{ secrets.API_KEY }}
       
     steps:
     - uses: actions/checkout@v3
