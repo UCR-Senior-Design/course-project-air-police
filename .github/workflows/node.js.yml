@@ -9,6 +9,9 @@ on:
   pull_request:
     branches: [ "main" ]
 
+    # allows the workflow to be manually run from github
+    workflow_dispatch:
+
 jobs:
   build:
 

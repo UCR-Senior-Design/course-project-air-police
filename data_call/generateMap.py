@@ -82,8 +82,8 @@ def mapGeneration(data=None):
 
 
     # Create a HeatMap layer based on PM2.5 values
-    heat_data = [[row['geo.lat'], row['geo.lon'], row['pm25']] for index, row in data.dropna(subset=['geo.lat', 'geo.lon', 'pm25']).iterrows()]
-    HeatMap(heat_data, radius=15).add_to(m)
+    #heat_data = [[row['geo.lat'], row['geo.lon'], row['pm25']] for index, row in data.dropna(subset=['geo.lat', 'geo.lon', 'pm25']).iterrows()]
+    #HeatMap(heat_data, radius=15).add_to(m)
 
     # Save the map as an HTML file
     html_file_path = 'views/map.hbs'
