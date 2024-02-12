@@ -9,6 +9,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.2.0",
     "mongoose": "^8.0.1",
+    "nodemailer": "^6.9.9",
     "python-shell": "^5.0.0",
     "window": "^4.2.7"
   },
