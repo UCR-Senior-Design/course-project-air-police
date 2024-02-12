@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 import pandas as pd
 import requests
+import base64
 from requests.auth import HTTPBasicAuth
 import json
 from datetime import datetime, timedelta
@@ -327,7 +328,9 @@ def generate_pm25_graph():
     plt.savefig(temp_file_path)
     
     with open(temp_file_path, 'rb') as file:
-        img_html = f'<img src="data:image/png;base64,{file.read().encode("base64").decode()}" alt="PM2.5 Graph">'
+        img_data = file.read()
+        img_base64 = base64.b64encode(img_data).decode('utf-8')
+        img_html = f'<img src="data:image/png;base64,{img_base64}" alt="PM2.5 Graph">'
     
     return img_html
 
