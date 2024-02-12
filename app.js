@@ -110,6 +110,16 @@ app.get('/work-in-progress', (req, res) => {
       title: 'Work in Progress'
   });
 });
+
+
+
+//creates data analysis testing page
+app.get('/data-analysis-testing', (req, res) => {
+
+  //res.send('This is the data analysis testing page');
+  res.render('data-analysis-testing');
+});
+
 //////////
 
 ///////////////////////////
@@ -287,6 +297,16 @@ router.get('/work-in-progress', (req, res) => {
         title: 'Work in Progress'
     });
 });
+
+//Route for handling form submission for data analysis testing
+app.post('/data-analysis-testing', (req, res) => {
+  const monitorId = req.body.monitorId; 
+
+  //For now, let's just render a page that displays a monitor ID prompt
+  res.render('data-analysis', { monitorId: monitorId });
+});
+
+
 
 //Export the router
 module.exports = router;
