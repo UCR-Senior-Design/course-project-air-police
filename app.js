@@ -7,6 +7,7 @@ const User = require("./models/user.js")
 const bodyParser = require('body-parser')
 var bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
 const hash = process.env.hash;
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(process.env.DATABASE_URL, {
@@ -166,7 +167,22 @@ Best wishes,
 EmailJS team
   `
   // email the message here
-  console.log(message);
+  var transport = nodemailer.createTransport({
+    host: "sandbox.smtp.mailtrap.io",
+    port: 2525,
+    auth: {
+      user: process.env.mailtrapeuser,
+      pass: process.env.mailtrappassword,
+    }
+  });
+  
+  var msg = {
+    from: "jchang1211@gmail.com",
+    to: "jchan443@ucr.edu",
+    subject: "Salton Sea Researcher Registration",
+    text: message
+  };
+  transport.sendMail(msg)
   res.redirect('/invite');
   // emailjs.init({publicKey:process.env.emjs});
   // emailjs.send(process.env.sid, process.env.tempid, data);
