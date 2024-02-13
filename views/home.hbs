@@ -20,6 +20,9 @@
                     <button id="viewMapButton" type="button" class="btn btn-primary btn-lg px-4 gap-3">View Map</button>
                     <button id="viewDataButton" type="button" class="btn btn-outline-secondary btn-lg px-4">View Data</button>
                     <button id="researcherloginbutton" type="button" class="btn btn-outline-secondary btn-lg px-4">Researcher Login</button>
+
+                    <!-- Add the Data Analysis Testing button -->
+                    <button id="dataAnalysisTestingButton" type="button" class="btn btn-outline-secondary btn-lg px-4">Data Analysis Testing</button>
       </div>
     </div>
   </div>
@@ -38,10 +41,16 @@
     //handles click of the View Data button (currently has no functionality)
     document.getElementById('viewDataButton').addEventListener('click', function() {
     window.location.href = '/work-in-progress';
-});
-
-    
+    });
   });
+
+    //handles click of the Data Analysis Testing button
+  document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('dataAnalysisTestingButton').addEventListener('click', function () {
+        window.location.href = '/data-analysis-testing';
+    });
+  });
+
   document.addEventListener('DOMContentLoaded',function () {
     document.getElementById('researcherloginbutton').addEventListener('click', function () {
       window.location.href = '/rlogin';
