@@ -27,6 +27,7 @@ router.get('/', (req, res) => {
                 title: 'Data Analysis',
                 result: result 
             });
+            res.status(200); 
         }
     });
 });

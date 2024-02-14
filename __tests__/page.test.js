@@ -34,9 +34,30 @@ describe("GET loginPage", () => {
   });
 });
 
+describe("GET registerPage", () => {
+  it("returns status code 200 if the researcher registration page loaded", async () => {
+    const res = await request(app).get("/register");
+    expect(res.statusCode).toEqual(200);
+  });
+});
+
+// describe("GET viewDataPage", () => {
+//   it("returns status code 200 if the view data page loaded", async () => {
+//     const res = await request(app).get("/view-data");
+//     expect(res.statusCode).toEqual(200);
+//   });
+// });
+
+// describe("GET invitePage", () => {
+//   it("returns status code 200 if the invite page loaded", async () => {
+//     const res = await request(app).get("/invite");
+//     expect(res.statusCode).toEqual(200);
+//   });
+// });
+
 // describe("GET Table", () => {
 //   it("returns status code 200 when the user is logged in", async () => {
-//     const res = await request(app).post("/table").send({session.logged_in});
+//     const res = await request(app).post("/table").send({req.session.logged_in = true});
 //     expect(res.statusCode).toEqual(200);
 //   });
 // });
