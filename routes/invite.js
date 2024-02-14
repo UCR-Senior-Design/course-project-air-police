@@ -22,6 +22,6 @@ router.get('/', async (req, res) => {
             res.redirect('/table');
         }
     }
-    
+    res.status(200);
 })
 module.exports = router
