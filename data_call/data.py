@@ -10,25 +10,24 @@ import base64
 from requests.auth import HTTPBasicAuth
 import json
 from datetime import datetime, timedelta
-from pymongo import MongoClient
-from pymongo import UpdateOne
+import mysql.connector
 import matplotlib.pyplot as plt
+
 #input your apikey here... not sure if there is any safety issues of putting the api key into github, will look
 ## into but for now im not gonna put it in.
 
 apiKey = os.environ['api_key']
 
 
-def fetchData(columns = ['geo.lat', 'geo.lon','sn','pm25','pm10', 'timestamp']):
+def fetchData():
     ######################################################################################
     ## Inputs:                                                                          ##
-    ##        columns: list of columns the data should return                           ##
-    ##             default: ['geo.lat', 'geo.lon','sn','pm25','pm10','timestamp']       ##
     ## Output:                                                                          ##
     ##        data: dataframe of the retrieved data                                     ##
     ######################################################################################
 
     # apiKey
+    columns = ['geo.lat', 'geo.lon','sn','pm25','pm10', 'timestamp']
     auth = HTTPBasicAuth(apiKey,"")
     #uses requests to get data from our network
     # uses try except for error handling
@@ -58,16 +57,90 @@ def fetchData(columns = ['geo.lat', 'geo.lon','sn','pm25','pm10', 'timestamp']):
     return data
 
 
+
 # database stuff cant do it in its own folder
 # connect to mongoclient
 def connect():
     connection = os.environ['c_URI']
-    client = MongoClient(connection)
-    db = client["SSProject"]
-    collection = db["Devices"]
-    return db, collection
+    mhost = os.environ['mysqlhost']
+    muer = os.environ['mysqlUser']
+    mpassword = os.environ['mysqlPassword']
+    mdatabase = os.environ['mysqlDB']
+    mydb = mysql.connector.connect(
+        host = mhost,
+        user = muer,
+        password = mpassword,
+        database = mdatabase
+    )
+    return mydb
+
+
+# populates devices list
+def grabAllSensor():
+    auth = HTTPBasicAuth(apiKey,"")
+    try:
+        req = requests.request("get","https://api.quant-aq.com/device-api/v1/devices/?network_id=9", headers = None, auth = auth)
+    except:
+        print("Error Incorrect API Key")
+        return None
+    deviceListJson = req.json()
+    datajson = deviceListJson['data']
+    columns = ["sn", "lat", "lon" ]
+    edata = {col: [] for col in columns}
+    print(pd.DataFrame(datajson).keys())
+    ##loops through all entries in djson data section
+    for entry in datajson:
+        for col in columns: 
+            # since geo location is given in a list, this check is needed for our data to work properly
+            if col == "lat":
+                edata[col].append(entry['geo']['lat'])
+            elif col == "lon":
+                edata[col].append(entry['geo']['lon'])
+            else:
+                edata[col].append(entry[col])
+    data = pd.DataFrame(edata).fillna(0)
+    print(data)
+    mydb = connect()
+    mycursor = mydb.cursor()
+    query = "INSERT INTO Devices (sn, lat, lon) VALUES (%s, %s, %s)"
+    values = data.values.tolist()
+    mycursor.executemany(query, values)
+    mydb.commit()
+    print(mycursor.rowcount, "was inserted")
+
+
+def updateHealth(serialNumber):
+    if serialNumber == None:
+        return
+    opc_flag = 2
+    neph_flag = 4
+    sd_flag = 8192
+    # get raw data
+    auth = HTTPBasicAuth(apiKey,"")
+    request = "https://api.quant-aq.com/device-api/v1/devices/" + serialNumber + '/data/raw/?network_id'
+    print(request)
+    try:
+        req = requests.request("get",request, headers = None, auth = auth)
+    except:
+        print("Error Incorrect API Key")
+        return None
+    djson = req.json()
+    print(djson)
+updateHealth("MOD-PM-00642")
+# print(fetchData())
+
+def test():
+    mydb = connect()
+    query = "Select * FROM Data RIGHT OUTER JOIN Devices ON Data.sn = Devices.sn"
+    mycursor = mydb.cursor()
+    mycursor.execute(query)
+    result = mycursor.fetchall()
+    data = pd.DataFrame(result)
+    print(data)
+
 
 #works like a charm
+# mysql portion of this is done
 def pushDB(data):
     ######################################################################
     ## pushes data into the database                                    ##
@@ -75,10 +148,27 @@ def pushDB(data):
     ##   data: pandas dataframe from fetchData() check data.py          ##
     ## Return:                                                          ##
     ######################################################################
-    db, collection = connect()
-    for i, d in data.iterrows():
-        collection.insert_one(d.to_dict())
-    # collection.insert_one(data.to_dict())
+    # columns = ['geo.lat', 'geo.lon','sn','pm25','pm10', 'timestamp']
+    mydb = connect()
+    mycursor = mydb.cursor()
+    datas = data.fillna(0)
+    datas = datas.drop('geo.lat', axis = 1)
+    datas = datas.drop('geo.lon', axis = 1)
+    query = "INSERT INTO Data (sn, pm25, pm10, timestamp) VALUES (%s,%s,%s,%s)"
+    values = datas.values.tolist()
+    mycursor.executemany(query,values)
+    mydb.commit()
+    print(mycursor.rowcount, "was inserted")
+
+# pushDB(fetchData())
+# def test():
+#     mydb = connect()
+#     query = "Select * FROM Data"
+#     mycursor = mydb.cursor()
+#     mycursor.execute(query)
+#     result = mycursor.fetchall()
+#     data = pd.DataFrame(result)
+#     print(data)
 
 def getUniqueDevices():
     #######################################################################
@@ -188,7 +278,7 @@ def notFunctional(data=None):
                 ind.append(index)
                 reason.append('pm2.5 or pm10 is not reading properly')
                 nonFunc.append(row['sn'])
-        if pd.isna(row['geo.lat']) or pd.isna(row['geo.lon']):
+        if pd.isna(row['lat']) or pd.isna(row['lon']):
             if row['sn'] not in nonFunc:
                 ind.append(index)
                 reason.append('geo.lat or geo.lon not reading properly')
@@ -255,14 +345,14 @@ def mapGeneration(data=None):
     'contributors, &copy; <a href="https://cartodb.com/attributions">CartoDB</a>')
 
     # Add markers for each of the 46 currently active monitors to the map, each that displays a popup
-    for index, row in data.dropna(subset=['geo.lat', 'geo.lon']).iterrows():
-        latitude = row['geo.lat']
-        longitude = row['geo.lon']
+    for index, row in data.dropna(subset=['lat', 'lon']).iterrows():
+        latitude = row['lat']
+        longitude = row['lon']
         monitor_info = f"""
     <b>Monitor {index + 1}</b><br>
     Serial Number: {row['sn']}<br>
-    Latitude: {row['geo.lat']}<br>  
-    Longitude: {row['geo.lon']}<br>  
+    Latitude: {row['lat']}<br>  
+    Longitude: {row['lon']}<br>  
     PM2.5: {row['pm25']}<br>
     PM10: {row['pm10']}<br>
     Timestamp: {row['timestamp']}<br>
@@ -339,5 +429,5 @@ def dataAnalysis():
     
     print(pm25_plot_html)
 
-dataAnalysis()
-
+# dataAnalysis()
+# 
