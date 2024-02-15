@@ -126,7 +126,7 @@ def updateHealth(serialNumber):
         return None
     djson = req.json()
     print(djson)
-updateHealth("MOD-PM-00642")
+# updateHealth("MOD-PM-00642")
 # print(fetchData())
 
 def test():
@@ -154,13 +154,13 @@ def pushDB(data):
     datas = data.fillna(0)
     datas = datas.drop('geo.lat', axis = 1)
     datas = datas.drop('geo.lon', axis = 1)
-    query = "INSERT INTO Data (sn, pm25, pm10, timestamp) VALUES (%s,%s,%s,%s)"
+    query = "INSERT INTO Data (sn, pm25, pm10, timestamp) VALUES (%s,%s,%s,%s) ON DUPLICATE KEY UPDATE pm25 = VALUES(pm25), pm10= VALUES(pm10)"
     values = datas.values.tolist()
     mycursor.executemany(query,values)
     mydb.commit()
     print(mycursor.rowcount, "was inserted")
 
-# pushDB(fetchData())
+pushDB(fetchData())
 # def test():
 #     mydb = connect()
 #     query = "Select * FROM Data"
@@ -177,8 +177,18 @@ def getUniqueDevices():
     ## Return:                                                           ##
     ##   collection.distinct('Device'): list of unique device names      ##
     #######################################################################
-    db, collection = connect()
-    return collection.distinct('sn')
+    # db, collection = connect()
+    mydb = connect()
+    query = "SELECT sn FROM Devices"
+    mycursor = mydb.cursor()
+    mycursor.execute(query)
+    results = mycursor.fetchall()
+    dataframe = pd.DataFrame(results)
+    list = []
+    for i, sn in dataframe.iterrows():
+        list.append(sn[0])
+    return list
+# print(getUniqueDevices())
 
 
 #should  work like how pullData used to work. 
@@ -189,17 +199,26 @@ def getAllRecent():
     ## Return:                                                             ##
     ##   data: returns a dson/ dataframe/ list / dataframe  of recent data ##
     #########################################################################
-    db, collection = connect()
+    # db, collection = connect()
     devices = getUniqueDevices()
     recent = []
     for device in devices:
-        query = {'sn': device}
-        recent.append(collection.find_one(query, sort=[('timestamp', -1)]))
+        # query = {'sn': device}
+        mydb = connect()
+        mycursor = mydb.cursor()
+        query = "SELECT * FROM Data LEFT OUTER JOIN Devices ON Data.sn = Devices.sn WHERE Data.sn = %s ORDER BY Data.timestamp"
+        values = [device]
+        mycursor.execute(query, values)
+        recent.append(mycursor.fetchone())
+        # recent.append(collection.find_one(query, sort=[('timestamp', -1)]))
 
-    recents = pd.DataFrame(recent).drop('_id', axis=1)
+    recent = pd.DataFrame(recent).dropna(how='all', axis = 0).drop(columns=4, axis = 1)
+    recent = recent.rename(columns = {0: 'sn', 1:'pm25', 2:'pm10', 3:'timestamp', 5:'geo.lat', 6:'geo.lon', 7:'pmHealth', 8:'sdHealh'})
+    recent.replace(0, np.nan, inplace=True)
+
     # recents.drop('_id', axis=1)
-    return recents
-
+    return recent
+# print(getAllRecent())
 
 #tested and works a little slow but works unless your doing a data visualization you do not need to use this.
 def pullData(serialNumber=None):
@@ -210,28 +229,17 @@ def pullData(serialNumber=None):
     ##   data: returns a dson/ dataframe/ list / dataframe  of the data  ##
     ##         of all Data historical too.                               ##
     #######################################################################
-    db, collection = connect()
-    if serialNumber != None:
-        datas = collection.find({'sn':serialNumber})
-        data = pd.DataFrame(datas)
-        # data['geo.lat'] = data['geo'].apply(lambda x: x['lat'])
-        # data['geo.lon'] = data['geo'].apply(lambda x: x['lon'])
-        # # print(data)
-        # data = data.drop('geo',axis=1)
-        data = data.drop(columns=['_id'])
-        return data
-    else:
-        datas = collection.find()
-        data = pd.DataFrame(datas)
-        # print(data)
-        # data['geo.lat'] = data['geo'].apply(lambda x: x['lat'])
-        # data['geo.lon'] = data['geo'].apply(lambda x: x['lon'])
-        # # print(data)
-        # data = data.drop('geo',axis=1)
-        data = data.drop(columns=['_id'])
+    mydb = connect()
+    mycursor = mydb.cursor()
+    if serialNumber == None:
+        query = "SELECT * FROM Data LEFT OUTER JOIN Devices ON Data.sn = Devices.sn"
+        mycursor.execute(query)
+        data = mycursor.fetchall()
+        data = pd.DataFrame(data).dropna(how='all', axis = 0).drop(columns=4, axis = 1)
+        data = data.rename(columns = {0: 'sn', 1:'pm25', 2:'pm10', 3:'timestamp', 5:'geo.lat', 6:'geo.lon', 7:'pmHealth', 8:'sdHealh'})
         return data
 
-
+# print(pullData())
 
 
 
@@ -278,7 +286,7 @@ def notFunctional(data=None):
                 ind.append(index)
                 reason.append('pm2.5 or pm10 is not reading properly')
                 nonFunc.append(row['sn'])
-        if pd.isna(row['lat']) or pd.isna(row['lon']):
+        if pd.isna(row['geo.lat']) or pd.isna(row['geo.lon']):
             if row['sn'] not in nonFunc:
                 ind.append(index)
                 reason.append('geo.lat or geo.lon not reading properly')
@@ -345,14 +353,14 @@ def mapGeneration(data=None):
     'contributors, &copy; <a href="https://cartodb.com/attributions">CartoDB</a>')
 
     # Add markers for each of the 46 currently active monitors to the map, each that displays a popup
-    for index, row in data.dropna(subset=['lat', 'lon']).iterrows():
-        latitude = row['lat']
-        longitude = row['lon']
+    for index, row in data.dropna(subset=['geo.lat', 'geo.lon']).iterrows():
+        latitude = row['geo.lat']
+        longitude = row['geo.lon']
         monitor_info = f"""
     <b>Monitor {index + 1}</b><br>
     Serial Number: {row['sn']}<br>
-    Latitude: {row['lat']}<br>  
-    Longitude: {row['lon']}<br>  
+    Latitude: {row['geo.lat']}<br>  
+    Longitude: {row['geo.lon']}<br>  
     PM2.5: {row['pm25']}<br>
     PM10: {row['pm10']}<br>
     Timestamp: {row['timestamp']}<br>
@@ -380,7 +388,7 @@ def mapGeneration(data=None):
 
     # Open the HTML file in the default web browser
     webbrowser.open(html_file_path)
-
+# mapGeneration()
 #####Added function to perform data analysis on the distribution of PM2.5 values#####
     
 ###############################################################################################################
@@ -428,6 +436,3 @@ def dataAnalysis():
     pm25_plot_html = generate_pm25_graph()
     
     print(pm25_plot_html)
-
-# dataAnalysis()
-# 
