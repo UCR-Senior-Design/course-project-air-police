@@ -9,6 +9,7 @@ var bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const hash = process.env.hash;
+const mysql = require('mysql2');
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(process.env.DATABASE_URL, {
   serverApi: {
@@ -21,17 +22,32 @@ const { request } = require('http')
 
 
 async function createNewUser(eml, usr, pswd){
-  const usrs = await User.findOne( {$or: [{ username: usr}, {email:eml}]}).lean();
-  if(!usrs){
+  // const usrs = await User.findOne( {$or: [{ username: usr}, {email:eml}]}).lean();
+  var con = mysql.createConnection({
+    connectionLimit: 10,
+    host: process.env.mysqlhost,
+    port: 3306,
+    user: process.env.mysqlUser,
+    password: process.env.mysqlPassword,
+    database: process.env.mysqlDB 
+  });
+  var query = "SELECT * FROM User WHERE username = ?";
+  let value = [usr]
+  var result;
+  await con.promise().query(query, value)
+      .then(([rows, fields]) => {
+          result = rows;
+      })    
+      .catch((err) => {
+          console.error(err);
+       });
+  if(result.length === 0){
     // const hashs = bcrypt.hashSync(pswd, hash);
-    bcrypt.genSalt(parseInt(process.env.rounds_num), function(err, salt) {
+    bcrypt.genSalt(parseInt(process.env.hash), function(err, salt) {
       bcrypt.hash(pswd, salt, function(err, hashs) {
-        const test =  new User({ 
-          email: eml,
-          username: usr,
-          password: hashs
-        });
-        test.save();
+        let query = "INSERT INTO user (email, username, pwd) VALUES ( ?, ?, ?)";
+        let values = [eml, usr, hashs]
+        con.promise().query(query, values);
       });
   });
     
@@ -47,7 +63,7 @@ async function run() {
     // // Send a ping to confirm a successful connection
     // await client.db("SSProject").command({ ping: 1 });
     // console.log("Pinged your deployment. You successfully connected to MongoDB!");
-    await createNewUser('pyTest','1234');
+    await createNewUser('tno@gmail.com','pyTest','1234');
   } finally {
     // Ensures that the client will close when you finish/error
     await client.close();
@@ -131,10 +147,26 @@ app.use('/view-data', viewDataRouter);
 
 //////////////////////
 app.route('/invite').post( async (req, res) =>{
-  
+  var con = mysql.createConnection({
+    connectionLimit: 10,
+    host: process.env.mysqlhost,
+    port: 3306,
+    user: process.env.mysqlUser,
+    password: process.env.mysqlPassword,
+    database: process.env.mysqlDB 
+  });
   const {email} = req.body;
-  const user = await User.findOne({email:email});
-  if(user){
+  var query = "SELECT * FROM User WHERE email = ?";
+  let value = [email]
+  var result;
+  await con.promise().query(query, value)
+      .then(([rows, fields]) => {
+          result = rows;
+      })    
+      .catch((err) => {
+          console.error(err);
+       });
+  if(result.length !== 0){
     res.redirect('/invite?error="usrE');
     return;
   }
@@ -191,6 +223,14 @@ const inviteRouter = require('./routes/invite.js');
 app.use('/invite',inviteRouter);
 
 app.route('/register').post( async (req, res) => {
+  var con = mysql.createConnection({
+    connectionLimit: 10,
+    host: process.env.mysqlhost,
+    port: 3306,
+    user: process.env.mysqlUser,
+    password: process.env.mysqlPassword,
+    database: process.env.mysqlDB 
+  });
   const {token, username, password, retype} = req.body;
   if(!token){
     res.redirect('/home');
@@ -204,8 +244,17 @@ app.route('/register').post( async (req, res) => {
     errorpage+='usr2';
     haserror = true;
   }
-  const user = await User.findOne({username:username});
-  if(user){
+  var query = "SELECT * FROM User WHERE username = ?";
+  let value = [username]
+  var result;
+  await con.promise().query(query, value)
+      .then(([rows, fields]) => {
+          result = rows;
+      })    
+      .catch((err) => {
+          console.error(err);
+       });
+  if(result.length !== 0){
     errorpage+= 'usr1';
     haserror = true;
   }
@@ -237,8 +286,19 @@ app.route('/register').post( async (req, res) => {
           email = decoded.email;
           console.log(email);
         });
-      const user = await User.findOne({email: email});
-      if(!user){
+      // const user = await User.findOne({email: email});
+      var query = "SELECT * FROM User WHERE username = ?";
+      let value = [username]
+      var result2;
+      await con.promise().query(query, value)
+          .then(([rows, fields]) => {
+              result2 = rows;
+          })    
+          .catch((err) => {
+              console.error(err);
+           });
+
+      if(result2.length === 0){
         await createNewUser(email, username, password);
         res.redirect('/rlogin');
       }
@@ -256,15 +316,33 @@ app.use('/register',registerRouter);
 
 
 app.route('/rlogin').post( async (req,res) => {
+  var con = mysql.createConnection({
+    connectionLimit: 10,
+    host: process.env.mysqlhost,
+    port: 3306,
+    user: process.env.mysqlUser,
+    password: process.env.mysqlPassword,
+    database: process.env.mysqlDB 
+  });
   const {username, password} = req.body;
-  const user  = await User.findOne({username: username})
+  var query = "SELECT * FROM User WHERE username = ?";
+  let value = [username]
+  var result;
+  await con.promise().query(query, value)
+      .then(([rows, fields]) => {
+          result = rows;
+      })    
+      .catch((err) => {
+          console.error(err);
+       });
+  // const user  = await User.findOne({username: username})
   errorpage = '/rlogin?error='
   haserror = false;
   if(!username){
     errorpage+= 'usr2'
     haserror = true
   }
-  if(!user){
+  if(result.length === 0){
     errorpage += 'usr1';
     haserror = true;
   } 
@@ -273,11 +351,12 @@ app.route('/rlogin').post( async (req,res) => {
       errorpage += 'pw2';
       haserror = true;
     }
-      const response =  bcrypt.compareSync(password,user.password)
+      var input = result[0].pwd;
+      const response =  bcrypt.compareSync(password,input)
         if(response == true){
           if(!haserror){
             req.session.logged_in = true
-            req.session.token = jwt.sign({username: user.username}, process.env.key,{
+            req.session.token = jwt.sign({username: result[0].username}, process.env.key,{
               algorithm: 'HS256',
               allowInsecureKeySizes: true,
               expiresIn: 7200, // 24 hours
