@@ -107,69 +107,7 @@ def grabAllSensor():
     mycursor.executemany(query, values)
     mydb.commit()
     print(mycursor.rowcount, "was inserted")
-
-
-def updateHealth(serialNumber):
-    if serialNumber == None:
-        return
-    opc_flag = 2
-    neph_flag = 4
-    sd_flag = 8192
-    # get raw data
-    auth = HTTPBasicAuth(apiKey,"")
-    request = "https://api.quant-aq.com/device-api/v1/devices/" + serialNumber + '/data/raw/?network_id'
-    print(request)
-    try:
-        req = requests.request("get",request, headers = None, auth = auth)
-    except:
-        print("Error Incorrect API Key")
-        return None
-    djson = req.json()
-    print(djson)
-# updateHealth("MOD-PM-00642")
-# print(fetchData())
-
-def test():
-    mydb = connect()
-    query = "Select * FROM Data RIGHT OUTER JOIN Devices ON Data.sn = Devices.sn"
-    mycursor = mydb.cursor()
-    mycursor.execute(query)
-    result = mycursor.fetchall()
-    data = pd.DataFrame(result)
-    print(data)
-
-
-#works like a charm
-# mysql portion of this is done
-def pushDB(data):
-    ######################################################################
-    ## pushes data into the database                                    ##
-    ## Parameters:                                                      ##
-    ##   data: pandas dataframe from fetchData() check data.py          ##
-    ## Return:                                                          ##
-    ######################################################################
-    # columns = ['geo.lat', 'geo.lon','sn','pm25','pm10', 'timestamp']
-    mydb = connect()
-    mycursor = mydb.cursor()
-    datas = data.fillna(0)
-    datas = datas.drop('geo.lat', axis = 1)
-    datas = datas.drop('geo.lon', axis = 1)
-    query = "INSERT INTO Data (sn, pm25, pm10, timestamp) VALUES (%s,%s,%s,%s) ON DUPLICATE KEY UPDATE pm25 = VALUES(pm25), pm10= VALUES(pm10)"
-    values = datas.values.tolist()
-    mycursor.executemany(query,values)
-    mydb.commit()
-    print(mycursor.rowcount, "was inserted")
-
-pushDB(fetchData())
-# def test():
-#     mydb = connect()
-#     query = "Select * FROM Data"
-#     mycursor = mydb.cursor()
-#     mycursor.execute(query)
-#     result = mycursor.fetchall()
-#     data = pd.DataFrame(result)
-#     print(data)
-
+# grabAllSensor()
 def getUniqueDevices():
     #######################################################################
     ## gets all of the unique devices                                    ##
@@ -188,6 +126,141 @@ def getUniqueDevices():
     for i, sn in dataframe.iterrows():
         list.append(sn[0])
     return list
+
+
+def checkOffline():
+    auth = HTTPBasicAuth(apiKey,"")
+    #uses requests to get data from our network
+    # uses try except for error handling
+    sns = getUniqueDevices()
+
+    try:
+        req = requests.request("get","https://api.quant-aq.com/device-api/v1/devices/?network_id=9" , headers = None, auth = auth)
+    except:
+        return None
+    # print(req.json())
+    list = pd.DataFrame(req.json()["data"])
+    
+    list = list.drop(columns={"created","url", "description", "geo"}, axis=1)
+    value = []
+    for index, row in list.iterrows():
+        # try:
+        #     Ti = row['last_seen'].index(" ")
+        #     t = row['last_seen'][::Ti] + ' ' + row['last_seen'][Ti + 1::]
+        #     timestamp = datetime.strptime(t, '%y%m%d %H:%M:%S')  # Adjusted the timestamp format
+        # except ValueError:
+        #     # Handle the case where the space character is not found in the timestamp
+        #     # timestamp = datetime.now()
+        #     print("error")
+        Ti = row['last_seen'].index("T")
+        t = row['last_seen'][:Ti] + ' ' + row['last_seen'][Ti + 1:]
+        timestamp = datetime.strptime(t, '%Y-%m-%d %H:%M:%S')
+        todays = datetime.today()
+        todays = todays - timedelta(days=1)
+        ##checks if the data is outdated
+        if timestamp < todays:
+            temp = ["offline" ,row['sn']]
+            value.append(temp)
+        else:
+            temp = ["online", row['sn']]
+            value.append(temp)
+    mydb = connect()
+    # print(value)
+    query = "UPDATE Devices SET onlne = %s WHERE sn = %s"
+    mycursor = mydb.cursor()
+    mycursor.executemany(query, value)
+    mydb.commit()
+
+def updateHealth(serialNumber):
+    if serialNumber == None:
+        return
+    opc_flag = 2
+    neph_flag = 4
+    sd_flag = 8192
+    # get raw data
+    auth = HTTPBasicAuth(apiKey,"")
+    request = "https://api.quant-aq.com/device-api/v1/devices/" + serialNumber + '/data/raw/?network_id=9'
+    # print(request)
+    try:
+        req = requests.request("get",request, headers = None, auth = auth)
+    except:
+        print("Error Incorrect API Key")
+        return None
+    djson = req.json()
+    # print(djson)
+    rawData = pd.DataFrame(djson['data'])
+    # print(rawData)
+    curflag = rawData['flag'].iloc[0]
+    # print(curflag)
+    opcHealthnum = (curflag & opc_flag)
+    nephHealthnum = (curflag & neph_flag)
+    sdhealthnum = (curflag % sd_flag)
+    pmhealth = "ACTIVE"
+    if opcHealthnum != 0 or nephHealthnum != 0:
+        pmhealth = "ERROR"
+    sdhealth = "ACTIVE"
+    if sdhealthnum != 0:
+        sdhealth = "ERROR"
+    query = "Update Devices SET pmHealth = %s, sdHealth = %s WHERE sn = %s"
+    values = [pmhealth, sdhealth, serialNumber]
+    mydb = connect()
+    mycursor = mydb.cursor()
+    mycursor.execute(query, values)
+    mydb.commit()
+    # print(curflag)
+
+
+
+def updateAllHealth():
+    sns = getUniqueDevices()
+    for sn in sns:
+        updateHealth(sn)
+    # print(data)
+# updateAllHealth()
+
+def test():
+    mydb = connect()
+    query = "Select * FROM Data RIGHT OUTER JOIN Devices ON Data.sn = Devices.sn"
+    mycursor = mydb.cursor()
+    mycursor.execute(query)
+    result = mycursor.fetchall()
+    data = pd.DataFrame(result)
+    print(data)
+# test()
+
+#works like a charm
+# mysql portion of this is done
+def pushDB(data):
+    ######################################################################
+    ## pushes data into the database                                    ##
+    ## Parameters:                                                      ##
+    ##   data: pandas dataframe from fetchData() check data.py          ##
+    ## Return:                                                          ##
+    ######################################################################
+    # columns = ['geo.lat', 'geo.lon','sn','pm25','pm10', 'timestamp']
+    mydb = connect()
+    mycursor = mydb.cursor()
+    datas = data.fillna(0)
+    datas = datas.drop('geo.lat', axis = 1)
+    datas = datas.drop('geo.lon', axis = 1)
+    query = "INSERT INTO Data (sn, pm25, pm10, timestamp) VALUES (%s,%s,%s,%s) ON DUPLICATE KEY UPDATE pm25 = VALUES(pm25), pm10= VALUES(pm10)"
+    values = datas.values.tolist()
+    # print(values)
+    mycursor.executemany(query,values)
+    mydb.commit()
+    print(mycursor.rowcount, "was inserted")
+
+pushDB(fetchData())
+# def test():
+#     mydb = connect()
+#     query = "Select * FROM Data"
+#     mycursor = mydb.cursor()
+#     mycursor.execute(query)
+#     result = mycursor.fetchall()
+#     data = pd.DataFrame(result)
+#     print(data)
+
+
 # print(getUniqueDevices())
 
 
@@ -213,12 +286,12 @@ def getAllRecent():
         # recent.append(collection.find_one(query, sort=[('timestamp', -1)]))
 
     recent = pd.DataFrame(recent).dropna(how='all', axis = 0).drop(columns=4, axis = 1)
-    recent = recent.rename(columns = {0: 'sn', 1:'pm25', 2:'pm10', 3:'timestamp', 5:'geo.lat', 6:'geo.lon', 7:'pmHealth', 8:'sdHealh'})
+    recent = recent.rename(columns = {0: 'sn', 1:'pm25', 2:'pm10', 3:'timestamp', 5:'geo.lat', 6:'geo.lon', 7:'pmHealth', 8:'sdHealh', 9: "status"})
     recent.replace(0, np.nan, inplace=True)
 
     # recents.drop('_id', axis=1)
     return recent
-# print(getAllRecent())
+print(getAllRecent())
 
 #tested and works a little slow but works unless your doing a data visualization you do not need to use this.
 def pullData(serialNumber=None):
