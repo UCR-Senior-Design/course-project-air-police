@@ -250,7 +250,7 @@ def pushDB(data):
     mydb.commit()
     print(mycursor.rowcount, "was inserted")
 
-pushDB(fetchData())
+# pushDB(fetchData())
 # def test():
 #     mydb = connect()
 #     query = "Select * FROM Data"
@@ -291,7 +291,7 @@ def getAllRecent():
 
     # recents.drop('_id', axis=1)
     return recent
-print(getAllRecent())
+# print(getAllRecent())
 
 #tested and works a little slow but works unless your doing a data visualization you do not need to use this.
 def pullData(serialNumber=None):
@@ -381,23 +381,19 @@ def pullDataTime(serialNumber, time=30):
     ## check if serialNumber is None
     if(serialNumber == None):
         return pd.DataFrame()
-    ## SELECT * FROM Collection WHERE SN = serialNumber AND timestamp > curDate - time;
-    ## Honestly regretting using MongoDB rather than mySQL
-    db, collection, client = connect()
     curDate = datetime.now()
     threshold = timedelta(days=time)
-    query = {
-        'sn':serialNumber, 
-        'timestamp': {
-            '$lt': (curDate - threshold).strftime('%y%m%d %H:%M:%S')
-        }
-    }
-    data = collection.find(query)
+    thresh = (curDate - threshold).strftime('%Y-%m-%dT%H:%M:%S')
+    query = "SELECT Data.sn, Data.pm25, Data.pm10, Data.timestamp, Devices.lat, Devices.lon FROM Data LEFT OUTER JOIN Devices ON Data.sn = Devices.sn WHERE Data.sn = %s AND  Data.timestamp > %s"
+    values = [serialNumber, thresh]
+    mydb = connect()
+    mycursor = mydb.cursor()
+    mycursor.execute(query, values)
+    data = mycursor.fetchall()
     pdData = pd.DataFrame(data)
-    client.close()
     return pdData
 
-
+# print(pullDataTime("MOD-PM-00166",30))
 
 
 
