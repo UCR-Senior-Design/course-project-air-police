@@ -112,6 +112,40 @@ app.get('/work-in-progress', (req, res) => {
   });
 });
 
+	// Specify the JSON data to be displayed 
+	var tableData = 
+	[ 
+		{ 
+		"id": "24323", 
+		"name": "Mark Smith", 
+		"date": "25/5/2020" 
+		}, 
+		{ 
+		"id": "24564", 
+		"name": "Caitlin MacDonald", 
+		"date": "17/5/2020" 
+		}, 
+		{ 
+		"id": "24345", 
+		"name": "Jessie Johnson ", 
+		"date": "1/5/2020" 
+		}, 
+		{ 
+		"id": "24874", 
+		"name": "Alen Williams", 
+		"date": "14/5/2020" 
+		}, 
+		{ 
+		"id": "24323", 
+		"name": "Maria Garcia ", 
+		"date": "13/5/2020" 
+		} 
+	]; 
+
+app.get('/data', (req, res) => {
+  res.json(tableData);
+});
+
 
 
 //creates data analysis testing page
