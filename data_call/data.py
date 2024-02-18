@@ -61,7 +61,7 @@ def fetchData():
 # database stuff cant do it in its own folder
 # connect to mongoclient
 def connect():
-    connection = os.environ['c_URI']
+    # connection = os.environ['c_URI']
     mhost = os.environ['mysqlhost']
     muer = os.environ['mysqlUser']
     mpassword = os.environ['mysqlPassword']
