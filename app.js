@@ -41,7 +41,7 @@ async function createNewUser(eml, usr, pswd){
       .catch((err) => {
           console.error(err);
        });
-  if(result.length === 0){
+  if(result.length === 0 || !result){
     // const hashs = bcrypt.hashSync(pswd, hash);
     bcrypt.genSalt(parseInt(process.env.hash), function(err, salt) {
       bcrypt.hash(pswd, salt, function(err, hashs) {
