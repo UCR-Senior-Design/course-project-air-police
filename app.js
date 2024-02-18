@@ -101,10 +101,10 @@ async function fetchTableData() {
     password: process.env.mysqlPassword,
     database: process.env.mysqlDB 
   });
-  var query = "SELECT * FROM Data";
-  await con.promise().query(query, value)
+  var query = "SELECT * FROM Data LEFT OUTER JOIN Devices ON Data.sn = Devices.sn";
+  await con.promise().query(query)
       .then(([rows, fields]) => {
-          console.log(rows)
+          // console.log(rows)
           tableData = rows;
       })    
       .catch((err) => {
@@ -118,6 +118,7 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
     await mg.connect(process.env.DATABASE_URL)
+    // await fetchTableData()
     // // Send a ping to confirm a successful connection
     // await client.db("SSProject").command({ ping: 1 });
     // console.log("Pinged your deployment. You successfully connected to MongoDB!");
@@ -187,7 +188,8 @@ app.get('/work-in-progress', (req, res) => {
 });
 
 // create route for the researcher table data
-app.get('/data', (req, res) => {
+app.get('/data', async(req, res) => {
+  await fetchTableData()
   res.json(tableData);
 });
 
