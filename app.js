@@ -1,4 +1,4 @@
-// --------------- code for connecting to the mongoDB cloud ---------------
+// --------------- code for connecting to the database ---------------
 
 require('dotenv').config()
 const mg = require('mongoose');
@@ -20,17 +20,18 @@ const client = new MongoClient(process.env.DATABASE_URL, {
 });
 const { request } = require('http')
 
+const sqlConfig = {
+  connectionLimit: 10,
+  host: process.env.mysqlhost,
+  port: 3306,
+  user: process.env.mysqlUser,
+  password: process.env.mysqlPassword,
+  database: process.env.mysqlDB 
+}
 
 async function createNewUser(eml, usr, pswd){
   // const usrs = await User.findOne( {$or: [{ username: usr}, {email:eml}]}).lean();
-  var con = mysql.createConnection({
-    connectionLimit: 10,
-    host: process.env.mysqlhost,
-    port: 3306,
-    user: process.env.mysqlUser,
-    password: process.env.mysqlPassword,
-    database: process.env.mysqlDB 
-  });
+  var con = mysql.createConnection(sqlConfig);
   var query = "SELECT * FROM User WHERE username = ?";
   let value = [usr]
   var result;
@@ -54,6 +55,21 @@ async function createNewUser(eml, usr, pswd){
   }
   //add error things here
 }
+
+var tableData;
+async function fetchTableData() {
+  // pull researcher table data from sql db, export it as json response
+  var con = mysql.createConnection(sqlConfig);
+  var query = "SELECT * FROM Data";
+  await con.promise().query(query)
+      .then(([rows, fields]) => {
+          tableData = rows;
+      })    
+      .catch((err) => {
+          console.error(err);
+       });
+}
+fetchTableData();
 
 async function run() {
   try {
@@ -126,6 +142,11 @@ app.get('/work-in-progress', (req, res) => {
   res.render('work-in-progress', {
       title: 'Work in Progress'
   });
+});
+
+// create route for the researcher table data
+app.get('/data', (req, res) => {
+  res.json(tableData);
 });
 
 
