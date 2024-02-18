@@ -10,25 +10,24 @@ import base64
 from requests.auth import HTTPBasicAuth
 import json
 from datetime import datetime, timedelta
-from pymongo import MongoClient
-from pymongo import UpdateOne
+import mysql.connector
 import matplotlib.pyplot as plt
+
 #input your apikey here... not sure if there is any safety issues of putting the api key into github, will look
 ## into but for now im not gonna put it in.
 
 apiKey = os.environ['api_key']
 
 
-def fetchData(columns = ['geo.lat', 'geo.lon','sn','pm25','pm10', 'timestamp']):
+def fetchData():
     ######################################################################################
     ## Inputs:                                                                          ##
-    ##        columns: list of columns the data should return                           ##
-    ##             default: ['geo.lat', 'geo.lon','sn','pm25','pm10','timestamp']       ##
     ## Output:                                                                          ##
     ##        data: dataframe of the retrieved data                                     ##
     ######################################################################################
 
     # apiKey
+    columns = ['geo.lat', 'geo.lon','sn','pm25','pm10', 'timestamp']
     auth = HTTPBasicAuth(apiKey,"")
     #uses requests to get data from our network
     # uses try except for error handling
@@ -58,28 +57,57 @@ def fetchData(columns = ['geo.lat', 'geo.lon','sn','pm25','pm10', 'timestamp']):
     return data
 
 
+
 # database stuff cant do it in its own folder
 # connect to mongoclient
 def connect():
     connection = os.environ['c_URI']
-    client = MongoClient(connection)
-    db = client["SSProject"]
-    collection = db["Devices"]
-    return db, collection
+    mhost = os.environ['mysqlhost']
+    muer = os.environ['mysqlUser']
+    mpassword = os.environ['mysqlPassword']
+    mdatabase = os.environ['mysqlDB']
+    mydb = mysql.connector.connect(
+        host = mhost,
+        user = muer,
+        password = mpassword,
+        database = mdatabase
+    )
+    return mydb
 
-#works like a charm
-def pushDB(data):
-    ######################################################################
-    ## pushes data into the database                                    ##
-    ## Parameters:                                                      ##
-    ##   data: pandas dataframe from fetchData() check data.py          ##
-    ## Return:                                                          ##
-    ######################################################################
-    db, collection = connect()
-    for i, d in data.iterrows():
-        collection.insert_one(d.to_dict())
-    # collection.insert_one(data.to_dict())
 
+# populates devices list
+def grabAllSensor():
+    auth = HTTPBasicAuth(apiKey,"")
+    try:
+        req = requests.request("get","https://api.quant-aq.com/device-api/v1/devices/?network_id=9", headers = None, auth = auth)
+    except:
+        print("Error Incorrect API Key")
+        return None
+    deviceListJson = req.json()
+    datajson = deviceListJson['data']
+    columns = ["sn", "lat", "lon" ]
+    edata = {col: [] for col in columns}
+    print(pd.DataFrame(datajson).keys())
+    ##loops through all entries in djson data section
+    for entry in datajson:
+        for col in columns: 
+            # since geo location is given in a list, this check is needed for our data to work properly
+            if col == "lat":
+                edata[col].append(entry['geo']['lat'])
+            elif col == "lon":
+                edata[col].append(entry['geo']['lon'])
+            else:
+                edata[col].append(entry[col])
+    data = pd.DataFrame(edata).fillna(0)
+    print(data)
+    mydb = connect()
+    mycursor = mydb.cursor()
+    query = "INSERT INTO Devices (sn, lat, lon) VALUES (%s, %s, %s)"
+    values = data.values.tolist()
+    mycursor.executemany(query, values)
+    mydb.commit()
+    print(mycursor.rowcount, "was inserted")
+# grabAllSensor()
 def getUniqueDevices():
     #######################################################################
     ## gets all of the unique devices                                    ##
@@ -87,8 +115,153 @@ def getUniqueDevices():
     ## Return:                                                           ##
     ##   collection.distinct('Device'): list of unique device names      ##
     #######################################################################
-    db, collection = connect()
-    return collection.distinct('sn')
+    # db, collection = connect()
+    mydb = connect()
+    query = "SELECT sn FROM Devices"
+    mycursor = mydb.cursor()
+    mycursor.execute(query)
+    results = mycursor.fetchall()
+    dataframe = pd.DataFrame(results)
+    list = []
+    for i, sn in dataframe.iterrows():
+        list.append(sn[0])
+    return list
+
+
+def checkOffline():
+    auth = HTTPBasicAuth(apiKey,"")
+    #uses requests to get data from our network
+    # uses try except for error handling
+    sns = getUniqueDevices()
+
+    try:
+        req = requests.request("get","https://api.quant-aq.com/device-api/v1/devices/?network_id=9" , headers = None, auth = auth)
+    except:
+        return None
+    # print(req.json())
+    list = pd.DataFrame(req.json()["data"])
+    
+    list = list.drop(columns={"created","url", "description", "geo"}, axis=1)
+    value = []
+    for index, row in list.iterrows():
+        # try:
+        #     Ti = row['last_seen'].index(" ")
+        #     t = row['last_seen'][::Ti] + ' ' + row['last_seen'][Ti + 1::]
+        #     timestamp = datetime.strptime(t, '%y%m%d %H:%M:%S')  # Adjusted the timestamp format
+        # except ValueError:
+        #     # Handle the case where the space character is not found in the timestamp
+        #     # timestamp = datetime.now()
+        #     print("error")
+        Ti = row['last_seen'].index("T")
+        t = row['last_seen'][:Ti] + ' ' + row['last_seen'][Ti + 1:]
+        timestamp = datetime.strptime(t, '%Y-%m-%d %H:%M:%S')
+        todays = datetime.today()
+        todays = todays - timedelta(days=1)
+        ##checks if the data is outdated
+        if timestamp < todays:
+            temp = ["offline" ,row['sn']]
+            value.append(temp)
+        else:
+            temp = ["online", row['sn']]
+            value.append(temp)
+    mydb = connect()
+    # print(value)
+    query = "UPDATE Devices SET onlne = %s WHERE sn = %s"
+    mycursor = mydb.cursor()
+    mycursor.executemany(query, value)
+    mydb.commit()
+
+def updateHealth(serialNumber):
+    if serialNumber == None:
+        return
+    opc_flag = 2
+    neph_flag = 4
+    sd_flag = 8192
+    # get raw data
+    auth = HTTPBasicAuth(apiKey,"")
+    request = "https://api.quant-aq.com/device-api/v1/devices/" + serialNumber + '/data/raw/?network_id=9'
+    # print(request)
+    try:
+        req = requests.request("get",request, headers = None, auth = auth)
+    except:
+        print("Error Incorrect API Key")
+        return None
+    djson = req.json()
+    # print(djson)
+    rawData = pd.DataFrame(djson['data'])
+    # print(rawData)
+    curflag = rawData['flag'].iloc[0]
+    # print(curflag)
+    opcHealthnum = (curflag & opc_flag)
+    nephHealthnum = (curflag & neph_flag)
+    sdhealthnum = (curflag % sd_flag)
+    pmhealth = "ACTIVE"
+    if opcHealthnum != 0 or nephHealthnum != 0:
+        pmhealth = "ERROR"
+    sdhealth = "ACTIVE"
+    if sdhealthnum != 0:
+        sdhealth = "ERROR"
+    query = "Update Devices SET pmHealth = %s, sdHealth = %s WHERE sn = %s"
+    values = [pmhealth, sdhealth, serialNumber]
+    mydb = connect()
+    mycursor = mydb.cursor()
+    mycursor.execute(query, values)
+    mydb.commit()
+    # print(curflag)
+
+
+
+def updateAllHealth():
+    sns = getUniqueDevices()
+    for sn in sns:
+        updateHealth(sn)
+    # print(data)
+# updateAllHealth()
+
+def test():
+    mydb = connect()
+    query = "Select * FROM Data RIGHT OUTER JOIN Devices ON Data.sn = Devices.sn"
+    mycursor = mydb.cursor()
+    mycursor.execute(query)
+    result = mycursor.fetchall()
+    data = pd.DataFrame(result)
+    print(data)
+# test()
+
+#works like a charm
+# mysql portion of this is done
+def pushDB(data):
+    ######################################################################
+    ## pushes data into the database                                    ##
+    ## Parameters:                                                      ##
+    ##   data: pandas dataframe from fetchData() check data.py          ##
+    ## Return:                                                          ##
+    ######################################################################
+    # columns = ['geo.lat', 'geo.lon','sn','pm25','pm10', 'timestamp']
+    mydb = connect()
+    mycursor = mydb.cursor()
+    datas = data.fillna(0)
+    datas = datas.drop('geo.lat', axis = 1)
+    datas = datas.drop('geo.lon', axis = 1)
+    query = "INSERT INTO Data (sn, pm25, pm10, timestamp) VALUES (%s,%s,%s,%s) ON DUPLICATE KEY UPDATE pm25 = VALUES(pm25), pm10= VALUES(pm10)"
+    values = datas.values.tolist()
+    # print(values)
+    mycursor.executemany(query,values)
+    mydb.commit()
+    print(mycursor.rowcount, "was inserted")
+
+# pushDB(fetchData())
+# def test():
+#     mydb = connect()
+#     query = "Select * FROM Data"
+#     mycursor = mydb.cursor()
+#     mycursor.execute(query)
+#     result = mycursor.fetchall()
+#     data = pd.DataFrame(result)
+#     print(data)
+
+
+# print(getUniqueDevices())
 
 
 #should  work like how pullData used to work. 
@@ -99,17 +272,26 @@ def getAllRecent():
     ## Return:                                                             ##
     ##   data: returns a dson/ dataframe/ list / dataframe  of recent data ##
     #########################################################################
-    db, collection = connect()
+    # db, collection = connect()
     devices = getUniqueDevices()
     recent = []
     for device in devices:
-        query = {'sn': device}
-        recent.append(collection.find_one(query, sort=[('timestamp', -1)]))
+        # query = {'sn': device}
+        mydb = connect()
+        mycursor = mydb.cursor()
+        query = "SELECT * FROM Data LEFT OUTER JOIN Devices ON Data.sn = Devices.sn WHERE Data.sn = %s ORDER BY Data.timestamp"
+        values = [device]
+        mycursor.execute(query, values)
+        recent.append(mycursor.fetchone())
+        # recent.append(collection.find_one(query, sort=[('timestamp', -1)]))
 
-    recents = pd.DataFrame(recent).drop('_id', axis=1)
+    recent = pd.DataFrame(recent).dropna(how='all', axis = 0).drop(columns=4, axis = 1)
+    recent = recent.rename(columns = {0: 'sn', 1:'pm25', 2:'pm10', 3:'timestamp', 5:'geo.lat', 6:'geo.lon', 7:'pmHealth', 8:'sdHealh', 9: "status"})
+    recent.replace(0, np.nan, inplace=True)
+
     # recents.drop('_id', axis=1)
-    return recents
-
+    return recent
+# print(getAllRecent())
 
 #tested and works a little slow but works unless your doing a data visualization you do not need to use this.
 def pullData(serialNumber=None):
@@ -120,28 +302,17 @@ def pullData(serialNumber=None):
     ##   data: returns a dson/ dataframe/ list / dataframe  of the data  ##
     ##         of all Data historical too.                               ##
     #######################################################################
-    db, collection = connect()
-    if serialNumber != None:
-        datas = collection.find({'sn':serialNumber})
-        data = pd.DataFrame(datas)
-        # data['geo.lat'] = data['geo'].apply(lambda x: x['lat'])
-        # data['geo.lon'] = data['geo'].apply(lambda x: x['lon'])
-        # # print(data)
-        # data = data.drop('geo',axis=1)
-        data = data.drop(columns=['_id'])
-        return data
-    else:
-        datas = collection.find()
-        data = pd.DataFrame(datas)
-        # print(data)
-        # data['geo.lat'] = data['geo'].apply(lambda x: x['lat'])
-        # data['geo.lon'] = data['geo'].apply(lambda x: x['lon'])
-        # # print(data)
-        # data = data.drop('geo',axis=1)
-        data = data.drop(columns=['_id'])
+    mydb = connect()
+    mycursor = mydb.cursor()
+    if serialNumber == None:
+        query = "SELECT * FROM Data LEFT OUTER JOIN Devices ON Data.sn = Devices.sn"
+        mycursor.execute(query)
+        data = mycursor.fetchall()
+        data = pd.DataFrame(data).dropna(how='all', axis = 0).drop(columns=4, axis = 1)
+        data = data.rename(columns = {0: 'sn', 1:'pm25', 2:'pm10', 3:'timestamp', 5:'geo.lat', 6:'geo.lon', 7:'pmHealth', 8:'sdHealh'})
         return data
 
-
+# print(pullData())
 
 
 
@@ -210,23 +381,19 @@ def pullDataTime(serialNumber, time=30):
     ## check if serialNumber is None
     if(serialNumber == None):
         return pd.DataFrame()
-    ## SELECT * FROM Collection WHERE SN = serialNumber AND timestamp > curDate - time;
-    ## Honestly regretting using MongoDB rather than mySQL
-    db, collection, client = connect()
     curDate = datetime.now()
     threshold = timedelta(days=time)
-    query = {
-        'sn':serialNumber, 
-        'timestamp': {
-            '$lt': (curDate - threshold).strftime('%y%m%d %H:%M:%S')
-        }
-    }
-    data = collection.find(query)
+    thresh = (curDate - threshold).strftime('%Y-%m-%dT%H:%M:%S')
+    query = "SELECT Data.sn, Data.pm25, Data.pm10, Data.timestamp, Devices.lat, Devices.lon FROM Data LEFT OUTER JOIN Devices ON Data.sn = Devices.sn WHERE Data.sn = %s AND  Data.timestamp > %s"
+    values = [serialNumber, thresh]
+    mydb = connect()
+    mycursor = mydb.cursor()
+    mycursor.execute(query, values)
+    data = mycursor.fetchall()
     pdData = pd.DataFrame(data)
-    client.close()
     return pdData
 
-
+# print(pullDataTime("MOD-PM-00166",30))
 
 
 
@@ -290,7 +457,7 @@ def mapGeneration(data=None):
 
     # Open the HTML file in the default web browser
     webbrowser.open(html_file_path)
-
+# mapGeneration()
 #####Added function to perform data analysis on the distribution of PM2.5 values#####
     
 ###############################################################################################################
@@ -338,6 +505,3 @@ def dataAnalysis():
     pm25_plot_html = generate_pm25_graph()
     
     print(pm25_plot_html)
-
-dataAnalysis()
-
