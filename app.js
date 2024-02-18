@@ -1,4 +1,4 @@
-// --------------- code for connecting to the mongoDB cloud ---------------
+// --------------- code for connecting to the database ---------------
 
 require('dotenv').config()
 const mg = require('mongoose');
@@ -54,6 +54,64 @@ async function createNewUser(eml, usr, pswd){
   }
   //add error things here
 }
+
+	// // Specify the JSON data to be displayed 
+	// var tableData = 
+	// [ 
+	// 	{ 
+	// 	"sn": "12345", 
+	// 	"pm25": "12345", 
+	// 	"pm10": "12345" ,
+  //   "timestamp": "00000000"
+	// 	}, 
+	// 	{ 
+  //     "sn": "12345", 
+  //     "pm25": "12345", 
+  //     "pm10": "12345" ,
+  //     "timestamp": "00000000"
+	// 	}, 
+	// 	{ 
+  //     "sn": "12345", 
+  //     "pm25": "12345", 
+  //     "pm10": "12345" ,
+  //     "timestamp": "00000000"
+	// 	}, 
+	// 	{ 
+  //     "sn": "12345", 
+  //     "pm25": "12345", 
+  //     "pm10": "12345" ,
+  //     "timestamp": "00000000"
+	// 	}, 
+	// 	{ 
+  //     "sn": "12345", 
+  //     "pm25": "12345", 
+  //     "pm10": "12345" ,
+  //     "timestamp": "00000000"
+	// 	} 
+	// ]; 
+
+var tableData;
+async function fetchTableData() {
+  // pull researcher table data from sql db, export it as json response
+  var con = mysql.createConnection({
+    connectionLimit: 10,
+    host: process.env.mysqlhost,
+    port: 3306,
+    user: process.env.mysqlUser,
+    password: process.env.mysqlPassword,
+    database: process.env.mysqlDB 
+  });
+  var query = "SELECT * FROM Data";
+  await con.promise().query(query, value)
+      .then(([rows, fields]) => {
+          console.log(rows)
+          tableData = rows;
+      })    
+      .catch((err) => {
+          console.error(err);
+       });
+}
+
 
 async function run() {
   try {
@@ -128,36 +186,7 @@ app.get('/work-in-progress', (req, res) => {
   });
 });
 
-	// Specify the JSON data to be displayed 
-	var tableData = 
-	[ 
-		{ 
-		"id": "24323", 
-		"name": "Mark Smith", 
-		"date": "25/5/2020" 
-		}, 
-		{ 
-		"id": "24564", 
-		"name": "Caitlin MacDonald", 
-		"date": "17/5/2020" 
-		}, 
-		{ 
-		"id": "24345", 
-		"name": "Jessie Johnson ", 
-		"date": "1/5/2020" 
-		}, 
-		{ 
-		"id": "24874", 
-		"name": "Alen Williams", 
-		"date": "14/5/2020" 
-		}, 
-		{ 
-		"id": "24323", 
-		"name": "Maria Garcia ", 
-		"date": "13/5/2020" 
-		} 
-	]; 
-
+// create route for the researcher table data
 app.get('/data', (req, res) => {
   res.json(tableData);
 });
