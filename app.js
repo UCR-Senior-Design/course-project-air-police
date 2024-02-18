@@ -20,17 +20,18 @@ const client = new MongoClient(process.env.DATABASE_URL, {
 });
 const { request } = require('http')
 
+const sqlConfig = {
+  connectionLimit: 10,
+  host: process.env.mysqlhost,
+  port: 3306,
+  user: process.env.mysqlUser,
+  password: process.env.mysqlPassword,
+  database: process.env.mysqlDB 
+}
 
 async function createNewUser(eml, usr, pswd){
   // const usrs = await User.findOne( {$or: [{ username: usr}, {email:eml}]}).lean();
-  var con = mysql.createConnection({
-    connectionLimit: 10,
-    host: process.env.mysqlhost,
-    port: 3306,
-    user: process.env.mysqlUser,
-    password: process.env.mysqlPassword,
-    database: process.env.mysqlDB 
-  });
+  var con = mysql.createConnection(sqlConfig);
   var query = "SELECT * FROM User WHERE username = ?";
   let value = [usr]
   var result;
@@ -55,63 +56,20 @@ async function createNewUser(eml, usr, pswd){
   //add error things here
 }
 
-	// // Specify the JSON data to be displayed 
-	// var tableData = 
-	// [ 
-	// 	{ 
-	// 	"sn": "12345", 
-	// 	"pm25": "12345", 
-	// 	"pm10": "12345" ,
-  //   "timestamp": "00000000"
-	// 	}, 
-	// 	{ 
-  //     "sn": "12345", 
-  //     "pm25": "12345", 
-  //     "pm10": "12345" ,
-  //     "timestamp": "00000000"
-	// 	}, 
-	// 	{ 
-  //     "sn": "12345", 
-  //     "pm25": "12345", 
-  //     "pm10": "12345" ,
-  //     "timestamp": "00000000"
-	// 	}, 
-	// 	{ 
-  //     "sn": "12345", 
-  //     "pm25": "12345", 
-  //     "pm10": "12345" ,
-  //     "timestamp": "00000000"
-	// 	}, 
-	// 	{ 
-  //     "sn": "12345", 
-  //     "pm25": "12345", 
-  //     "pm10": "12345" ,
-  //     "timestamp": "00000000"
-	// 	} 
-	// ]; 
-
 var tableData;
 async function fetchTableData() {
   // pull researcher table data from sql db, export it as json response
-  var con = mysql.createConnection({
-    connectionLimit: 10,
-    host: process.env.mysqlhost,
-    port: 3306,
-    user: process.env.mysqlUser,
-    password: process.env.mysqlPassword,
-    database: process.env.mysqlDB 
-  });
+  var con = mysql.createConnection(sqlConfig);
   var query = "SELECT * FROM Data";
-  await con.promise().query(query, value)
+  await con.promise().query(query)
       .then(([rows, fields]) => {
-          console.log(rows)
           tableData = rows;
       })    
       .catch((err) => {
           console.error(err);
        });
 }
-
+fetchTableData();
 
 async function run() {
   try {
