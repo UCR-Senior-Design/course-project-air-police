@@ -170,7 +170,7 @@ def checkOffline():
     mycursor = mydb.cursor()
     mycursor.executemany(query, value)
     mydb.commit()
-
+# checkOffline()
 def updateHealth(serialNumber):
     if serialNumber == None:
         return
@@ -285,7 +285,7 @@ def getAllRecent():
         recent.append(mycursor.fetchone())
         # recent.append(collection.find_one(query, sort=[('timestamp', -1)]))
 
-    recent = pd.DataFrame(recent).dropna(how='all', axis = 0).drop(columns=4, axis = 1)
+    recent = pd.DataFrame(recent).dropna(how='all', axis = 0).drop(columns=4, axis=1)
     recent = recent.rename(columns = {0: 'sn', 1:'pm25', 2:'pm10', 3:'timestamp', 5:'geo.lat', 6:'geo.lon', 7:'pmHealth', 8:'sdHealh', 9: "status"})
     recent.replace(0, np.nan, inplace=True)
 
