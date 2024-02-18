@@ -3,15 +3,23 @@ const app = require("../app");
 const mongoose = require("mongoose");
 require("dotenv").config();
 
+const mysql = require('mysql2');
+
 beforeAll(async () => {
-   await mongoose.connect(process.env.DATABASE_URL);
+   await mysql.createConnection({
+    connectionLimit: 10,
+    host: process.env.mysqlhost,
+    port: 3306,
+    user: process.env.mysqlUser,
+    password: process.env.mysqlPassword,
+    database: process.env.mysqlDB 
+  });
 });
 
-afterAll(async () => {
-  // Closing the DB connection allows Jest to exit successfully.
-  await mongoose.connection.close();
-});
-
+// afterAll(async () => {
+//   // Closing the DB connection allows Jest to exit successfully.
+//   await mysql.close();
+// });
 
 describe("GET Home", () => {
   it("returns status code 200 if the home page loaded", async () => {
