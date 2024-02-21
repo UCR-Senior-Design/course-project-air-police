@@ -61,7 +61,6 @@ def fetchData():
 # database stuff cant do it in its own folder
 # connect to mongoclient
 def connect():
-    # connection = os.environ['c_URI']
     mhost = os.environ['mysqlhost']
     muer = os.environ['mysqlUser']
     mpassword = os.environ['mysqlPassword']
@@ -102,7 +101,7 @@ def grabAllSensor():
     print(data)
     mydb = connect()
     mycursor = mydb.cursor()
-    query = "INSERT INTO Devices (sn, lat, lon) VALUES (%s, %s, %s)"
+    query = "INSERT INTO Devices (sn, lat, lon) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE lat = VALUES(lat), lon = VALUES(lon)"
     values = data.values.tolist()
     mycursor.executemany(query, values)
     mydb.commit()
@@ -113,9 +112,9 @@ def getUniqueDevices():
     ## gets all of the unique devices                                    ##
     ## PARAMETERS:                                                       ##
     ## Return:                                                           ##
-    ##   collection.distinct('Device'): list of unique device names      ##
+    ##   list: list of unique device names                               ##
     #######################################################################
-    # db, collection = connect()
+
     mydb = connect()
     query = "SELECT sn FROM Devices"
     mycursor = mydb.cursor()
@@ -144,18 +143,12 @@ def checkOffline():
     list = list.drop(columns={"created","url", "description", "geo"}, axis=1)
     value = []
     for index, row in list.iterrows():
-        # try:
-        #     Ti = row['last_seen'].index(" ")
-        #     t = row['last_seen'][::Ti] + ' ' + row['last_seen'][Ti + 1::]
-        #     timestamp = datetime.strptime(t, '%y%m%d %H:%M:%S')  # Adjusted the timestamp format
-        # except ValueError:
-        #     # Handle the case where the space character is not found in the timestamp
-        #     # timestamp = datetime.now()
-        #     print("error")
+
         Ti = row['last_seen'].index("T")
         t = row['last_seen'][:Ti] + ' ' + row['last_seen'][Ti + 1:]
         timestamp = datetime.strptime(t, '%Y-%m-%d %H:%M:%S')
         todays = datetime.today()
+        #update the threshold to how many
         todays = todays - timedelta(days=1)
         ##checks if the data is outdated
         if timestamp < todays:
@@ -170,7 +163,7 @@ def checkOffline():
     mycursor = mydb.cursor()
     mycursor.executemany(query, value)
     mydb.commit()
-# checkOffline()
+
 def updateHealth(serialNumber):
     if serialNumber == None:
         return
@@ -180,21 +173,17 @@ def updateHealth(serialNumber):
     # get raw data
     auth = HTTPBasicAuth(apiKey,"")
     request = "https://api.quant-aq.com/device-api/v1/devices/" + serialNumber + '/data/raw/?network_id=9'
-    # print(request)
     try:
         req = requests.request("get",request, headers = None, auth = auth)
     except:
         print("Error Incorrect API Key")
         return None
     djson = req.json()
-    # print(djson)
     rawData = pd.DataFrame(djson['data'])
-    # print(rawData)
     curflag = rawData['flag'].iloc[0]
-    # print(curflag)
     opcHealthnum = (curflag & opc_flag)
     nephHealthnum = (curflag & neph_flag)
-    sdhealthnum = (curflag % sd_flag)
+    sdhealthnum = (curflag & sd_flag)
     pmhealth = "ACTIVE"
     if opcHealthnum != 0 or nephHealthnum != 0:
         pmhealth = "ERROR"
@@ -207,7 +196,7 @@ def updateHealth(serialNumber):
     mycursor = mydb.cursor()
     mycursor.execute(query, values)
     mydb.commit()
-    # print(curflag)
+
 
 
 
@@ -215,18 +204,6 @@ def updateAllHealth():
     sns = getUniqueDevices()
     for sn in sns:
         updateHealth(sn)
-    # print(data)
-# updateAllHealth()
-
-def test():
-    mydb = connect()
-    query = "Select * FROM Data RIGHT OUTER JOIN Devices ON Data.sn = Devices.sn"
-    mycursor = mydb.cursor()
-    mycursor.execute(query)
-    result = mycursor.fetchall()
-    data = pd.DataFrame(result)
-    print(data)
-# test()
 
 #works like a charm
 # mysql portion of this is done
@@ -237,7 +214,8 @@ def pushDB(data):
     ##   data: pandas dataframe from fetchData() check data.py          ##
     ## Return:                                                          ##
     ######################################################################
-    # columns = ['geo.lat', 'geo.lon','sn','pm25','pm10', 'timestamp']
+    # if data == None:
+    #     data = fetchData()
     mydb = connect()
     mycursor = mydb.cursor()
     datas = data.fillna(0)
@@ -245,23 +223,9 @@ def pushDB(data):
     datas = datas.drop('geo.lon', axis = 1)
     query = "INSERT INTO Data (sn, pm25, pm10, timestamp) VALUES (%s,%s,%s,%s) ON DUPLICATE KEY UPDATE pm25 = VALUES(pm25), pm10= VALUES(pm10)"
     values = datas.values.tolist()
-    # print(values)
     mycursor.executemany(query,values)
     mydb.commit()
     print(mycursor.rowcount, "was inserted")
-
-# pushDB(fetchData())
-# def test():
-#     mydb = connect()
-#     query = "Select * FROM Data"
-#     mycursor = mydb.cursor()
-#     mycursor.execute(query)
-#     result = mycursor.fetchall()
-#     data = pd.DataFrame(result)
-#     print(data)
-
-
-# print(getUniqueDevices())
 
 
 #should  work like how pullData used to work. 
@@ -276,22 +240,18 @@ def getAllRecent():
     devices = getUniqueDevices()
     recent = []
     for device in devices:
-        # query = {'sn': device}
         mydb = connect()
         mycursor = mydb.cursor()
         query = "SELECT * FROM Data LEFT OUTER JOIN Devices ON Data.sn = Devices.sn WHERE Data.sn = %s ORDER BY Data.timestamp"
         values = [device]
         mycursor.execute(query, values)
         recent.append(mycursor.fetchone())
-        # recent.append(collection.find_one(query, sort=[('timestamp', -1)]))
 
     recent = pd.DataFrame(recent).dropna(how='all', axis = 0).drop(columns=4, axis=1)
     recent = recent.rename(columns = {0: 'sn', 1:'pm25', 2:'pm10', 3:'timestamp', 5:'geo.lat', 6:'geo.lon', 7:'pmHealth', 8:'sdHealh', 9: "status"})
     recent.replace(0, np.nan, inplace=True)
-
-    # recents.drop('_id', axis=1)
     return recent
-# print(getAllRecent())
+
 
 #tested and works a little slow but works unless your doing a data visualization you do not need to use this.
 def pullData(serialNumber=None):
@@ -311,12 +271,6 @@ def pullData(serialNumber=None):
         data = pd.DataFrame(data).dropna(how='all', axis = 0).drop(columns=4, axis = 1)
         data = data.rename(columns = {0: 'sn', 1:'pm25', 2:'pm10', 3:'timestamp', 5:'geo.lat', 6:'geo.lon', 7:'pmHealth', 8:'sdHealh'})
         return data
-
-# print(pullData())
-
-
-
-
 
 
 
@@ -393,7 +347,6 @@ def pullDataTime(serialNumber, time=30):
     pdData = pd.DataFrame(data)
     return pdData
 
-# print(pullDataTime("MOD-PM-00166",30))
 
 
 
@@ -457,7 +410,6 @@ def mapGeneration(data=None):
 
     # Open the HTML file in the default web browser
     webbrowser.open(html_file_path)
-# mapGeneration()
 #####Added function to perform data analysis on the distribution of PM2.5 values#####
     
 ###############################################################################################################
