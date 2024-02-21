@@ -61,6 +61,8 @@ async function fetchTableData() {
   // pull researcher table data from sql db, export it as json response
   var con = mysql.createConnection(sqlConfig);
   var query = "SELECT * FROM Data";
+  // var query = "SELECT D.sn, D.pm25, D.pm10, D.timestamp, M.pmHealth, M.sdHealth, M.onlne 
+  // FROM Data D, Devices M WHERE D.sn = M.sn;"
   await con.promise().query(query)
       .then(([rows, fields]) => {
           tableData = rows;
