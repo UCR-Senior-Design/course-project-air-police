@@ -46,7 +46,7 @@ def createDevicesTable():
 def createUserTable():
     mydb = conn()
     mycursor = mydb.cursor()
-    mycursor.execute("CREATE TABLE User (email VARCHAR(255), username VARCHAR(30), pwd TEXT, PRIMARY KEY (username) )")
+    mycursor.execute("CREATE TABLE IF NOT EXISTS User (email VARCHAR(255), username VARCHAR(30), pwd TEXT, PRIMARY KEY (username) )")
 
 def initialize():
     createDB()
