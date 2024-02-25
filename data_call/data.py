@@ -457,3 +457,35 @@ def dataAnalysis():
     pm25_plot_html = generate_pm25_graph()
     
     print(pm25_plot_html)
+
+
+
+
+
+def updateDataFractionForToday(serialNumber):
+    auth = HTTPBasicAuth(apiKey,"")
+    #uses requests to get data from our network
+    # uses try except for error handling
+    query = "https://api.quant-aq.com/device-api/v1/devices/" + serialNumber + "/data-by-date/" + datetime.now().strftime('%Y-%m-%d') + "/?network_id=9"
+    try:
+        req = requests.request("get",query, headers = None, auth = auth)
+    except:
+        print("Error Incorrect API Key")
+        return None
+    res = req.json()
+    total = res["meta"]["total"]
+    fraction = total / 1440
+
+    mydb = connect()
+    mycursor = mydb.cursor()
+    query = "UPDATE Devices SET dataFraction = %s WHERE sn = %s"
+    values = [fraction, serialNumber]
+    mycursor.execute(query, values)
+    mydb.commit()
+
+def updateAllDataFraction():
+    sns = getUniqueDevices()
+    for sn in sns:
+        updateDataFractionForToday(sn)
+
+
