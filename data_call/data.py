@@ -245,14 +245,15 @@ def getAllRecent():
         query = "SELECT * FROM Data LEFT OUTER JOIN Devices ON Data.sn = Devices.sn WHERE Data.sn = %s ORDER BY Data.timestamp"
         values = [device]
         mycursor.execute(query, values)
-        recent.append(mycursor.fetchone())
-
-    recent = pd.DataFrame(recent).dropna(how='all', axis = 0).drop(columns=4, axis=1)
-    recent = recent.rename(columns = {0: 'sn', 1:'pm25', 2:'pm10', 3:'timestamp', 5:'geo.lat', 6:'geo.lon', 7:'pmHealth', 8:'sdHealh', 9: "status"})
+        test = mycursor.fetchone()
+        if test is not None:
+            recent.append(test)
+    recent = pd.DataFrame(recent).dropna(how='all', axis = 0).drop(columns=4, axis = 1)
+    recent = recent.rename(columns = {0: 'sn', 1:'pm25', 2:'pm10', 3:'timestamp', 5:'geo.lat', 6:'geo.lon', 7:'pmHealth', 8:'sdHealh', 9: "status", 10: "Data Fraction"})
     recent.replace(0, np.nan, inplace=True)
     return recent
 
-
+getAllRecent()
 #tested and works a little slow but works unless your doing a data visualization you do not need to use this.
 def pullData(serialNumber=None):
     #######################################################################
@@ -457,3 +458,35 @@ def dataAnalysis():
     pm25_plot_html = generate_pm25_graph()
     
     print(pm25_plot_html)
+
+
+
+
+
+def updateDataFractionForToday(serialNumber):
+    auth = HTTPBasicAuth(apiKey,"")
+    #uses requests to get data from our network
+    # uses try except for error handling
+    query = "https://api.quant-aq.com/device-api/v1/devices/" + serialNumber + "/data-by-date/" + datetime.now().strftime('%Y-%m-%d') + "/?network_id=9"
+    try:
+        req = requests.request("get",query, headers = None, auth = auth)
+    except:
+        print("Error Incorrect API Key")
+        return None
+    res = req.json()
+    total = res["meta"]["total"]
+    fraction = total / 1440
+
+    values = [fraction, serialNumber]
+    return values
+
+def updateAllDataFraction():
+    sns = getUniqueDevices()
+    list = []
+    for sn in sns:
+        list.append(updateDataFractionForToday(sn))
+    mydb = connect()
+    mycursor = mydb.cursor()
+    query = "UPDATE Devices SET dataFraction = %s WHERE sn = %s"
+    mycursor.executemany(query, list)
+    mydb.commit()

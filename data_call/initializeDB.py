@@ -31,6 +31,15 @@ def createDB():
     mycursor = mydb.cursor()
     mycursor.execute("CREATE DATABASE IF NOT EXISTS SaltonSea")
 
+def dropTables():
+    mydb = conn()
+    sql = "DROP TABLE IF EXISTS Data"
+    mycursor = mydb.cursor()
+    mycursor.execute(sql)
+    mydb.commit()
+    mycursor = mydb.cursor()
+    sql = "DROP TABLE IF EXISTS Devices"
+    mycursor.execute(sql)
 
 def createDataTable():
     mydb = conn()
@@ -41,7 +50,7 @@ def createDataTable():
 def createDevicesTable():
     mydb = conn()
     mycursor = mydb.cursor()
-    mycursor.execute("CREATE TABLE IF NOT EXISTS Devices (sn VARCHAR(255), lat DECIMAL(5,2), lon DECIMAL(5,2), pmHealth VARCHAR(20), sdHealth VARCHAR(20), onlne VARCHAR(10), PRIMARY KEY(sn))")
+    mycursor.execute("CREATE TABLE IF NOT EXISTS Devices (sn VARCHAR(255), lat DECIMAL(5,2), lon DECIMAL(5,2), pmHealth VARCHAR(20), sdHealth VARCHAR(20), onlne VARCHAR(10), dataFraction DECIMAL(5,4), PRIMARY KEY(sn))")
 
 def createUserTable():
     mydb = conn()
@@ -50,6 +59,7 @@ def createUserTable():
 
 def initialize():
     createDB()
+    dropTables()
     createDataTable()
     createDevicesTable()
     createUserTable()
