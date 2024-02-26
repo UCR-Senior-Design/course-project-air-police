@@ -245,14 +245,15 @@ def getAllRecent():
         query = "SELECT * FROM Data LEFT OUTER JOIN Devices ON Data.sn = Devices.sn WHERE Data.sn = %s ORDER BY Data.timestamp"
         values = [device]
         mycursor.execute(query, values)
-        recent.append(mycursor.fetchone())
-
-    recent = pd.DataFrame(recent).dropna(how='all', axis = 0).drop(columns=4, axis=1)
-    recent = recent.rename(columns = {0: 'sn', 1:'pm25', 2:'pm10', 3:'timestamp', 5:'geo.lat', 6:'geo.lon', 7:'pmHealth', 8:'sdHealh', 9: "status"})
+        test = mycursor.fetchone()
+        if test is not None:
+            recent.append(test)
+    recent = pd.DataFrame(recent).dropna(how='all', axis = 0).drop(columns=4, axis = 1)
+    recent = recent.rename(columns = {0: 'sn', 1:'pm25', 2:'pm10', 3:'timestamp', 5:'geo.lat', 6:'geo.lon', 7:'pmHealth', 8:'sdHealh', 9: "status", 10: "Data Fraction"})
     recent.replace(0, np.nan, inplace=True)
     return recent
 
-
+getAllRecent()
 #tested and works a little slow but works unless your doing a data visualization you do not need to use this.
 def pullData(serialNumber=None):
     #######################################################################
