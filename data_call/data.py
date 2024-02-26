@@ -476,16 +476,16 @@ def updateDataFractionForToday(serialNumber):
     total = res["meta"]["total"]
     fraction = total / 1440
 
-    mydb = connect()
-    mycursor = mydb.cursor()
-    query = "UPDATE Devices SET dataFraction = %s WHERE sn = %s"
     values = [fraction, serialNumber]
-    mycursor.execute(query, values)
-    mydb.commit()
+    return values
 
 def updateAllDataFraction():
     sns = getUniqueDevices()
+    list = []
     for sn in sns:
-        updateDataFractionForToday(sn)
-
-
+        list.append(updateDataFractionForToday(sn))
+    mydb = connect()
+    mycursor = mydb.cursor()
+    query = "UPDATE Devices SET dataFraction = %s WHERE sn = %s"
+    mycursor.executemany(query, list)
+    mydb.commit()

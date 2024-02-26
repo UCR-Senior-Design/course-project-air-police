@@ -1,5 +1,5 @@
 import data as dc
 
 def updateDataFraction():
-    dc.updateAllDataFraction
+    dc.updateAllDataFraction()
 updateDataFraction()
