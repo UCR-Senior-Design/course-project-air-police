@@ -12,7 +12,6 @@ router.get('/', (req,res) => {
     }
     else{
         res.redirect('/rlogin?error=ngl');
-        res.status(400); 
     }
 })
 

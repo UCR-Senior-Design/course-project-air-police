@@ -3,18 +3,18 @@ const app = require("../app");
 const mongoose = require("mongoose");
 require("dotenv").config();
 
-const mysql = require('mysql2');
+// const mysql = require('mysql2');
 
-beforeAll(async () => {
-   await mysql.createConnection({
-    connectionLimit: 10,
-    host: process.env.mysqlhost,
-    port: 3306,
-    user: process.env.mysqlUser,
-    password: process.env.mysqlPassword,
-    database: process.env.mysqlDB 
-  });
-});
+// beforeAll(async () => {
+//    await mysql.createConnection({
+//     connectionLimit: 10,
+//     host: process.env.mysqlhost,
+//     port: 3306,
+//     user: process.env.mysqlUser,
+//     password: process.env.mysqlPassword,
+//     database: process.env.mysqlDB 
+//   });
+// });
 
 // afterAll(async () => {
 //   // Closing the DB connection allows Jest to exit successfully.
@@ -57,15 +57,32 @@ describe("GET registerPage", () => {
 // });
 
 describe("GET invitePage", () => {
-  it("returns status code 200 if the invite page loaded", async () => {
+  it("returns status code 302 if the invite page redirects with no token", async () => {
     const res = await request(app).get("/invite");
+    expect(res.statusCode).toEqual(302);
+  });
+});
+
+describe("GET Table", () => {
+  it("returns status code 302 (redirect) when the user is not logged in", async () => {
+    const res  = await request(app).get("/table");
     expect(res.statusCode).toEqual(302);
   });
 });
 
 // describe("GET Table", () => {
 //   it("returns status code 200 when the user is logged in", async () => {
-//     const res = await request(app).post("/table").send({req.session.logged_in = true});
+//     const res  = await request(app).get("/table");
+//     //response.send({session.logged_in : true});
 //     expect(res.statusCode).toEqual(200);
 //   });
 // });
+
+// describe("GET Table", () => {
+//   it("returns status code 200 when the user is logged in", async () => {
+//     const res  = await request(app).get("/table");
+//     //response.send({session.logged_in : true});
+//     expect(res.statusCode).toEqual(302);
+//   });
+// });
+// // req.session.logged_in = true
