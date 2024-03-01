@@ -1,24 +1,24 @@
 // --------------- code for connecting to the database ---------------
 
-require('dotenv').config()
-const mg = require('mongoose');
-const { MongoClient, ServerApiVersion } = require('mongodb');
-const User = require("./models/user.js")
-const bodyParser = require('body-parser')
-var bcrypt = require('bcryptjs');
-var jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
+require("dotenv").config();
+const mg = require("mongoose");
+const { MongoClient, ServerApiVersion } = require("mongodb");
+const User = require("./models/user.js");
+const bodyParser = require("body-parser");
+var bcrypt = require("bcryptjs");
+var jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
 const hash = process.env.hash;
-const mysql = require('mysql2');
+const mysql = require("mysql2");
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(process.env.DATABASE_URL, {
   serverApi: {
     version: ServerApiVersion.v1,
     strict: true,
     deprecationErrors: true,
-  }
+  },
 });
-const { request } = require('http')
+const { request } = require("http");
 
 const sqlConfig = {
   connectionLimit: 10,
@@ -26,32 +26,33 @@ const sqlConfig = {
   port: 3306,
   user: process.env.mysqlUser,
   password: process.env.mysqlPassword,
-  database: process.env.mysqlDB 
-}
+  database: process.env.mysqlDB,
+};
 
-async function createNewUser(eml, usr, pswd){
+async function createNewUser(eml, usr, pswd) {
   // const usrs = await User.findOne( {$or: [{ username: usr}, {email:eml}]}).lean();
   var con = mysql.createConnection(sqlConfig);
   var query = "SELECT * FROM User WHERE username = ?";
-  let value = [usr]
+  let value = [usr];
   var result;
-  await con.promise().query(query, value)
-      .then(([rows, fields]) => {
-          result = rows;
-      })    
-      .catch((err) => {
-          console.error(err);
-       });
-  if(result.length === 0 || !result){
+  await con
+    .promise()
+    .query(query, value)
+    .then(([rows, fields]) => {
+      result = rows;
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+  if (result.length === 0 || !result) {
     // const hashs = bcrypt.hashSync(pswd, hash);
-    bcrypt.genSalt(parseInt(process.env.hash), function(err, salt) {
-      bcrypt.hash(pswd, salt, function(err, hashs) {
+    bcrypt.genSalt(parseInt(process.env.hash), function (err, salt) {
+      bcrypt.hash(pswd, salt, function (err, hashs) {
         let query = "INSERT INTO user (email, username, pwd) VALUES ( ?, ?, ?)";
-        let values = [eml, usr, hashs]
+        let values = [eml, usr, hashs];
         con.promise().query(query, values);
       });
-  });
-    
+    });
   }
   //add error things here
 }
@@ -60,26 +61,43 @@ var tableData;
 async function fetchTableData() {
   // pull researcher table data from sql db, export it as json response
   var con = mysql.createConnection(sqlConfig);
-  var query = "SELECT D.sn, D.pm25, D.pm10, M.sdHealth, M.onlne, D.timestamp FROM Data D, Devices M WHERE D.sn = M.sn AND D.timestamp = (SELECT MAX(timestamp) FROM Data WHERE sn = D.sn) ORDER BY M.onlne, D.sn;"
-  await con.promise().query(query)
-      .then(([rows, fields]) => {
-          tableData = rows;
-      })    
-      .catch((err) => {
-          console.error(err);
-       });
+  var query =
+    "SELECT D.sn, D.pm25, D.pm10, M.sdHealth, M.onlne, D.timestamp FROM Data D, Devices M WHERE D.sn = M.sn AND D.timestamp = (SELECT MAX(timestamp) FROM Data WHERE sn = D.sn) ORDER BY M.onlne, D.sn;";
+  await con
+    .promise()
+    .query(query)
+    .then(([rows, fields]) => {
+      tableData = rows;
+    })
+    .catch((err) => {
+      console.error(err);
+    });
 }
 fetchTableData();
-
+var addedResearchers;
+async function emailGet() {
+  var con = mysql.createConnection(sqlConfig);
+  var query = "SELECT email FROM User";
+  await con
+    .promise()
+    .query(query)
+    .then(([rows, fields]) => {
+      addedResearchers = rows;
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+}
+emailGet();
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
-    await mg.connect(process.env.DATABASE_URL)
+    await mg.connect(process.env.DATABASE_URL);
     // // Send a ping to confirm a successful connection
     // await client.db("SSProject").command({ ping: 1 });
     // console.log("Pinged your deployment. You successfully connected to MongoDB!");
-    await createNewUser('tno@gmail.com','pyTest','1234');
+    await createNewUser("tno@gmail.com", "pyTest", "1234");
   } finally {
     // Ensures that the client will close when you finish/error
     await client.close();
@@ -88,74 +106,73 @@ async function run() {
 run().catch(console.dir);
 // --------------- end of code for connecting to the mongoDB cloud ---------------
 
-
 // --------------- code for setting up the application ---------------
 // dependancies
-const express = require('express')
-const hbs = require('express-handlebars');
-const app = express()
-const path = require('node:path');
-const session = require('express-session')
+const express = require("express");
+const hbs = require("express-handlebars");
+const app = express();
+const path = require("node:path");
+const session = require("express-session");
 
-app.use(express.json())
+app.use(express.json());
 //for req and res
 app.use(bodyParser.json()); // Parse JSON bodies
 app.use(bodyParser.urlencoded({ extended: true }));
-// Templating Engine 
+// Templating Engine
 app.engine(
-  'hbs',
+  "hbs",
   hbs.engine({
-    extname: 'hbs',
-    defaultLayout: 'index',
-    layoutsDir: __dirname + '/views/layouts/'
-  })
-)
+    extname: "hbs",
+    defaultLayout: "index",
+    layoutsDir: __dirname + "/views/layouts/",
+  }),
+);
 
-app.use(express.static(path.join(__dirname, 'public'))) 
+app.use(express.static(path.join(__dirname, "public")));
 
-app.set('views', path.join(__dirname, 'views'))
-app.set('view engine', 'hbs')
+app.set("views", path.join(__dirname, "views"));
+app.set("view engine", "hbs");
 
 app.use(
   session({
-    secret: 'secret',
+    secret: "secret",
     resave: true,
-    saveUninitialized: true
-  })
-)
+    saveUninitialized: true,
+  }),
+);
 // --------------- end of code for setting up the application ---------------
-
 
 // --------------- code for routing to pages ---------------
 // creates home page
-const homeRouter = require('./routes/home.js')
-app.use('/home', homeRouter)
-app.use('', homeRouter)
-
+const homeRouter = require("./routes/home.js");
+app.use("/home", homeRouter);
+app.use("", homeRouter);
 
 // creates map page
-const mapRouter = require('./routes/map.js')
-app.use('/map', mapRouter)
+const mapRouter = require("./routes/map.js");
+app.use("/map", mapRouter);
 
-
-app.get('/work-in-progress', (req, res) => {
-  res.render('work-in-progress', {
-      title: 'Work in Progress'
+app.get("/work-in-progress", (req, res) => {
+  res.render("work-in-progress", {
+    title: "Work in Progress",
   });
 });
 
 // create route for the researcher table data
-app.get('/data', (req, res) => {
+app.get("/data", (req, res) => {
   res.json(tableData);
 });
 
-
+app.get("/researcher", async (req, res) => {
+  await emailGet();
+  // add a security check here
+  res.json(addedResearchers);
+});
 
 //creates data analysis testing page
-app.get('/data-analysis-testing', (req, res) => {
-
+app.get("/data-analysis-testing", (req, res) => {
   //res.send('This is the data analysis testing page');
-  res.render('data-analysis-testing');
+  res.render("data-analysis-testing");
 });
 
 //////////
@@ -163,46 +180,46 @@ app.get('/data-analysis-testing', (req, res) => {
 ///////////////////////////
 
 //viewDataRouter
-const viewDataRouter = require('./routes/viewData.js');
-app.use('/view-data', viewDataRouter);
+const viewDataRouter = require("./routes/viewData.js");
+app.use("/view-data", viewDataRouter);
 
 //////////////////////
-app.route('/invite').post( async (req, res) =>{
+app.route("/invite").post(async (req, res) => {
   var con = mysql.createConnection({
     connectionLimit: 10,
     host: process.env.mysqlhost,
     port: 3306,
     user: process.env.mysqlUser,
     password: process.env.mysqlPassword,
-    database: process.env.mysqlDB 
+    database: process.env.mysqlDB,
   });
-  const {email} = req.body;
+  const { email } = req.body;
   var query = "SELECT * FROM User WHERE email = ?";
-  let value = [email]
+  let value = [email];
   var result;
-  await con.promise().query(query, value)
-      .then(([rows, fields]) => {
-          result = rows;
-      })    
-      .catch((err) => {
-          console.error(err);
-       });
-  if(result.length !== 0){
+  await con
+    .promise()
+    .query(query, value)
+    .then(([rows, fields]) => {
+      result = rows;
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+  if (result.length !== 0) {
     res.redirect('/invite?error="usrE');
     return;
   }
-  const token = jwt.sign({ email: email },
-    process.env.key,
-    {
-      algorithm: 'HS256',
-      allowInsecureKeySizes: true,
-      expiresIn: 7200, // 24 hours
-    });
+  const token = jwt.sign({ email: email }, process.env.key, {
+    algorithm: "HS256",
+    allowInsecureKeySizes: true,
+    expiresIn: 7200, // 24 hours
+  });
   const registersite = "http://localhost:3000/register?token=";
   const site = registersite + token;
   var data = {
-    link: site
-  }
+    link: site,
+  };
   var message = `
   Hello ${email},
 
@@ -218,7 +235,7 @@ If you are not a part of his team, please ignore this message.
 
 Best wishes,
 EmailJS team
-  `
+  `;
   // email the message here
   var transport = nodemailer.createTransport({
     host: "sandbox.smtp.mailtrap.io",
@@ -226,209 +243,212 @@ EmailJS team
     auth: {
       user: process.env.mailtrapeuser,
       pass: process.env.mailtrappassword,
-    }
+    },
   });
-  
+
   var msg = {
     from: "jchang1211@gmail.com",
     to: "jchan443@ucr.edu",
     subject: "Salton Sea Researcher Registration",
-    text: message
+    text: message,
   };
-  transport.sendMail(msg)
-  res.redirect('/invite');
+  transport.sendMail(msg);
+  console.log(message);
+  res.redirect("/invite");
   // emailjs.init({publicKey:process.env.emjs});
   // emailjs.send(process.env.sid, process.env.tempid, data);
-})
-const inviteRouter = require('./routes/invite.js');
-app.use('/invite',inviteRouter);
+});
+const inviteRouter = require("./routes/invite.js");
+app.use("/invite", inviteRouter);
 
-app.route('/register').post( async (req, res) => {
+app.route("/register").post(async (req, res) => {
   var con = mysql.createConnection({
     connectionLimit: 10,
     host: process.env.mysqlhost,
     port: 3306,
     user: process.env.mysqlUser,
     password: process.env.mysqlPassword,
-    database: process.env.mysqlDB 
+    database: process.env.mysqlDB,
   });
-  const {token, username, password, retype} = req.body;
-  if(!token){
-    res.redirect('/home');
+  const { token, username, password, retype } = req.body;
+  if (!token) {
+    res.redirect("/home");
   }
   // const urlParams = new URLSearchParams(window.location.search);
   // const myParam = urlParams.get('myParam');
   // const token = urlParams.get('token')[0];
-  var errorpage = "/register?token=" + token + "&error="
+  var errorpage = "/register?token=" + token + "&error=";
   var haserror = false;
-  if(!username){
-    errorpage+='usr2';
+  if (!username) {
+    errorpage += "usr2";
     haserror = true;
   }
   var query = "SELECT * FROM User WHERE username = ?";
-  let value = [username]
+  let value = [username];
   var result;
-  await con.promise().query(query, value)
-      .then(([rows, fields]) => {
-          result = rows;
-      })    
-      .catch((err) => {
-          console.error(err);
-       });
-  if(result.length !== 0){
-    errorpage+= 'usr1';
+  await con
+    .promise()
+    .query(query, value)
+    .then(([rows, fields]) => {
+      result = rows;
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+  if (result.length !== 0) {
+    errorpage += "usr1";
     haserror = true;
-  }
-  else{
-    if(!password){
-      errorpage+= 'pw2';
+  } else {
+    if (!password) {
+      errorpage += "pw2";
       haserror = true;
     }
     //add regex checking here
-    const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&-])[A-Za-z\d@$!%*?&-]{8,}$/;
-    if(!passwordPattern.test(password)){
+    const passwordPattern =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&-])[A-Za-z\d@$!%*?&-]{8,}$/;
+    if (!passwordPattern.test(password)) {
       haserror = true;
-      errorpage += 'pw1';
+      errorpage += "pw1";
     }
-    if(password != retype){
-      errorpage += 'pw3';
+    if (password != retype) {
+      errorpage += "pw3";
       haserror = true;
     }
-    if(!haserror){
+    if (!haserror) {
       var email;
-      jwt.verify(token, 
-        process.env.key,
-        (error, decoded)=>{
-          if(error){
-            haserror = true;
-            //  add errors here redirecting
-            // res.redirect('/home');
-          }
-          email = decoded.email;
-          console.log(email);
-        });
+      jwt.verify(token, process.env.key, (error, decoded) => {
+        if (error) {
+          haserror = true;
+          //  add errors here redirecting
+          // res.redirect('/home');
+        }
+        email = decoded.email;
+        console.log(email);
+      });
       // const user = await User.findOne({email: email});
       var query = "SELECT * FROM User WHERE username = ?";
-      let value = [username]
+      let value = [username];
       var result2;
-      await con.promise().query(query, value)
-          .then(([rows, fields]) => {
-              result2 = rows;
-          })    
-          .catch((err) => {
-              console.error(err);
-           });
+      await con
+        .promise()
+        .query(query, value)
+        .then(([rows, fields]) => {
+          result2 = rows;
+        })
+        .catch((err) => {
+          console.error(err);
+        });
 
-      if(result2.length === 0){
+      if (result2.length === 0) {
         await createNewUser(email, username, password);
-        res.redirect('/rlogin');
-      }
-      else{
-        res.redirect('/rlogin?error=ngl2');
+        res.redirect("/rlogin");
+      } else {
+        res.redirect("/rlogin?error=ngl2");
       }
     }
   }
-  if(haserror){
+  if (haserror) {
     res.redirect(errorpage);
   }
-})
-const registerRouter = require('./routes/register.js');
-app.use('/register',registerRouter);
+});
+const registerRouter = require("./routes/register.js");
+app.use("/register", registerRouter);
 
-
-app.route('/rlogin').post( async (req,res) => {
+app.route("/rlogin").post(async (req, res) => {
   var con = mysql.createConnection({
     connectionLimit: 10,
     host: process.env.mysqlhost,
     port: 3306,
     user: process.env.mysqlUser,
     password: process.env.mysqlPassword,
-    database: process.env.mysqlDB 
+    database: process.env.mysqlDB,
   });
-  const {username, password} = req.body;
+  const { username, password } = req.body;
   var query = "SELECT * FROM User WHERE username = ?";
-  let value = [username]
+  let value = [username];
   var result;
-  await con.promise().query(query, value)
-      .then(([rows, fields]) => {
-          result = rows;
-      })    
-      .catch((err) => {
-          console.error(err);
-       });
+  await con
+    .promise()
+    .query(query, value)
+    .then(([rows, fields]) => {
+      result = rows;
+    })
+    .catch((err) => {
+      console.error(err);
+    });
   // const user  = await User.findOne({username: username})
-  errorpage = '/rlogin?error='
+  errorpage = "/rlogin?error=";
   haserror = false;
-  if(!username){
-    errorpage+= 'usr2'
-    haserror = true
-  }
-  if(result.length === 0){
-    errorpage += 'usr1';
+  if (!username) {
+    errorpage += "usr2";
     haserror = true;
-  } 
-  else {
-    if(!password){
-      errorpage += 'pw2';
+  }
+  if (result.length === 0) {
+    errorpage += "usr1";
+    haserror = true;
+  } else {
+    if (!password) {
+      errorpage += "pw2";
       haserror = true;
     }
-      var input = result[0].pwd;
-      const response =  bcrypt.compareSync(password,input)
-        if(response == true){
-          if(!haserror){
-            req.session.logged_in = true
-            req.session.token = jwt.sign({username: result[0].username}, process.env.key,{
-              algorithm: 'HS256',
-              allowInsecureKeySizes: true,
-              expiresIn: 7200, // 24 hours
-            });
-            res.redirect('/table');
-          }
-        }
-        if(response == false){
-          errorpage += 'pw1'
-          haserror = true;
-        }
+    var input = result[0].pwd;
+    const response = bcrypt.compareSync(password, input);
+    if (response == true) {
+      if (!haserror) {
+        req.session.logged_in = true;
+        req.session.token = jwt.sign(
+          { username: result[0].username },
+          process.env.key,
+          {
+            algorithm: "HS256",
+            allowInsecureKeySizes: true,
+            expiresIn: 7200, // 24 hours
+          },
+        );
+        res.redirect("/table");
+      }
     }
-    
-    if(haserror){
-      res.redirect(errorpage)
+    if (response == false) {
+      errorpage += "pw1";
+      haserror = true;
     }
-  
+  }
+
+  if (haserror) {
+    res.redirect(errorpage);
+  }
+
   // res.redirect('/rlogin?error=pw1')
 });
 
-const rloginRouter = require('./routes/rlogin.js');
-app.use('/rlogin',rloginRouter);
+const rloginRouter = require("./routes/rlogin.js");
+app.use("/rlogin", rloginRouter);
 
-const tableRouter = require('./routes/table.js');
-app.use('/table',tableRouter);
+const tableRouter = require("./routes/table.js");
+app.use("/table", tableRouter);
 
 ////////////////////////////////////////////////////////////////
 const router = express.Router();
 
 //route for the provisional page
-router.get('/work-in-progress', (req, res) => {
-    res.render('work-in-progress', {
-        title: 'Work in Progress'
-    });
+router.get("/work-in-progress", (req, res) => {
+  res.render("work-in-progress", {
+    title: "Work in Progress",
+  });
 });
 
 //Route for handling form submission for data analysis testing
-app.post('/data-analysis-testing', (req, res) => {
-  const monitorId = req.body.monitorId; 
+app.post("/data-analysis-testing", (req, res) => {
+  const monitorId = req.body.monitorId;
 
   //For now, let's just render a page that displays a monitor ID prompt
-  res.render('data-analysis', { monitorId: monitorId });
+  res.render("data-analysis", { monitorId: monitorId });
 });
-
-
 
 //Export the router
 module.exports = router;
 /////////////////////////////////////////////////////////////
 // --------------- end of code for routing to pages ---------------
-
 
 // export to server... important to never remove this from the bottom!
 module.exports = app;

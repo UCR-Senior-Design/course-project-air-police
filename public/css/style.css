@@ -1,45 +1,63 @@
-body{
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  background-color: aqua;
-}
-.loginTitle{
-  font-size: 50px;
-  font-weight: bold;
-  color: white;
-  margin-left: 50px;
-}
-.jbtn{
-  width: 100px;
-  border:none;
-  background-color:chocolate;
-}
-.loginBackground{
-  background: rgb(2,0,36);
-  background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(9,9,121,1) 38%, rgba(0,212,255,1) 100%);
-}
-.d1{
-  margin-left: 200px;
-}
-.corner{
-  width: 500px;
-  margin:10px;
-}
-.claln{
-  width:500px;
-  
-  margin: 10px;
-  margin-left: 500px;
-  margin-right: 500px;
+body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    background-color: aqua;
 }
 
-.burt{
-  border: 5px transparent;
-  background-color: gray;
-  margin: 5px;
-  width:285px;
-  margin-left: 100px;
-  
+.loginTitle {
+    font-size: 50px;
+    font-weight: bold;
+    color: white;
+    margin-left: 50px;
 }
+
+.jbtn {
+    width: 100px;
+    border: none;
+    background-color: chocolate;
+}
+
+.loginBackground {
+    background: rgb(2, 0, 36);
+    background: linear-gradient(
+        90deg,
+        rgba(2, 0, 36, 1) 0%,
+        rgba(9, 9, 121, 1) 38%,
+        rgba(0, 212, 255, 1) 100%
+    );
+}
+
+.d1 {
+    margin-left: 200px;
+}
+
+.corner {
+    width: 500px;
+    margin: 10px;
+}
+
+.claln {
+    width: 500px;
+
+    margin: 10px;
+    margin-left: 500px;
+    margin-right: 500px;
+}
+
+.burt {
+    border: 5px transparent;
+    background-color: gray;
+    margin: 5px;
+    width: 285px;
+    margin-left: 100px;
+}
+
 .text-align-center {
-  text-align: center;
+    text-align: center;
+}
+
+.box {
+    margin-left: 5%;
+    width: 90%;
+    height: 400px;
+    border: 2px solid black;
 }
