@@ -253,7 +253,7 @@ def getAllRecent():
     recent.replace(0, np.nan, inplace=True)
     return recent
 
-getAllRecent()
+# getAllRecent()
 #tested and works a little slow but works unless your doing a data visualization you do not need to use this.
 def pullData(serialNumber=None):
     #######################################################################
