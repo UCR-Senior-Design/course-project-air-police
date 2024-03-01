@@ -1,9 +1,6 @@
 // --------------- code for connecting to the database ---------------
 
 require("dotenv").config();
-const mg = require("mongoose");
-const { MongoClient, ServerApiVersion } = require("mongodb");
-const User = require("./models/user.js");
 const bodyParser = require("body-parser");
 var bcrypt = require("bcryptjs");
 var jwt = require("jsonwebtoken");
@@ -11,13 +8,6 @@ const nodemailer = require("nodemailer");
 const hash = process.env.hash;
 const mysql = require("mysql2");
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(process.env.DATABASE_URL, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  },
-});
 const { request } = require("http");
 
 const sqlConfig = {
@@ -93,14 +83,12 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
-    await mg.connect(process.env.DATABASE_URL);
     // // Send a ping to confirm a successful connection
     // await client.db("SSProject").command({ ping: 1 });
     // console.log("Pinged your deployment. You successfully connected to MongoDB!");
     await createNewUser("tno@gmail.com", "pyTest", "1234");
   } finally {
     // Ensures that the client will close when you finish/error
-    await client.close();
   }
 }
 run().catch(console.dir);
@@ -254,6 +242,7 @@ EmailJS team
   };
   transport.sendMail(msg);
   console.log(message);
+
   res.redirect("/invite");
   // emailjs.init({publicKey:process.env.emjs});
   // emailjs.send(process.env.sid, process.env.tempid, data);
