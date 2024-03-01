@@ -5,15 +5,19 @@ import pushingToDB as push
 
 import schedule
 import time
+exit_flag = False
 
+def job():
+    push.updateDBs()
 
-
-
-schedule.every().day.at("8:00").do(push.updateDBs())
+schedule.every().day.at("09:00").do(job)
 schedule.run_pending()
 
-while True:
+while not exit_flag:
     # checks every hour for a pending job
-    time.sleep(3600)
+    print('running')
     schedule.run_pending()
+    print('finished 1')
+    time.sleep(3600)
+    
 # set up cron job 1 here
