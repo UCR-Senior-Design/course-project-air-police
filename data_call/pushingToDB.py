@@ -5,5 +5,5 @@ def updateDBs():
     dc.checkOffline()
     dc.updateAllHealth()
     dc.pushDB(dc.fetchData())
-
-updateDBs()
+    print('ok')
+# updateDBs()
