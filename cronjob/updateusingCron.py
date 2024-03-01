@@ -1,7 +1,14 @@
 import sys
-sys.path.append('data_call') 
+sys.path.append('data_call')
 
-import data as dc
+import pushingToDB as push
 
+import schedule
+import time
+
+
+
+
+schedule.every().day.at("8:00").do(push.updateDBs())
 
 # set up cron job 1 here
