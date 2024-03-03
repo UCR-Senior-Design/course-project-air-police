@@ -4,10 +4,6 @@ body{
   margin: 0;
 }
 
-.container {
-  max-width: 960px;
-}
-
 .border-top { border-top: 1px solid #e5e5e5; }
 .border-bottom { border-bottom: 1px solid #e5e5e5; }
 .border-top-gray { border-top-color: #adb5bd; }
@@ -31,6 +27,27 @@ body{
   display: show;
 }
 
+.fixed-table-loading {
+  visibility: hidden;
+  top: 0px;
+  display: none;
+}
+
+.loading-wrap {
+  visibility: hidden;
+  display: none;
+}
+
+.table-loading {
+  visibility: hidden;
+  display: none;
+}
+
+.loading {
+  visibility: hidden;
+  display: none;
+}
+
 
 .loginTitle{
   font-size: 50px;
@@ -50,13 +67,10 @@ body{
 .d1{
   margin-left: 200px;
 }
-.corner{
-  width: 500px;
-  margin:10px;
-}
 .claln{
   width:500px;
   margin: auto;
+  margin-top: 10%;
 }
 
 .burt{
