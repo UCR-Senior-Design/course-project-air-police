@@ -21,13 +21,24 @@
   </head>
 
   <body>
+    <!-- Navigation bar that goes at the top of every page -->
+    <nav class="navbar navbar-dark bg-dark sticky-top justify-content-between">
+      <div class="container-fluid">
 
-    <nav class="navbar navbar-dark bg-dark justify-content-between">
-      <a class="navbar-brand">Navbar</a>
-      <form class="form-inline">
-        <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-      </form>
+        <a class="navbar-brand" href="/">Home</a>
+
+        <div class="dropdown">
+          <a class="nav-link dropdown-toggle ml-2" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Log in as a
+          </a>
+
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="/data-analysis-testing">Participant</a></li>
+            <li><a class="dropdown-item" href="/rlogin">Researcher</a></li>
+          </ul>
+        </div>
+
+      </div>
     </nav>
 
     {{{body}}}

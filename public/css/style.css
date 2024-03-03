@@ -17,13 +17,12 @@ body{
 .lh-condensed { line-height: 1.25; }
 
 .nav-link {
-  color: rgb(0, 0, 0);;
+  color: rgb(255, 255, 255);;
 }
 
 .nav-link:hover {
-  color: rgb(139, 177, 205);
+  color: rgb(183, 204, 220);
 }
-
 
 
 .loginTitle{
@@ -50,10 +49,7 @@ body{
 }
 .claln{
   width:500px;
-  
-  margin: 10px;
-  margin-left: 500px;
-  margin-right: 500px;
+  margin: auto;
 }
 
 .burt{
