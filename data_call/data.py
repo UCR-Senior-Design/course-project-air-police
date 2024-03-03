@@ -374,12 +374,19 @@ def mapGeneration(data=None):
 
     # Define air quality color ranges based on PM2.5 values
     color_ranges = {
-        "Good": (0, 50),
-        "Moderate": (51, 100),
-        "Unhealthy for Sensitive Groups": (101, 150),
-        "Unhealthy": (151, 200),
-        "Very Unhealthy": (201, 300),
-        "Hazardous": (301, float('inf'))
+        #"Good": (0, 50),
+        #"Moderate": (51, 100),
+        #"Unhealthy for Sensitive Groups": (101, 150),
+        #"Unhealthy": (151, 200),
+        #"Very Unhealthy": (201, 300),
+        #"Hazardous": (301, float('inf'))
+
+        (0, 50): "green",
+        (51, 100): "yellow",
+        (101, 150): "orange",
+        (151, 200): "red",
+        (201, 300): "purple",
+        (301, float('inf')): "black"
     }
 
     # Add markers for each monitor with appropriate air quality color
@@ -390,9 +397,9 @@ def mapGeneration(data=None):
 
         # Determine the air quality color based on the PM2.5 value
         marker_color = "blue"  # Default color if value doesn't fall into any range
-        for color, (min_value, max_value) in color_ranges.items():
+        for (min_value, max_value), color in color_ranges.items():
             if min_value <= pm25_value <= max_value:
-                marker_color = color.lower()
+                marker_color = color
                 break
 
         monitor_info = f"""
@@ -416,7 +423,7 @@ def mapGeneration(data=None):
         ).add_to(m)
 
     # Save the map as an HTML file
-    html_file_path = 'views/map.html'
+    html_file_path = 'views/map.hbs'
     m.save(html_file_path)
 
     # Open the HTML file in the default web browser
