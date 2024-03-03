@@ -1,9 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
+  <head>
     <title>Salton Sea Air Quality Monitoring</title>
-    
     <style>
         body {
             background-image: url('/images/saltonseaclouds.png');
@@ -20,70 +18,23 @@
             font-size: 1.25rem;
             color: #FFFFFF;
         }
-  
     </style>
+  </head>
 
-
-
-<body>
-
-
-    <section>
-       <section class="section-wrapper">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <img class="img-fluid mb-4" src="images/saltonseamap.png" alt="Image" width="290" height="420">
-                </div>
-                <div class="col-md-6 text-center">
-                    <h1 class="display-4 fw-bold">Salton Sea Air Quality Monitoring</h1>
-                    <p class="lead">Welcome to our in-progress site for monitoring air quality around the Salton Sea.</p>
-                    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-         <!-- Add the button with the ID 'viewMapButton' -->
-                    <button id="viewMapButton" type="button" class="btn btn-outline-dark btn-lg px-4 gap-3">View Map</button>
-                    <button id="viewDataButton" type="button" class="btn btn-outline-dark btn-lg px-4">View Data</button>
-                    <button id="researcherloginbutton" type="button" class="btn btn-outline-dark btn-lg px-4">Researcher Login</button>
-
-                    <!-- Add the Data Analysis Testing button -->
-                    <button id="dataAnalysisTestingButton" type="button" class="btn btn-outline-dark btn-lg px-4">Participant Login</button>
-
+  <section class="section-wrapper">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <img class="img-fluid mb-4" src="images/saltonseamap.png" alt="Image" width="290" height="420">
+            </div>
+            <div class="col-md-6 text-center">
+                <h1 class="display-4 fw-bold">Salton Sea Air Quality Monitoring</h1>
+                <p class="lead">Welcome to our in-progress site for monitoring air quality around the Salton Sea.</p>
+            
+            </div>
+        </div>
       </div>
-    </div>
-  </div>
-</section>
+  </section>
     
-
-    <script src="/js/homeScript.js"></script>
-</body>
 </html>
 
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    document.getElementById('viewMapButton').addEventListener('click', function () {
-      window.location.href = '/map';
-    });
-    //handles click of the View Data button (currently has no functionality)
-    document.getElementById('viewDataButton').addEventListener('click', function() {
-    window.location.href = '/work-in-progress';
-    });
-  });
-
-    //handles click of the Data Analysis Testing button
-  document.addEventListener('DOMContentLoaded', function () {
-      document.getElementById('dataAnalysisTestingButton').addEventListener('click', function () {
-        window.location.href = '/data-analysis-testing';
-    });
-  });
-
-
-  document.addEventListener('DOMContentLoaded',function () {
-    document.getElementById('researcherloginbutton').addEventListener('click', function () {
-      window.location.href = '/rlogin';
-    });
-  })
-</script>
-    
-    <script src="routes/scripts.js"></script>
-</body>
-
-</head>
