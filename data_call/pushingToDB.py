@@ -6,4 +6,4 @@ def updateDBs():
     dc.updateAllHealth()
     dc.pushDB(dc.fetchData())
     print('ok')
-# updateDBs()
+updateDBs()

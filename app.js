@@ -52,7 +52,7 @@ async function fetchTableData() {
   // pull researcher table data from sql db, export it as json response
   var con = mysql.createConnection(sqlConfig);
   var query =
-  "SELECT D.sn, D.pm25, D.pm10, M.sdHealth, M.onlne, M.pmHealth, D.timestamp FROM Data D, Devices M WHERE D.sn = M.sn AND D.timestamp = (SELECT MAX(timestamp) FROM Data WHERE sn = D.sn) ORDER BY M.pmHealth DESC, M.onlne, M.sdHealth DESC, D.sn;"
+  "SELECT D.sn, D.pm25, D.pm10, D.timestamp, M.dataFraction, M.sdHealth, M.onlne, M.pmHealth FROM Data D, Devices M WHERE D.sn = M.sn AND D.timestamp = (SELECT MAX(timestamp) FROM Data WHERE sn = D.sn) ORDER BY M.pmHealth DESC, M.onlne, M.sdHealth DESC, D.sn;"
   await con.promise().query(query)
     .then(([rows, fields]) => {
       tableData = rows;
