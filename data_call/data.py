@@ -386,7 +386,7 @@ def mapGeneration(data=None):
         (101, 150): "orange",
         (151, 200): "red",
         (201, 300): "purple",
-        (301, float('inf')): "black"
+        (301, float('inf')): "maroon"
     }
 
     # Add markers for each monitor with appropriate air quality color
@@ -421,6 +421,34 @@ def mapGeneration(data=None):
             fill=True,
             fill_color=marker_color
         ).add_to(m)
+
+    # Adding Legend
+    legend_html = """
+    <div style="position: fixed; 
+                bottom: 50px; right: 50px; width: 230px; height: 190px; 
+                border:2px solid green; z-index:9999; font-size:14px;
+                background-color:gray;
+                ">
+    &nbsp;<b>Legend</b><br>
+    &nbsp;<i class="dot" style="background: green;"></i>&nbsp;Good<br>
+    &nbsp;<i class="dot" style="background: yellow;"></i>&nbsp;Moderate<br>
+    &nbsp;<i class="dot" style="background: orange;"></i>&nbsp;Unhealthy for Sensitive Groups<br>
+    &nbsp;<i class="dot" style="background: red;"></i>&nbsp;Unhealthy<br>
+    &nbsp;<i class="dot" style="background: purple;"></i>&nbsp;Very Unhealthy<br>
+    &nbsp;<i class="dot" style="background: maroon;"></i>&nbsp;Hazardous<br>
+    </div>
+    <style>
+        .dot {
+            height: 10px;
+            width: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+    </style>
+    """
+
+    m.get_root().html.add_child(folium.Element(legend_html))
 
     # Save the map as an HTML file
     html_file_path = 'views/map.hbs'
