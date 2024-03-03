@@ -244,10 +244,11 @@ def getAllRecent():
     query = "SELECT Devices.*, Data.* FROM Devices LEFT JOIN ( SELECT d1.* FROM Data d1 JOIN ( SELECT sn, MAX(timestamp) AS max_timestamp FROM Data GROUP BY sn ) d2 ON d1.sn = d2.sn AND d1.timestamp = d2.max_timestamp ) AS Data ON Data.sn = Devices.sn ORDER BY Devices.sn;"
     mycursor.execute(query)
     recent = mycursor.fetchall()
-    recent = pd.DataFrame(recent).dropna(how='all', axis = 0).drop(columns=4, axis = 1)
-    recent = recent.rename(columns = {0: 'sn', 1:'pm25', 2:'pm10', 3:'timestamp', 5:'geo.lat', 6:'geo.lon', 7:'pmHealth', 8:'sdHealh', 9: "status", 10: "Data Fraction"})
+    recent = pd.DataFrame(recent).dropna(how='all', axis = 0).drop(columns=7, axis = 1)
+    recent = recent.rename(columns = {0: 'sn', 1:'geo.lat', 2:'geo.lon', 3:'pmHealth',4:'sdHealth', 5:'status', 6:'Data Fraction', 8:'pm25', 9: "pm10", 10: "timestamp"})
     recent.replace(0, np.nan, inplace=True)
     return recent
+
 
 #tested and works a little slow but works unless your doing a data visualization you do not need to use this.
 def pullData(serialNumber=None):
