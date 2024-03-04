@@ -48,16 +48,29 @@ async function createNewUser(eml, usr, pswd) {
 }
 
 var tableData;
+var errorTable;
 async function fetchTableData() {
   // pull researcher table data from sql db, export it as json response
   var con = mysql.createConnection(sqlConfig);
-  var query =
-    "SELECT D.sn, D.pm25, D.pm10, SUBSTRING(D.timestamp,1,10) AS timestamp, CONCAT(ROUND(M.dataFraction*100,2),'%') AS dataFraction, M.sdHealth, M.onlne, M.pmHealth FROM Data D, Devices M WHERE D.sn = M.sn AND D.timestamp = (SELECT MAX(timestamp) FROM Data WHERE sn = D.sn) ORDER BY M.pmHealth DESC, M.onlne, M.sdHealth DESC, D.sn;";
+  var query1 =
+    "SELECT D.sn, D.pm25, D.pm10, SUBSTRING(D.timestamp,1,10) AS timestamp, CONCAT(ROUND(M.dataFraction*100,2),'%') AS dataFraction, M.sdHealth, M.onlne, M.pmHealth FROM Data D, Devices M WHERE D.sn = M.sn AND D.timestamp = (SELECT MAX(timestamp) FROM Data WHERE sn = D.sn) ORDER BY D.sn;";
   await con
     .promise()
-    .query(query)
+    .query(query1)
     .then(([rows, fields]) => {
       tableData = rows;
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+
+  var query2 =
+    "SELECT D.sn, D.pm25, D.pm10, SUBSTRING(D.timestamp,1,10) AS timestamp, CONCAT(ROUND(M.dataFraction*100,2),'%') AS dataFraction, M.sdHealth, M.onlne, M.pmHealth FROM Data D, Devices M WHERE D.sn = M.sn AND D.timestamp = (SELECT MAX(timestamp) FROM Data WHERE sn = D.sn) AND D.sn IN (SELECT sn FROM Devices WHERE onlne = 'offline' OR pmHealth = 'ERROR' OR sdHealth = 'ERROR') ORDER BY M.sdHealth, D.sn;";
+  await con
+    .promise()
+    .query(query2)
+    .then(([rows, fields]) => {
+      errorTable = rows;
     })
     .catch((err) => {
       console.error(err);
@@ -135,6 +148,9 @@ app.get("/work-in-progress", (req, res) => {
 // create route for the researcher table data
 app.get("/data", (req, res) => {
   res.json(tableData);
+});
+app.get("/errorData", (req, res) => {
+  res.json(errorTable);
 });
 
 //creates data analysis testing page
