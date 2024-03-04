@@ -390,15 +390,15 @@ def mapGeneration(data=None):
     }
 
     # Add markers for each monitor with appropriate air quality color
-    for index, row in data.dropna(subset=['geo.lat', 'geo.lon', 'pm25']).iterrows():
+    for index, row in data.dropna(subset=['geo.lat', 'geo.lon', 'pm10']).iterrows():
         latitude = row['geo.lat']
         longitude = row['geo.lon']
-        pm25_value = row['pm25']
+        pm10_value = row['pm10']
 
         # Determine the air quality color based on the PM2.5 value
         marker_color = "blue"  # Default color if value doesn't fall into any range
         for (min_value, max_value), color in color_ranges.items():
-            if min_value <= pm25_value <= max_value:
+            if min_value <= pm10_value <= max_value:
                 marker_color = color
                 break
 
@@ -425,9 +425,11 @@ def mapGeneration(data=None):
     # Adding Legend
     legend_html = """
     <div style="position: fixed; 
-                bottom: 50px; right: 50px; width: 230px; height: 190px; 
-                border:2px solid green; z-index:9999; font-size:14px;
-                background-color:gray;
+                bottom: 50px; right: 50px; width: 230px; height: 155px; 
+                border:3px solid black; z-index:9999; font-size:14px;
+                background-color:#f2f2f2;
+                /* Custom Ornate Border */
+                border-image: url('path/to/ornate-border.png') 30 round;
                 ">
     &nbsp;<b>Legend</b><br>
     &nbsp;<i class="dot" style="background: green;"></i>&nbsp;Good<br>
