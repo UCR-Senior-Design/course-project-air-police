@@ -374,25 +374,32 @@ def mapGeneration(data=None):
 
     # Define air quality color ranges based on PM2.5 values
     color_ranges = {
-        "Good": (0, 50),
-        "Moderate": (51, 100),
-        "Unhealthy for Sensitive Groups": (101, 150),
-        "Unhealthy": (151, 200),
-        "Very Unhealthy": (201, 300),
-        "Hazardous": (301, float('inf'))
+        #"Good": (0, 50),
+        #"Moderate": (51, 100),
+        #"Unhealthy for Sensitive Groups": (101, 150),
+        #"Unhealthy": (151, 200),
+        #"Very Unhealthy": (201, 300),
+        #"Hazardous": (301, float('inf'))
+
+        (0, 50): "green",
+        (51, 100): "yellow",
+        (101, 150): "orange",
+        (151, 200): "red",
+        (201, 300): "purple",
+        (301, float('inf')): "maroon"
     }
 
     # Add markers for each monitor with appropriate air quality color
-    for index, row in data.dropna(subset=['geo.lat', 'geo.lon', 'pm25']).iterrows():
+    for index, row in data.dropna(subset=['geo.lat', 'geo.lon', 'pm10']).iterrows():
         latitude = row['geo.lat']
         longitude = row['geo.lon']
-        pm25_value = row['pm25']
+        pm10_value = row['pm10']
 
         # Determine the air quality color based on the PM2.5 value
         marker_color = "blue"  # Default color if value doesn't fall into any range
-        for color, (min_value, max_value) in color_ranges.items():
-            if min_value <= pm25_value <= max_value:
-                marker_color = color.lower()
+        for (min_value, max_value), color in color_ranges.items():
+            if min_value <= pm10_value <= max_value:
+                marker_color = color
                 break
 
         monitor_info = f"""
@@ -415,8 +422,38 @@ def mapGeneration(data=None):
             fill_color=marker_color
         ).add_to(m)
 
+    # Adding Legend
+    legend_html = """
+    <div style="position: fixed; 
+                bottom: 50px; right: 50px; width: 230px; height: 155px; 
+                border:3px solid black; z-index:9999; font-size:14px;
+                background-color:#f2f2f2;
+                /* Custom Ornate Border */
+                border-image: url('path/to/ornate-border.png') 30 round;
+                ">
+    &nbsp;<b>Legend</b><br>
+    &nbsp;<i class="dot" style="background: green;"></i>&nbsp;Good<br>
+    &nbsp;<i class="dot" style="background: yellow;"></i>&nbsp;Moderate<br>
+    &nbsp;<i class="dot" style="background: orange;"></i>&nbsp;Unhealthy for Sensitive Groups<br>
+    &nbsp;<i class="dot" style="background: red;"></i>&nbsp;Unhealthy<br>
+    &nbsp;<i class="dot" style="background: purple;"></i>&nbsp;Very Unhealthy<br>
+    &nbsp;<i class="dot" style="background: maroon;"></i>&nbsp;Hazardous<br>
+    </div>
+    <style>
+        .dot {
+            height: 10px;
+            width: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+    </style>
+    """
+
+    m.get_root().html.add_child(folium.Element(legend_html))
+
     # Save the map as an HTML file
-    html_file_path = 'views/map.html'
+    html_file_path = 'views/map.hbs'
     m.save(html_file_path)
 
     # Open the HTML file in the default web browser
