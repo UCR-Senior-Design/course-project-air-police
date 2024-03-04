@@ -411,14 +411,14 @@ const tableRouter = require("./routes/table.js");
 app.use("/table", tableRouter);
 
 ////////////////////////////////////////////////////////////////
-const router = express.Router();
+//const router = express.Router();
 
 //route for the provisional page
-router.get("/work-in-progress", (req, res) => {
+/*router.get("/work-in-progress", (req, res) => {
   res.render("work-in-progress", {
     title: "Work in Progress",
   });
-});
+});*/
 
 //Route for handling form submission for data analysis testing
 app.post("/data-analysis-testing", (req, res) => {
@@ -429,8 +429,43 @@ app.post("/data-analysis-testing", (req, res) => {
 });
 ///////////////////////////////////////////////////////
 
+////////////////////////////////////////////////////////////////
+const router = express.Router();
+
+//route for the provisional page
+/*router.get("/work-in-progress", (req, res) => {
+  res.render("work-in-progress", {
+    title: "Work in Progress",
+  });
+});*/
 
 //Route for handling form submission for data analysis testing
+app.post("/data-analysis-testing", (req, res) => {
+  const monitorId = req.body.monitorId;
+
+  //For now, let's just render a page that displays a monitor ID prompt
+  res.render("data-analysis", { monitorId: monitorId });
+});
+///////////////////////////////////////////////////////
+app.get('/monitorIds', async (req, res) => {
+  try {
+    const connection = await pool.promise().getConnection();
+
+    const [rows] = await connection.query('SELECT sn FROM Devices');
+
+    connection.release();
+
+    const monitorIds = rows.map(row => row.sn);
+
+    res.json({ monitorIds });
+  } catch (error) {
+    console.error('Error fetching monitor IDs from database:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+//Route for handling form submission for data analysis testing
+/*
 app.post("/data-analysis-testing", (req, res) => {
   const enteredMonitorId = req.body.monitorId;
   const validMonitorIds = [
@@ -455,7 +490,7 @@ app.post("/data-analysis-testing", (req, res) => {
       res.render("data-analysis-testing", { error: "Incorrect monitor ID. Please enter a valid Monitor ID." });
   }
 });
-
+*/
 
 
 //////////////////////////////////////////////
