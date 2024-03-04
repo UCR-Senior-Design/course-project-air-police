@@ -1,35 +1,21 @@
 <!DOCTYPE html> 
-<html lang="en"> 
   <head> 
-    <meta charset="utf-8"> 
-    <meta name="viewport"
-        content="width=device-width, 
-            initial-scale=1, 
-            shrink-to-fit=no"> 
+
     <title> 
       Researcher Dashboard
     </title> 
 
-    <!-- Include Bootstrap for styling -->
-    <link rel="stylesheet"
-        href= 
-    "https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"> 
+        <!-- Include Bootstrap for styling -->
+    <link rel="stylesheet" href= "https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"> 
 
-    <!-- Include the Bootstrap Table CSS 
-    for the table -->
-    <link rel="stylesheet"
-        href= 
-    "https://unpkg.com/bootstrap-table@1.16.0/dist/bootstrap-table.min.css"> 
   </head> 
   <body> 
-    <div class="container"> 
-      <h1 class="text text-success text-center "> 
-      Researcher Dashboard
-      </h1> 
-      <h6 class="text text-success text-center"> 
-      A list of all the monitors part of the Salton Sea project, complete with the latest device information.
-      </h6> 
-      <table class="table-striped border-success"> 
+    <div class="container mt-4"> 
+      <h4 class="text text-success text-center"> 
+        A list of all the monitors with errors
+      </h4> 
+
+      <table class="table-striped border-success" id = "errorTable"> 
         <thead> 
         <tr> 
           <th data-field="sn"> 
@@ -37,49 +23,129 @@
             Serial Number
           </span> 
           </th> 
+          <th data-field="pmHealth"> 
+          <span class="text-success"> 
+            PM Health
+          </span> 
+          </th> 
           <th data-field="pm25"> 
           <span class="text-success"> 
-            PM 2.5 Reading
+            PM 2.5
           </span> 
           </th> 
           <th data-field="pm10"> 
           <span class="text-success"> 
-            PM 10 Reading
+            PM 10
           </span> 
           </th> 
           <th data-field="sdHealth"> 
           <span class="text-success"> 
-            SD Card Status
+            SD Card
           </span> 
           <th data-field="onlne"> 
           <span class="text-success"> 
-            Current State
+            State
           </span> 
+          <th data-field="dataFraction"> 
+          <span class="text-success"> 
+            Uptime
+          </span> 
+          </th> 
           <th data-field="timestamp"> 
           <span class="text-success"> 
-            Timestamp
+            Last Seen
           </span> 
           </th> 
         </tr> 
         </thead> 
       </table> 
+      
+    </div> 
+
+    <div class="container mt-4"> 
+
+      <h4 class="text text-success text-center"> 
+        Ordered list of all Salton Sea monitors
+      </h4> 
+      
+      <table class="table-striped border-success" id = "normalTable"> 
+        <thead> 
+        <tr> 
+          <th data-field="sn"> 
+          <span class="text-success"> 
+            Serial Number
+          </span> 
+          </th> 
+          <th data-field="pmHealth"> 
+          <span class="text-success"> 
+            PM Health
+          </span> 
+          </th> 
+          <th data-field="pm25"> 
+          <span class="text-success"> 
+            PM 2.5
+          </span> 
+          </th> 
+          <th data-field="pm10"> 
+          <span class="text-success"> 
+            PM 10
+          </span> 
+          </th> 
+          <th data-field="sdHealth"> 
+          <span class="text-success"> 
+            SD Card
+          </span> 
+          <th data-field="onlne"> 
+          <span class="text-success"> 
+            State
+          </span> 
+          <th data-field="dataFraction"> 
+          <span class="text-success"> 
+            Uptime
+          </span> 
+          </th> 
+          <th data-field="timestamp"> 
+          <span class="text-success"> 
+            Last Seen
+          </span> 
+          </th> 
+        </tr> 
+        </thead> 
+      </table> 
+      
+    </div> 
+
+
+    <div class="container"> 
+      * Uptime is the monitor's activity percentage over the past X hours.
     </div> 
 
     <!-- Include jQuery and other required files for Bootstrap -->
     <script src= "https://code.jquery.com/jquery-3.3.1.min.js"> </script> 
     <script src= "https://unpkg.com/bootstrap-table@1.16.0/dist/bootstrap-table.min.js"> </script> 
       
-      <script type="text/javascript"> 
-        fetch('/data')
-          .then(response => response.json())
-          .then((data) => {
-            console.log(data);
-            $('table').bootstrapTable({ data: data }); 
-          })
-          .catch(error => {
-            console.log(error);
-          });
-      </script> 
+    <script type="text/javascript"> 
+      fetch('/errorData')
+        .then(response => response.json())
+        .then((data) => {
+          console.log(data);
+          $(document.getElementById('errorTable')).bootstrapTable({ data: data }); 
+        })
+        .catch(error => {
+          console.log(error);
+        });
+
+      fetch('/data')
+        .then(response => response.json())
+        .then((data) => {
+          console.log(data);
+          $(document.getElementById('normalTable')).bootstrapTable({ data: data }); 
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    </script> 
+
 
   </body> 
-</html>
+

@@ -48,16 +48,29 @@ async function createNewUser(eml, usr, pswd) {
 }
 
 var tableData;
+var errorTable;
 async function fetchTableData() {
   // pull researcher table data from sql db, export it as json response
   var con = mysql.createConnection(sqlConfig);
-  var query =
-    "SELECT D.sn, D.pm25, D.pm10, M.sdHealth, M.onlne, D.timestamp FROM Data D, Devices M WHERE D.sn = M.sn AND D.timestamp = (SELECT MAX(timestamp) FROM Data WHERE sn = D.sn) ORDER BY M.onlne, D.sn;";
+  var query1 =
+    "SELECT D.sn, D.pm25, D.pm10, SUBSTRING(D.timestamp,1,10) AS timestamp, CONCAT(ROUND(M.dataFraction*100,2),'%') AS dataFraction, M.sdHealth, M.onlne, M.pmHealth FROM Data D, Devices M WHERE D.sn = M.sn AND D.timestamp = (SELECT MAX(timestamp) FROM Data WHERE sn = D.sn) ORDER BY D.sn;";
   await con
     .promise()
-    .query(query)
+    .query(query1)
     .then(([rows, fields]) => {
       tableData = rows;
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+
+  var query2 =
+    "SELECT D.sn, D.pm25, D.pm10, SUBSTRING(D.timestamp,1,10) AS timestamp, CONCAT(ROUND(M.dataFraction*100,2),'%') AS dataFraction, M.sdHealth, M.onlne, M.pmHealth FROM Data D, Devices M WHERE D.sn = M.sn AND D.timestamp = (SELECT MAX(timestamp) FROM Data WHERE sn = D.sn) AND D.sn IN (SELECT sn FROM Devices WHERE onlne = 'offline' OR pmHealth = 'ERROR' OR sdHealth = 'ERROR') ORDER BY M.sdHealth, D.sn;";
+  await con
+    .promise()
+    .query(query2)
+    .then(([rows, fields]) => {
+      errorTable = rows;
     })
     .catch((err) => {
       console.error(err);
@@ -149,6 +162,9 @@ app.get("/work-in-progress", (req, res) => {
 // create route for the researcher table data
 app.get("/data", (req, res) => {
   res.json(tableData);
+});
+app.get("/errorData", (req, res) => {
+  res.json(errorTable);
 });
 
 app.get("/researcher", async (req, res) => {
@@ -433,6 +449,38 @@ app.post("/data-analysis-testing", (req, res) => {
   //For now, let's just render a page that displays a monitor ID prompt
   res.render("data-analysis", { monitorId: monitorId });
 });
+///////////////////////////////////////////////////////
+
+
+//Route for handling form submission for data analysis testing
+app.post("/data-analysis-testing", (req, res) => {
+  const enteredMonitorId = req.body.monitorId;
+  const validMonitorIds = [
+    "MOD-PM-00645", "MOD-PM-00642", "MOD-PM-00636", "MOD-PM-00637", "MOD-PM-00651",
+    "MOD-PM-00665", "MOD-PM-00678", "MOD-PM-00687", "MOD-PM-00703", "MOD-PM-00691",
+    "MOD-PM-00695", "MOD-PM-00671", "MOD-PM-00676", "MOD-PM-00692", "MOD-PM-00661",
+    "MOD-PM-00166", "MOD-PM-00677", "MOD-PM-00704", "MOD-PM-00681", "MOD-PM-00688",
+    "MOD-PM-00682", "MOD-PM-00673", "MOD-PM-00672", "MOD-PM-00666", "MOD-PM-00656",
+    "MOD-PM-00654", "MOD-PM-00639", "MOD-PM-00662", "MOD-PM-00668", "MOD-PM-00655",
+    "MOD-PM-00709", "MOD-PM-00684", "MOD-PM-00674", "MOD-PM-00659", "MOD-PM-00653",
+    "MOD-PM-00641", "MOD-PM-00638", "MOD-PM-00635", "MOD-PM-00683", "MOD-PM-00711",
+    "MOD-PM-00640", "MOD-PM-00675", "MOD-PM-00646", "MOD-PM-00696", "MOD-PM-00652",
+    "MOD-PM-00660"
+  ];
+
+  const isValidMonitorId = validMonitorIds.some(id => enteredMonitorId.toUpperCase() === id.toUpperCase());
+
+  if (isValidMonitorId) {
+      res.send("Correct Monitor ID. Proceed with data analysis.");
+  } else {
+      //data-analysis-testing view with the error message
+      res.render("data-analysis-testing", { error: "Incorrect monitor ID. Please enter a valid Monitor ID." });
+  }
+});
+
+
+
+//////////////////////////////////////////////
 
 //Export the router
 module.exports = router;

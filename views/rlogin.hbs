@@ -1,14 +1,6 @@
 <!DOCTYPE html>
 <html lang="en", class = "loginBackground">
   <body class = "loginBackground">
-    <div class = "corner">
-      <button id = "back" class = "jbtn">back</button>
-      <script>
-        document.getElementById("back").addEventListener("click",function() {
-          window.location.href = '/home';
-        });
-      </script>
-    </div>
     <div class="claln">
         <p class = "loginTitle"> Researcher Login </p>
         {{!-- change class for styling --}}
@@ -56,7 +48,7 @@
           <p id = "ngl", name = "ngl"></p>
           {{!-- username input group --}}
           <div class="form-group">   
-                <label for="username" style = color:white>username</label>
+                <label for="username" style = color:white>Username</label>
                 <input class="form-control" id="username" type="username" name="username" placeholder="Enter username"/><br>
                 <p id = "incorrect_username", name = "incorrect_username"></p>
           </div>
