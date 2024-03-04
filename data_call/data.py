@@ -84,7 +84,7 @@ def grabAllSensor():
         return None
     deviceListJson = req.json()
     datajson = deviceListJson['data']
-    columns = ["sn", "lat", "lon" ]
+    columns = ["sn", "id", "lat", "lon"]
     edata = {col: [] for col in columns}
     print(pd.DataFrame(datajson).keys())
     ##loops through all entries in djson data section
@@ -101,12 +101,23 @@ def grabAllSensor():
     print(data)
     mydb = connect()
     mycursor = mydb.cursor()
-    query = "INSERT INTO Devices (sn, lat, lon) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE lat = VALUES(lat), lon = VALUES(lon)"
+    query = "INSERT INTO Devices (sn,id, lat, lon) VALUES (%s,%s, %s, %s) ON DUPLICATE KEY UPDATE lat = VALUES(lat), lon = VALUES(lon)"
     values = data.values.tolist()
     mycursor.executemany(query, values)
     mydb.commit()
     print(mycursor.rowcount, "was inserted")
 # grabAllSensor()
+def mapIdToSN(id):
+    mydb = connect()
+    mycursor = mydb.cursor()
+    query = "SELECT d.sn FROM Devices d WHERE d.id = %s"
+    values = [id]
+    mycursor.execute(query, values)
+    # print(mycursor.fetchone()[0])
+    sn = mycursor.fetchone()
+    if sn == None:
+        return ""
+    return sn[0]
 def getUniqueDevices():
     #######################################################################
     ## gets all of the unique devices                                    ##
@@ -244,8 +255,8 @@ def getAllRecent():
     query = "SELECT Devices.*, Data.* FROM Devices LEFT JOIN ( SELECT d1.* FROM Data d1 JOIN ( SELECT sn, MAX(timestamp) AS max_timestamp FROM Data GROUP BY sn ) d2 ON d1.sn = d2.sn AND d1.timestamp = d2.max_timestamp ) AS Data ON Data.sn = Devices.sn ORDER BY Devices.sn;"
     mycursor.execute(query)
     recent = mycursor.fetchall()
-    recent = pd.DataFrame(recent).dropna(how='all', axis = 0).drop(columns=7, axis = 1)
-    recent = recent.rename(columns = {0: 'sn', 1:'geo.lat', 2:'geo.lon', 3:'pmHealth',4:'sdHealth', 5:'status', 6:'Data Fraction', 8:'pm25', 9: "pm10", 10: "timestamp"})
+    recent = pd.DataFrame(recent).dropna(how='all', axis = 0).drop(columns=8, axis = 1)
+    recent = recent.rename(columns = {0: 'sn',1:'id', 2:'geo.lat', 3:'geo.lon', 4:'pmHealth',5:'sdHealth', 6:'status', 7:'Data Fraction', 9:'pm25', 10: "pm10", 11: "timestamp"})
     recent.replace(0, np.nan, inplace=True)
     return recent
 
