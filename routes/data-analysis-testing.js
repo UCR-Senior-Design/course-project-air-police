@@ -4,4 +4,3 @@ router.get('/data-analysis-testing', (req,res) => {
     //For now, let's just render a page that displays a monitor ID prompt
     res.render("data-analysis", { monitorId: monitorId });
 })
-

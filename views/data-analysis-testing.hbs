@@ -122,6 +122,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const form = document.querySelector('.needs-validation');
     form.addEventListener('submit', handleFormSubmission);
 });
+{{#if error}}
+<div class="alert alert-danger" role="alert">
+    {{error}}
+</div>
+{{/if}}
+
     </script>
   </body>
 </html>
