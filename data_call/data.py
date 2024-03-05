@@ -425,13 +425,15 @@ def mapGeneration(data=None):
 
         # Add marker with appropriate color
         folium.CircleMarker(
-            location=[latitude, longitude],
-            radius=1,
-            popup=folium.Popup(html=monitor_info, max_width=300),
-            color=marker_color,
-            fill=True,
-            fill_color=marker_color
-        ).add_to(m)
+    location=[latitude, longitude],
+    radius=5,
+    popup=folium.Popup(html=monitor_info, max_width=300),
+    color='black', 
+    fill=True,
+    fill_color=marker_color,  
+    fill_opacity=1, 
+).add_to(m)
+
 
     # Adding Legend
     legend_html = """
