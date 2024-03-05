@@ -174,10 +174,12 @@ app.get("/researcher", async (req, res) => {
 });
 
 //creates data analysis testing page
-app.get("/data-analysis-testing", (req, res) => {
-  //res.send('This is the data analysis testing page');
-  res.render("data-analysis-testing");
-});
+const dataAnalysisTestingRouter = require("./routes/data-analysis-testing.js");
+app.use("/data-analysis-testing", dataAnalysisTestingRouter);
+
+//creates success page
+const successRouter = require("./routes/success-page.js");
+app.use("/success-page", successRouter);
 
 //////////
 
@@ -463,12 +465,12 @@ const router = express.Router();
 });*/
 
 //Route for handling form submission for data analysis testing
-app.post("/data-analysis-testing", (req, res) => {
-  const monitorId = req.body.monitorId;
+//app.post("/data-analysis-testing", (req, res) => {
+//  const monitorId = req.body.monitorId;
 
   //For now, let's just render a page that displays a monitor ID prompt
-  res.render("data-analysis", { monitorId: monitorId });
-});
+ // res.render("data-analysis", { monitorId: monitorId });
+//});
 ///////////////////////////////////////////////////////
 app.get('/monitorIds', async (req, res) => {
   try {
@@ -487,75 +489,26 @@ app.get('/monitorIds', async (req, res) => {
   }
 });
 
-//Route for handling form submission for data analysis testing
-/*
-app.post("/data-analysis-testing", (req, res) => {
-  const enteredMonitorId = req.body.monitorId;
-  const validMonitorIds = [
-    "MOD-PM-00645",
-    "MOD-PM-00642",
-    "MOD-PM-00636",
-    "MOD-PM-00637",
-    "MOD-PM-00651",
-    "MOD-PM-00665",
-    "MOD-PM-00678",
-    "MOD-PM-00687",
-    "MOD-PM-00703",
-    "MOD-PM-00691",
-    "MOD-PM-00695",
-    "MOD-PM-00671",
-    "MOD-PM-00676",
-    "MOD-PM-00692",
-    "MOD-PM-00661",
-    "MOD-PM-00166",
-    "MOD-PM-00677",
-    "MOD-PM-00704",
-    "MOD-PM-00681",
-    "MOD-PM-00688",
-    "MOD-PM-00682",
-    "MOD-PM-00673",
-    "MOD-PM-00672",
-    "MOD-PM-00666",
-    "MOD-PM-00656",
-    "MOD-PM-00654",
-    "MOD-PM-00639",
-    "MOD-PM-00662",
-    "MOD-PM-00668",
-    "MOD-PM-00655",
-    "MOD-PM-00709",
-    "MOD-PM-00684",
-    "MOD-PM-00674",
-    "MOD-PM-00659",
-    "MOD-PM-00653",
-    "MOD-PM-00641",
-    "MOD-PM-00638",
-    "MOD-PM-00635",
-    "MOD-PM-00683",
-    "MOD-PM-00711",
-    "MOD-PM-00640",
-    "MOD-PM-00675",
-    "MOD-PM-00646",
-    "MOD-PM-00696",
-    "MOD-PM-00652",
-    "MOD-PM-00660",
-  ];
 
-  const isValidMonitorId = validMonitorIds.some(
-    (id) => enteredMonitorId.toUpperCase() === id.toUpperCase(),
-  );
+//////////////////////////////////////////////
+app.post("/data-analysis-testing", (req, res) => {
+  const monitorId = req.body.monitorId;
+
+  console.log("Submitted monitor ID:", monitorId);
+
+  const isValidMonitorId = validateMonitorId(monitorId); 
 
   if (isValidMonitorId) {
-    res.send("Correct Monitor ID. Proceed with data analysis.");
+      console.log("Valid monitor ID. Redirecting to success page...");
+      res.redirect("/success-page?monitorId=" + monitorId);
   } else {
-    //data-analysis-testing view with the error message
-    res.render("data-analysis-testing", {
-      error: "Incorrect monitor ID. Please enter a valid Monitor ID.",
-    });
+      console.log("Invalid monitor ID. Redirecting back to data-analysis-testing page...");
+      res.redirect("/data-analysis-testing?error=invalid");
   }
 });
 
-//
-*/
+
+
 
 
 //////////////////////////////////////////////
