@@ -52,8 +52,7 @@ var errorTable;
 async function fetchTableData() {
   // pull researcher table data from sql db, export it as json response
   var con = mysql.createConnection(sqlConfig);
-  var query1 =
-    "SELECT D.sn, D.pm25, D.pm10, SUBSTRING(D.timestamp,1,10) AS timestamp, CONCAT(ROUND(M.dataFraction*100,2),'%') AS dataFraction, M.sdHealth, M.onlne, M.pmHealth FROM Data D, Devices M WHERE D.sn = M.sn AND D.timestamp = (SELECT MAX(timestamp) FROM Data WHERE sn = D.sn) ORDER BY D.sn;";
+  var query1 = "SELECT Devices.sn, CONCAT(ROUND(Devices.dataFraction*100,2),'%') AS dataFraction, Data.pm25, Data.pm10,  SUBSTRING(Data.timestamp,1,10) AS timestamp FROM Devices LEFT JOIN ( SELECT d1.* FROM Data d1 JOIN ( SELECT sn, MAX(timestamp) AS max_timestamp FROM Data GROUP BY sn ) d2 ON d1.sn = d2.sn AND d1.timestamp = d2.max_timestamp ) AS Data ON Data.sn = Devices.sn ORDER BY Devices.sn;"
   await con
     .promise()
     .query(query1)
@@ -64,8 +63,8 @@ async function fetchTableData() {
       console.error(err);
     });
 
-  var query2 =
-    "SELECT D.sn, D.pm25, D.pm10, SUBSTRING(D.timestamp,1,10) AS timestamp, CONCAT(ROUND(M.dataFraction*100,2),'%') AS dataFraction, M.sdHealth, M.onlne, M.pmHealth FROM Data D, Devices M WHERE D.sn = M.sn AND D.timestamp = (SELECT MAX(timestamp) FROM Data WHERE sn = D.sn) AND D.sn IN (SELECT sn FROM Devices WHERE onlne = 'offline' OR pmHealth = 'ERROR' OR sdHealth = 'ERROR') ORDER BY M.sdHealth, D.sn;";
+  var query2 ="SELECT Devices.sn, Devices.pmHealth, Devices.sdHealth, Devices.onlne, Devices.dataFraction FROM Devices ORDER BY Devices.onlne;";
+  
   await con
     .promise()
     .query(query2)
