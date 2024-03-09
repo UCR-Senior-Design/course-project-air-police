@@ -33,7 +33,7 @@ router.get('/', (req,res) => {
         res.redirect("/success-page?monitorId=" + monitorId) // sends status code 302 by default
     }
     else {
-        res.render("login", { displayText: 'login page' });
+        res.render("login", { title: 'Participant Login', monitorId : req.query.monitorId });
         res.status(200); 
     }
 

@@ -43,37 +43,13 @@
       </footer>
     </div>
 
-
-
+    
 
     <script>
-      var monitorID = document.getElementById('monitorId').value;
-      console.log(monitorID)
+      // monitorId is a variable stored in the route so here's how to access it in html:
+      // monitor ID: {{ monitorId }}
     </script>
-    {{!-- const monitorIdInput = document.getElementById('monitorId');
-    const enteredMonitorId = monitorIdInput.value;
 
-    const validMonitorIds = [
-        "948", "1001", "976", "966", "993",
-        "1002", "977", "972", "998", "947",
-        "953", "1003", "956", "1000", "989",
-        "984", "1014", "987", "950", "978",
-        "982", "1006", "962", "1021", "346",
-        "988", "1015", "992", "999", "983",
-        "1020", "967", "965", "973", "979",
-        "970", "985", "995", "964", "952",
-        "949", "946", "994", "1022", "951",
-        "986", "957", "1007", "1023", "963"
-    ];
-
-    // Check if entered monitor ID is valid
-    const isValidMonitorId = validMonitorIds.some(id => enteredMonitorId.toUpperCase() === id.toUpperCase());
-
-    if (isValidMonitorId) {
-        alert("Correct Monitor ID.");
-    } else {
-        alert("Incorrect monitor ID. Please enter a valid Monitor ID.");
-    } --}}
 
   </body>
 </html>
