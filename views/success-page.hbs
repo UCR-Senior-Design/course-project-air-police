@@ -21,5 +21,17 @@
             {{/each}}
         </tbody>
     </table>
+
+    <script>
+        fetch('/aqiData')
+        .then(response => response.json())
+        .then((data) => {
+          console.log(data);
+          // do something with the data here like send it to a table
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    </script>
 </body>
 </html>

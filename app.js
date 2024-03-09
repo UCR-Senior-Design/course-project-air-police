@@ -515,21 +515,27 @@ app.post("/data-analysis-testing", (req, res) => {
 
 
 const { PythonShell } = require('python-shell');
+let options = {
+  mode: "text",
+  pythonPath: ".venv/bin/python",
+  pythonOptions: ["-u"], // get print results in real-time
+};
 
+// fix this
 async function fetchAQIData() {
 
-    PythonShell.run('data.py', options, (err, result) => {
-        if (err) {
-            console.error('Error fetching AQI data:', err);
-            return;
-        }
-        const aqiData = JSON.parse(result); 
-        res.render('success-page', { aqiData }); 
-    });
+  PythonShell.run('data.py', options, (err, result) => {
+      if (err) {
+          console.error('Error fetching AQI data:', err);
+          return;
+      }
+      aqiData = JSON.parse(result); 
+  });
 }
+fetchAQIData()
 
-app.get('/success-page', async (req, res) => {
-    await fetchAQIData(res);
+app.get('/aqiData', async (req, res) => {
+  res.json(aqiData);
 });
 
 
