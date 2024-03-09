@@ -659,6 +659,10 @@ pm10_data = {
 aqi_values = calculate_aqi_for_all_monitors(pm25_data, pm10_data)
 print_aqi_for_all_monitors(aqi_values)
 
+def calculateAQI(pm25, pm10):
+    aqi_pm25 = calculate_aqi(pm25)
+    aqi_pm10 = calculate_aqi(pm10)
+    return aqi_pm25
 
 
 
