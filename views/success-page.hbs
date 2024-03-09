@@ -1,13 +1,25 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Success Page</title>
 </head>
 <body>
-    <h1>Success!</h1>
-    <p>Welcome! You have successfully logged in with monitor ID: {{ monitorId }}</p>
-    <p>AQI: {{ aqi }}</p>
+    <h1>Success Page</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Monitor ID</th>
+                <th>AQI Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each aqiData}}
+            <tr>
+                <td>{{this.monitorId}}</td>
+                <td>{{this.aqiValue}}</td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
 </body>
 </html>

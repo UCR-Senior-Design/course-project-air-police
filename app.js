@@ -513,6 +513,26 @@ app.post("/data-analysis-testing", (req, res) => {
 
 //////////////////////////////////////////////
 
+
+const { PythonShell } = require('python-shell');
+
+async function fetchAQIData() {
+
+    PythonShell.run('data.py', options, (err, result) => {
+        if (err) {
+            console.error('Error fetching AQI data:', err);
+            return;
+        }
+        const aqiData = JSON.parse(result); 
+        res.render('success-page', { aqiData }); 
+    });
+}
+
+app.get('/success-page', async (req, res) => {
+    await fetchAQIData(res);
+});
+
+
 //Export the router
 module.exports = router;
 /////////////////////////////////////////////////////////////
