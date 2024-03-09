@@ -523,19 +523,24 @@ let options = {
 
 // fix this
 async function fetchAQIData() {
-
-  PythonShell.run('data.py', options, (err, result) => {
-      if (err) {
-          console.error('Error fetching AQI data:', err);
-          return;
-      }
+  const result = await new Promise((resolve, reject) => {
+  PythonShell.run('data_call/idontfuckingknow.py', options).then( result=> {
+      // if (err) {
+      //     console.error('Error fetching AQI data:', err);
+      //     return;
+      // }
+      console.log("hello");
       aqiData = JSON.parse(result); 
+      return aqiData;
+  });
   });
 }
 fetchAQIData()
 
 app.get('/aqiData', async (req, res) => {
-  res.json(aqiData);
+  let aqidata = await fetchAQIData()
+  console.log(aqidata)
+  res.json(aqidata);
 });
 
 
