@@ -137,6 +137,39 @@ def getUniqueDevices():
         list.append(sn[0])
     return list
 
+def pushFullDB():
+    columns = ['sn','pm25','pm10', 'timestamp']
+    auth = HTTPBasicAuth(apiKey,"")
+    uniqueDevices = getUniqueDevices()
+
+    for sn in uniqueDevices:
+        mydb = connect()
+        mycursor = mydb.cursor()
+        try:
+            now = datetime.now()
+            today = now.strftime('%Y-%m-%d')
+            reqQuery = "https://api.quant-aq.com/device-api/v1/devices/" + sn + "/data-by-date/" + today
+            # print(reqQuery)
+            req = requests.request("get",reqQuery, headers = None, auth = auth)
+        except:
+            print("Error Incorrect API Key")
+            return None
+        # print(req)
+        jsondata = req.json()
+        edata = {col: [] for col in columns}
+        ##loops through all entries in djson data section
+        for entry in jsondata["data"]:
+            for col in columns:
+                edata[col].append(entry[col])
+        data = pd.DataFrame(edata).fillna(0)
+        query = "INSERT INTO Data (sn, pm25, pm10, timestamp) VALUES (%s,%s,%s,%s) ON DUPLICATE KEY UPDATE pm25 = VALUES(pm25), pm10= VALUES(pm10)"
+        values = data.values.tolist()
+        mycursor.executemany(query,values)
+        mydb.commit()
+        print(mycursor.rowcount, "was inserted")
+        mycursor.close()
+        mydb.close()
+    print("Finished")
 
 def checkOffline():
     auth = HTTPBasicAuth(apiKey,"")
@@ -416,8 +449,8 @@ def mapGeneration(data=None):
         monitor_info = f"""
         <b>Monitor {index + 1}</b><br>
         Serial Number: {row['sn']}<br>
-        Latitude: {row['geo.lat']}<br>  
-        Longitude: {row['geo.lon']}<br>  
+        Latitude: {row['geo.lat']}<br>
+        Longitude: {row['geo.lon']}<br>
         PM2.5: {row['pm25']}<br>
         PM10: {row['pm10']}<br>
         Timestamp: {row['timestamp']}<br>
@@ -428,17 +461,17 @@ def mapGeneration(data=None):
     location=[latitude, longitude],
     radius=5,
     popup=folium.Popup(html=monitor_info, max_width=300),
-    color='black', 
+    color='black',
     fill=True,
-    fill_color=marker_color,  
-    fill_opacity=1, 
+    fill_color=marker_color,
+    fill_opacity=1,
 ).add_to(m)
 
 
     # Adding Legend
     legend_html = """
-    <div style="position: fixed; 
-                bottom: 50px; right: 50px; width: 230px; height: 155px; 
+    <div style="position: fixed;
+                bottom: 50px; right: 50px; width: 230px; height: 155px;
                 border:3px solid black; z-index:9999; font-size:14px;
                 background-color:#f2f2f2;
                 /* Custom Ornate Border */
@@ -539,7 +572,7 @@ print_pm_values()
 def calculate_aqi(concentration):
     if concentration is None:
         return None
-    
+
     if 0 <= concentration <= 12.0:
         return linear_conversion(concentration, 0, 12, 0, 50)
     elif 12.1 <= concentration <= 35.4:
