@@ -29,6 +29,7 @@
                     Serial Number
                 </span>
             </th>
+            
             <th data-field="pmHealth">
                 <span class="text-success">
                     PM Health
@@ -79,6 +80,26 @@
                     PM 10
                 </span>
             </th>
+            <th data-field="pmHealth">
+                <span class="text-success">
+                    PM Health
+                </span>
+            </th>
+            <th data-field="sdHealth">
+                <span class="text-success">
+                    SD Card
+                </span>
+            </th>
+            <th data-field="onlne">
+                <span class="text-success">
+                    State
+                </span>
+            </th>
+            <th data-field="dataFraction">
+                <span class="text-success">
+                    Uptime
+                </span>
+            </th>
             <th data-field="timestamp">
                 <span class="text-success">
                     Last Seen
@@ -120,23 +141,44 @@
         .catch(error => {
             console.log(error);
         });
-    $('#errorTable').on('post-body.bs.table', function() {
-            applyColorToTable('#errorTable');
+    $('#errorTable').on('post-body.bs.table',  function() {
+             applyColorToTable('#errorTable');
         });
-
+    $('#normalTable').on('post-body.bs.table',  function() {
+             applyColorToTable('#normalTable');
+        });
     function applyColorToTable(tableId) {
-        $( '#errorTable thead tr').each(function() {
-            $(this).find('th').each(function() {
-                var value = $(this).find('span').text().trim().toLowerCase();
-                console.log(value)
-                if (value === 'error' || value === 'offline') {
-                    $(this).addClass('text-red');
-                } else {
-                    $(this).addClass('text-green');
-                }
-            });
+    $(tableId + ' tbody tr').each(function() {
+        $(this).find('td').each(function(index) {
+            var value = $(this).text().trim().toLowerCase();
+            console.log("Column " + (index + 1) + ": " + value);
+            if (value.includes('error') || value.includes('offline')) {
+              imageUrl = '/images/redx.png';
+              var imageElement = $('<img>').attr('src', imageUrl, alt='error');
+              imageElement.css({
+                'width':'20px',
+                'height':'20px'
+              })
+              // Replace the text content of the cell with the image
+              $(this).html(imageElement);
+            } else if(value.includes('active') || value.includes('online')) {
+                imageUrl = '/images/green.png';
+                var imageElement = $('<img>').attr('src', imageUrl, alt='ok');
+                // Replace the text content of the cell with the image
+                imageElement.css({
+                'width':'20px',
+                'height':'20px'
+                })
+                $(this).html(imageElement);
+            } else if(value === '0.00%'){
+              $(this).addClass('text-red')
+            }else if(value.includes('%')){
+              $(this).addClass('text-green')
+            }
         });
-    }
+    });
+}
+     
 </script>
 </body>
 </html>
