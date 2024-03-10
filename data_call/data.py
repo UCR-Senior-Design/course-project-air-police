@@ -352,9 +352,10 @@ def pullDataTime(serialNumber, time=30):
     mycursor = mydb.cursor()
     mycursor.execute(query, values)
     data = mycursor.fetchall()
-    pdData = pd.DataFrame(data)
+    pdData = pd.DataFrame(data).rename(columns = {0: 'sn',1: 'pm25', 2:'pm10', 3:'timestamp', 4:'geo.lat',5:'geo.lon'})
+    print(pdData)
     return pdData
-
+# pullDataTime('MOD-PM-00645', 30);
 
 
 
@@ -405,7 +406,7 @@ def mapGeneration(data=None):
         latitude = row['geo.lat']
         longitude = row['geo.lon']
         pm10_value = row['pm10']
-
+        img = genTimeGraph(row['sn'])
         # Determine the air quality color based on the PM2.5 value
         marker_color = "blue"  # Default color if value doesn't fall into any range
         for (min_value, max_value), color in color_ranges.items():
@@ -413,32 +414,35 @@ def mapGeneration(data=None):
                 marker_color = color
                 break
 
+
         monitor_info = f"""
         <b>Monitor {index + 1}</b><br>
         Serial Number: {row['sn']}<br>
-        Latitude: {row['geo.lat']}<br>  
-        Longitude: {row['geo.lon']}<br>  
+        Latitude: {row['geo.lat']}<br>
+        Longitude: {row['geo.lon']}<br>
         PM2.5: {row['pm25']}<br>
         PM10: {row['pm10']}<br>
         Timestamp: {row['timestamp']}<br>
+        {img}
+
         """
 
         # Add marker with appropriate color
         folium.CircleMarker(
     location=[latitude, longitude],
     radius=5,
-    popup=folium.Popup(html=monitor_info, max_width=300),
-    color='black', 
+    popup=folium.Popup(html=monitor_info, max_width=500),
+    color='black',
     fill=True,
-    fill_color=marker_color,  
-    fill_opacity=1, 
+    fill_color=marker_color,
+    fill_opacity=1,
 ).add_to(m)
 
 
     # Adding Legend
     legend_html = """
-    <div style="position: fixed; 
-                bottom: 50px; right: 50px; width: 230px; height: 155px; 
+    <div style="position: fixed;
+                bottom: 50px; right: 50px; width: 230px; height: 155px;
                 border:3px solid black; z-index:9999; font-size:14px;
                 background-color:#f2f2f2;
                 /* Custom Ornate Border */
@@ -539,7 +543,7 @@ print_pm_values()
 def calculate_aqi(concentration):
     if concentration is None:
         return None
-    
+
     if 0 <= concentration <= 12.0:
         return linear_conversion(concentration, 0, 12, 0, 50)
     elif 12.1 <= concentration <= 35.4:
@@ -662,7 +666,7 @@ print_aqi_for_all_monitors(aqi_values)
 
 
 
-
+# import glob
 def updateDataFractionForToday(serialNumber):
     auth = HTTPBasicAuth(apiKey,"")
     #uses requests to get data from our network
@@ -690,3 +694,34 @@ def updateAllDataFraction():
     query = "UPDATE Devices SET dataFraction = %s WHERE sn = %s"
     mycursor.executemany(query, list)
     mydb.commit()
+
+import os
+def genTimeGraph(serialNumber):
+    data = pullDataTime(serialNumber, 1)
+    # print(data.keys())
+    plt.figure(figsize=(10, 6))
+    if(data.empty):
+        return
+
+    # data = data.dropna(axis=0, how="any")
+    data['timestamp'] = pd.to_datetime(data['timestamp'])
+
+    # data.set_index('timestamp',inplace=True)
+    plt.plot(data['timestamp'], data['pm25'], label = "pm2.5")
+    plt.plot(data['timestamp'], data['pm10'], label = "pm10")
+    plt.xticks(rotation=45, ha='right')
+    plt.xlabel("time")
+    plt.ylabel("PM Values")
+    plt.legend()
+    temp_file_path = 'pmtimegraph_'+serialNumber+'.png'
+    plt.savefig(temp_file_path)
+    # file_pattern = 'pmtimegraph_*.png'
+
+    with open(temp_file_path, 'rb') as file:
+        img_data = file.read()
+        img_base64 = base64.b64encode(img_data).decode('utf-8')
+        img_html = f'<img src="data:image/png;base64,{img_base64}" alt="PM2.5 Graph"style="width:400px; height:200px;">'
+
+    plt.clf()
+    os.remove(temp_file_path)
+    return img_html
