@@ -1,151 +1,184 @@
-<!DOCTYPE html> 
-  <head> 
-
-    <title> 
-      Researcher Dashboard
-    </title> 
-
-        <!-- Include Bootstrap for styling -->
-    <link rel="stylesheet" href= "https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"> 
-
-  </head> 
-  <body> 
-    <div class="container mt-4"> 
-      <h4 class="text text-success text-center"> 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Researcher Dashboard</title>
+    <style>
+        .text-red {
+            color: red;
+        }
+        .text-green {
+            color: green;
+        }
+    </style>
+    <!-- Include Bootstrap for styling -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-4">
+    <h4 class="text text-success text-center">
         A list of all the monitors with errors
-      </h4> 
+    </h4>
 
-      <table class="table-striped border-success" id = "errorTable"> 
-        <thead> 
-        <tr> 
-          <th data-field="sn"> 
-          <span class="text-success"> 
-            Serial Number
-          </span> 
-          </th> 
-          <th data-field="pmHealth"> 
-          <span class="text-success"> 
-            PM Health
-          </span> 
-          </th> 
-          <th data-field="pm25"> 
-          <span class="text-success"> 
-            PM 2.5
-          </span> 
-          </th> 
-          <th data-field="pm10"> 
-          <span class="text-success"> 
-            PM 10
-          </span> 
-          </th> 
-          <th data-field="sdHealth"> 
-          <span class="text-success"> 
-            SD Card
-          </span> 
-          <th data-field="onlne"> 
-          <span class="text-success"> 
-            State
-          </span> 
-          <th data-field="dataFraction"> 
-          <span class="text-success"> 
-            Uptime
-          </span> 
-          </th> 
-          <th data-field="timestamp"> 
-          <span class="text-success"> 
-            Last Seen
-          </span> 
-          </th> 
-        </tr> 
-        </thead> 
-      </table> 
-      
-    </div> 
+    <table class="table-striped border-success" id="errorTable">
+        <thead>
+        <tr>
+            <th data-field="sn">
+                <span class="text-success">
+                    Serial Number
+                </span>
+            </th>
+            
+            <th data-field="pmHealth">
+                <span class="text-success">
+                    PM Health
+                </span>
+            </th>
+            <th data-field="sdHealth">
+                <span class="text-success">
+                    SD Card
+                </span>
+            </th>
+            <th data-field="onlne">
+                <span class="text-success">
+                    State
+                </span>
+            </th>
+            <th data-field="dataFraction">
+                <span class="text-success">
+                    Uptime
+                </span>
+            </th>
+        </tr>
+        </thead>
+    </table>
 
-    <div class="container mt-4"> 
+</div>
 
-      <h4 class="text text-success text-center"> 
+<div class="container mt-4">
+
+    <h4 class="text text-success text-center">
         Ordered list of all Salton Sea monitors
-      </h4> 
-      
-      <table class="table-striped border-success" id = "normalTable"> 
-        <thead> 
-        <tr> 
-          <th data-field="sn"> 
-          <span class="text-success"> 
-            Serial Number
-          </span> 
-          </th> 
-          <th data-field="pmHealth"> 
-          <span class="text-success"> 
-            PM Health
-          </span> 
-          </th> 
-          <th data-field="pm25"> 
-          <span class="text-success"> 
-            PM 2.5
-          </span> 
-          </th> 
-          <th data-field="pm10"> 
-          <span class="text-success"> 
-            PM 10
-          </span> 
-          </th> 
-          <th data-field="sdHealth"> 
-          <span class="text-success"> 
-            SD Card
-          </span> 
-          <th data-field="onlne"> 
-          <span class="text-success"> 
-            State
-          </span> 
-          <th data-field="dataFraction"> 
-          <span class="text-success"> 
-            Uptime
-          </span> 
-          </th> 
-          <th data-field="timestamp"> 
-          <span class="text-success"> 
-            Last Seen
-          </span> 
-          </th> 
-        </tr> 
-        </thead> 
-      </table> 
-      
-    </div> 
+    </h4>
+
+    <table class="table-striped border-success" id="normalTable">
+        <thead>
+        <tr>
+            <th data-field="sn">
+                <span class="text-success">
+                    Serial Number
+                </span>
+            </th>
+            <th data-field="pm25">
+                <span class="text-success">
+                    PM 2.5
+                </span>
+            </th>
+            <th data-field="pm10">
+                <span class="text-success">
+                    PM 10
+                </span>
+            </th>
+            <th data-field="pmHealth">
+                <span class="text-success">
+                    PM Health
+                </span>
+            </th>
+            <th data-field="sdHealth">
+                <span class="text-success">
+                    SD Card
+                </span>
+            </th>
+            <th data-field="onlne">
+                <span class="text-success">
+                    State
+                </span>
+            </th>
+            <th data-field="dataFraction">
+                <span class="text-success">
+                    Uptime
+                </span>
+            </th>
+            <th data-field="timestamp">
+                <span class="text-success">
+                    Last Seen
+                </span>
+            </th>
+        </tr>
+        </thead>
+    </table>
+
+</div>
 
 
-    <div class="container"> 
-      * Uptime is the monitor's activity percentage over the past X hours.
-    </div> 
+<div class="container">
+    * Uptime is the monitor's activity percentage over the past X hours.
+</div>
 
-    <!-- Include jQuery and other required files for Bootstrap -->
-    <script src= "https://code.jquery.com/jquery-3.3.1.min.js"> </script> 
-    <script src= "https://unpkg.com/bootstrap-table@1.16.0/dist/bootstrap-table.min.js"> </script> 
-      
-    <script type="text/javascript"> 
-      fetch('/errorData')
+<!-- Include jQuery and other required files for Bootstrap -->
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="https://unpkg.com/bootstrap-table@1.16.0/dist/bootstrap-table.min.js"></script>
+
+<script type="text/javascript">
+    fetch('/errorData')
         .then(response => response.json())
         .then((data) => {
-          console.log(data);
-          $(document.getElementById('errorTable')).bootstrapTable({ data: data }); 
+            console.log(data);
+            $(document.getElementById('errorTable')).bootstrapTable({ data: data });
         })
         .catch(error => {
-          console.log(error);
+            console.log(error);
         });
 
-      fetch('/data')
+    fetch('/data')
         .then(response => response.json())
         .then((data) => {
-          console.log(data);
-          $(document.getElementById('normalTable')).bootstrapTable({ data: data }); 
+            console.log(data);
+            $(document.getElementById('normalTable')).bootstrapTable({ data: data }).on('post-body.bs.table', function() {
+            });
         })
         .catch(error => {
-          console.log(error);
+            console.log(error);
         });
-    </script> 
-
-
-  </body> 
-
+    $('#errorTable').on('post-body.bs.table',  function() {
+             applyColorToTable('#errorTable');
+        });
+    $('#normalTable').on('post-body.bs.table',  function() {
+             applyColorToTable('#normalTable');
+        });
+    function applyColorToTable(tableId) {
+    $(tableId + ' tbody tr').each(function() {
+        $(this).find('td').each(function(index) {
+            var value = $(this).text().trim().toLowerCase();
+            console.log("Column " + (index + 1) + ": " + value);
+            if (value.includes('error') || value.includes('offline')) {
+              imageUrl = '/images/redx.png';
+              var imageElement = $('<img>').attr('src', imageUrl, alt='error');
+              imageElement.css({
+                'width':'20px',
+                'height':'20px'
+              })
+              // Replace the text content of the cell with the image
+              $(this).html(imageElement);
+            } else if(value.includes('active') || value.includes('online')) {
+                imageUrl = '/images/green.png';
+                var imageElement = $('<img>').attr('src', imageUrl, alt='ok');
+                // Replace the text content of the cell with the image
+                imageElement.css({
+                'width':'20px',
+                'height':'20px'
+                })
+                $(this).html(imageElement);
+            } else if(value === '0.00%'){
+              $(this).addClass('text-red')
+            }else if(value.includes('%')){
+              $(this).addClass('text-green')
+            }
+        });
+    });
+}
+     
+</script>
+</body>
+</html>
