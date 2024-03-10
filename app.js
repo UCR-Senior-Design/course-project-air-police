@@ -152,11 +152,6 @@ app.use("", homeRouter);
 const mapRouter = require("./routes/map.js");
 app.use("/map", mapRouter);
 
-app.get("/work-in-progress", (req, res) => {
-  res.render("work-in-progress", {
-    title: "Work in Progress",
-  });
-});
 
 // create route for the researcher table data
 app.get("/data", (req, res) => {
@@ -172,15 +167,15 @@ app.get("/researcher", async (req, res) => {
   res.json(addedResearchers);
 });
 
-//creates data analysis testing page
-const dataAnalysisTestingRouter = require("./routes/data-analysis-testing.js");
-app.use("/data-analysis-testing", dataAnalysisTestingRouter);
+
+//creates participant login page
+const loginRouter = require("./routes/login.js");
+app.use("/login", loginRouter);
 
 //creates success page
 const successRouter = require("./routes/success-page.js");
 app.use("/success-page", successRouter);
 
-//////////
 
 ///////////////////////////
 
@@ -435,42 +430,12 @@ app.use("/table", tableRouter);
 const lgRouter = require("./routes/logout.js");
 app.use("/logout", lgRouter);
 ////////////////////////////////////////////////////////////////
-//const router = express.Router();
 
-//route for the provisional page
-/*router.get("/work-in-progress", (req, res) => {
-  res.render("work-in-progress", {
-    title: "Work in Progress",
-  });
-});*/
 
-//Route for handling form submission for data analysis testing
-app.post("/data-analysis-testing", (req, res) => {
-  const monitorId = req.body.monitorId;
-
-  //For now, let's just render a page that displays a monitor ID prompt
-  res.render("data-analysis", { monitorId: monitorId });
-});
-///////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////
 const router = express.Router();
 
-//route for the provisional page
-/*router.get("/work-in-progress", (req, res) => {
-  res.render("work-in-progress", {
-    title: "Work in Progress",
-  });
-});*/
-
-//Route for handling form submission for data analysis testing
-//app.post("/data-analysis-testing", (req, res) => {
-//  const monitorId = req.body.monitorId;
-
-  //For now, let's just render a page that displays a monitor ID prompt
- // res.render("data-analysis", { monitorId: monitorId });
-//});
-///////////////////////////////////////////////////////
 app.get('/monitorIds', async (req, res) => {
   try {
     const connection = await pool.promise().getConnection();
@@ -487,24 +452,7 @@ app.get('/monitorIds', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-
-
 //////////////////////////////////////////////
-app.post("/data-analysis-testing", (req, res) => {
-  const monitorId = req.body.monitorId;
-
-  console.log("Submitted monitor ID:", monitorId);
-
-  const isValidMonitorId = validateMonitorId(monitorId); 
-
-  if (isValidMonitorId) {
-      console.log("Valid monitor ID. Redirecting to success page...");
-      res.redirect("/success-page?monitorId=" + monitorId);
-  } else {
-      console.log("Invalid monitor ID. Redirecting back to data-analysis-testing page...");
-      res.redirect("/data-analysis-testing?error=invalid");
-  }
-});
 
 
 
@@ -541,6 +489,7 @@ app.get('/aqiData', async (req, res) => {
   console.log(aqidata)
   res.json(aqidata);
 });
+
 
 
 //Export the router

@@ -609,17 +609,18 @@ def calculate_aqi_for_all_monitors(pm25_data, pm10_data):
 
 def print_aqi_for_all_monitors(aqi_values):
     if aqi_values:
-        for monitor_id, aqi_data in aqi_values.items():
-            print(f"Monitor ID: {monitor_id}")
-            if aqi_data['AQI_PM2.5'] is not None:
-                print(f"AQI_PM2.5: {aqi_data['AQI_PM2.5']:.2f}")
-            else:
-                print("AQI_PM2.5: N/A")
-            if aqi_data['AQI_PM10'] is not None:
-                print(f"AQI_PM10: {aqi_data['AQI_PM10']:.2f}")
-            else:
-                print("AQI_PM10: N/A")
-            print()
+        # for monitor_id, aqi_data in aqi_values.items():
+        #     print(f"Monitor ID: {monitor_id}")
+        #     if aqi_data['AQI_PM2.5'] is not None:
+        #         print(f"AQI_PM2.5: {aqi_data['AQI_PM2.5']:.2f}")
+        #     else:
+        #         print("AQI_PM2.5: N/A")
+        #     if aqi_data['AQI_PM10'] is not None:
+        #         print(f"AQI_PM10: {aqi_data['AQI_PM10']:.2f}")
+        #     else:
+        #         print("AQI_PM10: N/A")
+        #     print()
+        print(json.dumps(aqi_values))
     else:
         print("No AQI data available for any monitors.")
 
