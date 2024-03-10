@@ -30,4 +30,15 @@ router.get('/', (req,res) => {
     res.status(200);
 })
 
+
+//const { fetchData } = require('./data');
+
+router.get('/aqiData', (req, res) => {
+    const data = fetchData();
+    res.json(data);
+});
+
+
 module.exports = router;
+
+

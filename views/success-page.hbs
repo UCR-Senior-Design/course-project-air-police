@@ -14,13 +14,14 @@
             </tr>
         </thead>
         <tbody>
-            {{#each aqiData}}
-            <tr>
-                <td>{{this.monitorId}}</td>
-                <td>{{this.aqiValue}}</td>
-            </tr>
-            {{/each}}
-        </tbody>
+    {{#each aqiData}}
+    <tr>
+        <td>{{this.monitorId}}</td>
+        <td>{{this.aqiValue}}</td>
+    </tr>
+    {{/each}}
+</tbody>
+
     </table>
 
     <script>
@@ -29,10 +30,18 @@
         .then((data) => {
           console.log(data);
           // do something with the data here like send it to a table
+          data.forEach(item => {
+            const newRow = `<tr><td>${item.monitorId}</td><td>${item.aqiValue}</td></tr>`;
+            document.querySelector('tbody').insertAdjacentHTML('beforeend', newRow);
+        });
+
         })
         .catch(error => {
           console.log(error);
         });
     </script>
+
+
+    
 </body>
 </html>
