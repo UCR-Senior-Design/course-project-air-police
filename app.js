@@ -489,6 +489,7 @@ app.post("/changePMType", async (req, res) => {
   let options = {
     mode: "text",
     pythonPath: ".venv/Scripts/python",
+
     pythonOptions: ["-u"], // get print results in real-time
     args: [selectedPMType],
   };

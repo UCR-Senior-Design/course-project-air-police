@@ -540,9 +540,9 @@ def mapGeneration(data=None, pm_type='pm10'):
   
    # import sys
    # if len(sys.argv) > 1:
-   #     mapGeneration(sys.argv[1])  
+   #     mapGeneration(sys.argv[1])
    # else:
-   #     mapGeneration()  
+   #     mapGeneration()
 
 #####Added function to perform data analysis on the distribution of PM2.5 values#####
 
