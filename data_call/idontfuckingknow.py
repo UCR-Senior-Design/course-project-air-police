@@ -32,6 +32,3 @@ pm10_data = {
 
 aqi_values = dc.calculate_aqi_for_all_monitors(pm25_data, pm10_data)
 dc.print_aqi_for_all_monitors(aqi_values)
-
-with open('format.json', 'w') as json_file:
-    json.dump(aqi_values, json_file, indent=4)

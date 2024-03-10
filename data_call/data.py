@@ -407,6 +407,7 @@ from folium.plugins import HeatMap
 
 
 
+
 def mapGeneration(data=None, pm_type='pm10'):
     if data is None:
         data = getAllRecent()
@@ -414,9 +415,9 @@ def mapGeneration(data=None, pm_type='pm10'):
     # Generate a map with a central location of the Salton Sea area
     central_latitude = data['geo.lat'].mean()
     central_longitude = data['geo.lon'].mean()
-    m = folium.Map(location=[central_latitude, central_longitude], zoom_start=10,  
+    m = folium.Map(location=[central_latitude, central_longitude], zoom_start=10,
     tiles='https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attr='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://cartodb.com/attributions">CartoDB</a>')
-               
+
 
     # Define air quality color ranges based on PM2.5 values
     color_ranges = {
@@ -427,7 +428,7 @@ def mapGeneration(data=None, pm_type='pm10'):
         #"Unhealthy": (151, 200),
         #"Very Unhealthy": (201, 300),
         #"Hazardous": (301, float('inf'))
-        
+
         (0, 50): "green",
         (51, 100): "yellow",
         (101, 150): "orange",
@@ -482,17 +483,13 @@ def mapGeneration(data=None, pm_type='pm10'):
 
   # Adding Dropdown Menu
     dropdown_html = f"""
-    <select id="pm_dropdown">
+    <form action="/changePMType" method="post">
+    <select id="pm_dropdown" name = pm_type>
         <option value="pm10" {'selected' if pm_type == 'pm10' else ''}>PM10</option>
         <option value="pm25" {'selected' if pm_type == 'pm25' else ''}>PM2.5</option>
     </select>
-    <script>
-        document.getElementById("pm_dropdown").addEventListener("change", function() {{
-            var pm_type = this.value;
-            var url = window.location.href.split('?')[0] + '?pm_type=' + pm_type;
-            window.location.href = url;
-        }});
-    </script>
+    <button type="submit">Change</button>
+    </form>
     """
 
     m.get_root().html.add_child(folium.Element(dropdown_html))
@@ -506,7 +503,7 @@ def mapGeneration(data=None, pm_type='pm10'):
                 bottom: 50px; right: 50px; width: 230px; height: 155px;
                 border:3px solid black; z-index:9999; font-size:14px;
                 background-color:#f2f2f2;
-               
+
                 border-image: url('path/to/ornate-border.png') 30 round;
                 ">
     &nbsp;<b>Legend</b><br>
@@ -540,6 +537,7 @@ def mapGeneration(data=None, pm_type='pm10'):
 
     url = f'http://localhost:3000/map?pm_type={pm_type}'
     print(url)
+  
    # import sys
    # if len(sys.argv) > 1:
    #     mapGeneration(sys.argv[1])  

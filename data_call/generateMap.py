@@ -5,7 +5,7 @@ import folium
 import webbrowser
 
 #dc.mapGeneration()
-def generateMap(pm_type='pm10'):
+def generateMap(pm_type):
     dc.mapGeneration(pm_type=pm_type)
 
 if len(sys.argv) > 1:

@@ -1,5 +1,6 @@
 // --------------- code for connecting to the database ---------------
 
+
 require("dotenv").config();
 const bodyParser = require("body-parser");
 var bcrypt = require("bcryptjs");
@@ -52,7 +53,8 @@ var errorTable;
 async function fetchTableData() {
   // pull researcher table data from sql db, export it as json response
   var con = mysql.createConnection(sqlConfig);
-  var query1 = "SELECT Devices.sn, Devices.pmHealth, Devices.sdHealth,Devices.onlne, Devices.dataFraction, CONCAT(ROUND(Devices.dataFraction*100,2),'%') AS dataFraction, Data.pm25, Data.pm10,  SUBSTRING(Data.timestamp,1,10) AS timestamp FROM Devices LEFT JOIN ( SELECT d1.* FROM Data d1 JOIN ( SELECT sn, MAX(timestamp) AS max_timestamp FROM Data GROUP BY sn ) d2 ON d1.sn = d2.sn AND d1.timestamp = d2.max_timestamp ) AS Data ON Data.sn = Devices.sn ORDER BY Devices.sn;"
+  var query1 =
+    "SELECT Devices.sn, Devices.pmHealth, Devices.sdHealth,Devices.onlne, Devices.dataFraction, CONCAT(ROUND(Devices.dataFraction*100,2),'%') AS dataFraction, Data.pm25, Data.pm10,  SUBSTRING(Data.timestamp,1,10) AS timestamp FROM Devices LEFT JOIN ( SELECT d1.* FROM Data d1 JOIN ( SELECT sn, MAX(timestamp) AS max_timestamp FROM Data GROUP BY sn ) d2 ON d1.sn = d2.sn AND d1.timestamp = d2.max_timestamp ) AS Data ON Data.sn = Devices.sn ORDER BY Devices.sn;";
   await con
     .promise()
     .query(query1)
@@ -63,8 +65,9 @@ async function fetchTableData() {
       console.error(err);
     });
 
-  var query2 ="SELECT Devices.sn, Devices.pmHealth, Devices.sdHealth, Devices.onlne, CONCAT(ROUND(Devices.dataFraction*100,2),'%') AS dataFraction FROM Devices WHERE Devices.sdHealth = 'ERROR' OR Devices.pmHealth='ERROR' OR Devices.onlne = 'offline' ORDER BY Devices.onlne, Devices.sdHealth DESC, Devices.pmHealth DESC;";
-  
+  var query2 =
+    "SELECT Devices.sn, Devices.pmHealth, Devices.sdHealth, Devices.onlne, CONCAT(ROUND(Devices.dataFraction*100,2),'%') AS dataFraction FROM Devices WHERE Devices.sdHealth = 'ERROR' OR Devices.pmHealth='ERROR' OR Devices.onlne = 'offline' ORDER BY Devices.onlne, Devices.sdHealth DESC, Devices.pmHealth DESC;";
+
   await con
     .promise()
     .query(query2)
@@ -152,7 +155,6 @@ app.use("", homeRouter);
 const mapRouter = require("./routes/map.js");
 app.use("/map", mapRouter);
 
-
 // create route for the researcher table data
 app.get("/data", (req, res) => {
   res.json(tableData);
@@ -167,7 +169,6 @@ app.get("/researcher", async (req, res) => {
   res.json(addedResearchers);
 });
 
-
 //creates participant login page
 const loginRouter = require("./routes/login.js");
 app.use("/login", loginRouter);
@@ -175,7 +176,6 @@ app.use("/login", loginRouter);
 //creates success page
 const successRouter = require("./routes/success-page.js");
 app.use("/success-page", successRouter);
-
 
 ///////////////////////////
 
@@ -431,66 +431,75 @@ const lgRouter = require("./routes/logout.js");
 app.use("/logout", lgRouter);
 ////////////////////////////////////////////////////////////////
 
-
-
 ////////////////////////////////////////////////////////////////
 const router = express.Router();
 
-app.get('/monitorIds', async (req, res) => {
+app.get("/monitorIds", async (req, res) => {
   try {
     const connection = await pool.promise().getConnection();
 
-    const [rows] = await connection.query('SELECT sn FROM Devices');
+    const [rows] = await connection.query("SELECT sn FROM Devices");
 
     connection.release();
 
-    const monitorIds = rows.map(row => row.sn);
+    const monitorIds = rows.map((row) => row.sn);
 
     res.json({ monitorIds });
   } catch (error) {
-    console.error('Error fetching monitor IDs from database:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error fetching monitor IDs from database:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 //////////////////////////////////////////////
 
-
-
-
-
 //////////////////////////////////////////////
 
-
-const { PythonShell } = require('python-shell');
+const { PythonShell } = require("python-shell");
 let options = {
   mode: "text",
-  pythonPath: ".venv/bin/python",
+  pythonPath: ".venv/Scripts/python",
   pythonOptions: ["-u"], // get print results in real-time
 };
 
 // fix this
 async function fetchAQIData() {
   const result = await new Promise((resolve, reject) => {
-  PythonShell.run('data_call/idontfuckingknow.py', options).then( result=> {
+    PythonShell.run("data_call/idontfuckingknow.py", options).then((result) => {
       // if (err) {
       //     console.error('Error fetching AQI data:', err);
       //     return;
       // }
       console.log("hello");
-      aqiData = JSON.parse(result); 
+      aqiData = JSON.parse(result);
       return aqiData;
-  });
+    });
   });
 }
-fetchAQIData()
+fetchAQIData();
 
-app.get('/aqiData', async (req, res) => {
-  let aqidata = await fetchAQIData()
-  console.log(aqidata)
+app.get("/aqiData", async (req, res) => {
+  let aqidata = await fetchAQIData();
+  console.log(aqidata);
   res.json(aqidata);
 });
 
+app.post("/changePMType", async (req, res) => {
+  const selectedPMType = req.body.pm_type;
+  console.log(selectedPMType);
+  let options = {
+    mode: "text",
+    pythonPath: ".venv/Scripts/python",
+    pythonOptions: ["-u"], // get print results in real-time
+    args: [selectedPMType],
+  };
 
+  await PythonShell.run("data_call/generateMap.py", options, (err, results) => {
+    if (err) throw err;
+    console.log("Map generation completed");
+  });
+
+  res.redirect("/map"); //redirects back to the map page
+});
 
 //Export the router
 module.exports = router;
