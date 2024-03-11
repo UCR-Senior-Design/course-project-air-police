@@ -454,10 +454,47 @@ app.get('/monitorIds', async (req, res) => {
 });
 //////////////////////////////////////////////
 
+/*
+// fix this
+async function fetchAQIData() {
+  const result = await new Promise((resolve, reject) => {
+    PythonShell.run("data_call/idontfuckingknow.py", options).then((result) => {
+      // if (err) {
+      //     console.error('Error fetching AQI data:', err);
+      //     return;
+      // }
+      console.log("hello");
+      aqiData = JSON.parse(result);
+      return aqiData;
+    });
+  });
+}
+fetchAQIData();
 
+app.get("/aqiData", async (req, res) => {
+  let aqidata = await fetchAQIData();
+  console.log(aqidata);
+  res.json(aqidata);
+});
+*/
+app.post("/changePMType", async (req, res) => {
+  const selectedPMType = req.body.pm_type;
+  console.log(selectedPMType);
+  let options = {
+    mode: "text",
+    pythonPath: ".venv/Scripts/python",
 
+    pythonOptions: ["-u"], // get print results in real-time
+    args: [selectedPMType],
+  };
 
+  await PythonShell.run("data_call/generateMap.py", options, (err, results) => {
+    if (err) throw err;
+    console.log("Map generation completed");
+  });
 
+  res.redirect("/map"); //redirects back to the map page
+});
 //Export the router
 module.exports = router;
 /////////////////////////////////////////////////////////////
