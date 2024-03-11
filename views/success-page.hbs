@@ -1,12 +1,64 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Success Page</title>
 </head>
 <body>
-    <h1>Success!</h1>
-    <p>Welcome! You have successfully logged in with monitor ID: {{ monitorId }}</p>
+    <h1>Success Page</h1>
+    <img src="views/aqi_colors.png" alt="The ranges of AQI (air-quality index) values">
+    <table>
+        <thead>
+            <tr>
+                <th>Monitor ID</th>
+                <th>AQI Value</th>
+            </tr>
+        </thead>
+        <tbody>
+    {{#each aqiData}}
+    <tr>
+        <td>{{this.monitorId}}</td>
+        <td>{{this.aqiValue}}</td>
+    </tr>
+    {{/each}}
+</tbody>
+
+    </table>
+
+    <script>
+        /*
+        fetch('/aqiData')
+        .then(response => response.json())
+        .then((data) => {
+          console.log(data);
+          // do something with the data here like send it to a table
+          data.forEach(item => {
+            const newRow = `<tr><td>${item.monitorId}</td><td>${item.aqiValue}</td></tr>`;
+            document.querySelector('tbody').insertAdjacentHTML('beforeend', newRow);
+        });
+
+        })
+        .catch(error => {
+          console.log(error);
+        });
+        */
+      
+    fetch(`/aqiData?monitorId=${monitorId}`)
+    .then(response => response.json())
+    .then((data) => {
+        console.log(data);
+        // do something with the data here like send it to a table
+        data.forEach(item => {
+            const newRow = `<tr><td>${item.monitorId}</td><td>${item.aqiValue}</td></tr>`;
+            document.querySelector('tbody').insertAdjacentHTML('beforeend', newRow);
+        });
+    })
+    .catch(error => {
+        console.log(error);
+    });
+
+    </script>
+
+
+    
 </body>
 </html>
