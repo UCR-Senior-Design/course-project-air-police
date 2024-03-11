@@ -3,9 +3,7 @@ const router = express.Router()
 
 router.get('/', (req,res) => {
     
-
-    //For now, let's just render a page that displays the success
-    res.render("success-page", { title: 'SUCCESS PAGE ', displayText: 'participant login test' });
+    res.render("success-page", { title: 'SUCCESS PAGE ', monitorId : req.query.monitorId });
     res.status(200);
 })
 
