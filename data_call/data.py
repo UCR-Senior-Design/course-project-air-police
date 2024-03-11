@@ -663,12 +663,53 @@ def print_aqi_for_all_monitors(aqi_values):
         print("No AQI data available for any monitors.")
 
 
-def calculateAQI(pm25, pm10):
-    aqi_pm25 = calculate_aqi(pm25)
-    aqi_pm10 = calculate_aqi(pm10)
-    return aqi_pm25
 
 
+from initializeDB import conn
+
+def fetch_data_from_database():
+    mydb = conn()
+    cursor = mydb.cursor()
+    cursor.execute("SELECT * FROM Data") 
+    columns = [col[0] for col in cursor.description]
+    data = cursor.fetchall()
+    df = pd.DataFrame(data, columns=columns)
+    return df
+
+def fetch_AQI_data_for_all_monitors():
+    mydb = conn()
+    cursor = mydb.cursor()
+
+    cursor.execute("SELECT * FROM Data")  
+    columns = [col[0] for col in cursor.description]
+    data = cursor.fetchall()
+    pm_data = pd.DataFrame(data, columns=columns)
+
+   
+   # def calculateAQI(pm25):
+        # stuff
+      #  return pm25  
+
+    pm_data['AQI'] = pm_data['pm25'].apply(calculate_aqi)
+
+    return pm_data
+
+pm_data = fetch_AQI_data_for_all_monitors()
+
+monitor_ids = pm_data['monitor_id'].unique()
+
+plt.figure(figsize=(12, 6))
+for monitor_id in monitor_ids:
+    data_subset = pm_data[pm_data['monitor_id'] == monitor_id]
+    plt.plot(data_subset['timestamp'], data_subset['AQI'], label=f"Monitor {monitor_id}")
+
+plt.title('AQI Values Over Time for Each Monitor ID')
+plt.xlabel('Timestamp')
+plt.ylabel('AQI')
+plt.xticks(rotation=45)
+plt.legend()
+plt.tight_layout()
+plt.show()
 
 
 def updateDataFractionForToday(serialNumber):

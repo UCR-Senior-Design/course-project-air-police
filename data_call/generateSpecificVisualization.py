@@ -2,6 +2,8 @@ import sys
 import data as dc
 import mysql.connector
 import matplotlib.pyplot as plt
+import pandas as pd
+
 
 
 def generateVisualization(serialNumber):
