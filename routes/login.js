@@ -1,32 +1,55 @@
 const express = require("express");
 const router = express.Router();
+const mysql = require("mysql2");
+require("dotenv").config();
 
-const validMonitorIds = [
-    "948", "1001", "976", "966", "993",
-    "1002", "977", "972", "998", "947",
-    "953", "1003", "956", "1000", "989",
-    "984", "1014", "987", "950", "978",
-    "982", "1006", "962", "1021", "346",
-    "988", "1015", "992", "999", "983",
-    "1020", "967", "965", "973", "979",
-    "970", "985", "995", "964", "952",
-    "949", "946", "994", "1022", "951",
-    "986", "957", "1007", "1023", "963"
-];
+
+
+
+// get list of monitor login keys then place them in monitorKeys
+var monitorKeys;
+
+async function fetchMonitorDesc() {
+    const sqlConfig = {
+        connectionLimit: 10,
+        host: process.env.mysqlhost,
+        port: 3306,
+        user: process.env.mysqlUser,
+        password: process.env.mysqlPassword,
+        database: process.env.mysqlDB,
+    };
+    var con = mysql.createConnection(sqlConfig);
+    var query1 = "SELECT id FROM Devices;"
+
+    await con.promise().query(query1)
+    .then(([rows, fields]) => {
+        monitorKeys = rows;
+    })
+    .catch((err) => {
+        console.error(err);
+    });
+}
+fetchMonitorDesc(); // update monitorKeys list
+
 
 function checkValid(monitorId) {
-    // Check if entered monitor ID is valid
-    const isValidMonitorId = validMonitorIds.some(id => monitorId.toUpperCase() === id.toUpperCase());
-    return isValidMonitorId;
+
+    // Check if entered monitor ID is in the list
+    for (var i in monitorKeys) {
+        if (monitorId === monitorKeys[i].id) {
+            return true;
+        }
+    }
+    return false;
 }
 
 router.get('/', (req,res) => {
 
     const monitorId = req.query.monitorId;
-    console.log("Submitted monitor ID:", monitorId);
     var valid = false;
 
     if (monitorId != null) {
+        console.log("Submitted monitor ID:", monitorId);
         valid = checkValid(monitorId)
     }        
     if (valid) {
@@ -36,7 +59,6 @@ router.get('/', (req,res) => {
         res.render("login", { title: 'Participant Login', monitorId : req.query.monitorId });
         res.status(200); 
     }
-
 })
 
 module.exports = router;
