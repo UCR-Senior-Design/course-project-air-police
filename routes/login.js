@@ -53,6 +53,7 @@ router.get('/', (req,res) => {
         valid = checkValid(monitorId)
     }        
     if (valid) {
+        req.session.logged_in = true;
         res.redirect("/success-page?monitorId=" + monitorId) // sends status code 302 by default
     }
     else {
