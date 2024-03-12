@@ -407,71 +407,77 @@ from folium.plugins import HeatMap
 ###############################################################################################################
 
 
-def mapGeneration(data=None):
+def mapGeneration(data=None, pm_type='pm10'):
     if data is None:
         data = getAllRecent()
 
     # Generate a map with a central location of the Salton Sea area
     central_latitude = data['geo.lat'].mean()
     central_longitude = data['geo.lon'].mean()
-    m = folium.Map(location=[central_latitude, central_longitude], zoom_start=10,  tiles='https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attr = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> '
-    'contributors, &copy; <a href="https://cartodb.com/attributions">CartoDB</a>')
+    m = folium.Map(location=[central_latitude, central_longitude], zoom_start=10,
+                   tiles='https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                   attr='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://cartodb.com/attributions">CartoDB</a>')
 
     # Define air quality color ranges based on PM2.5 values
     color_ranges = {
-        #"Good": (0, 50),
-        #"Moderate": (51, 100),
-        #"Unhealthy for Sensitive Groups": (101, 150),
-        #"Unhealthy": (151, 200),
-        #"Very Unhealthy": (201, 300),
-        #"Hazardous": (301, float('inf'))
-
-        (0, 50): "green",
-        (51, 100): "yellow",
-        (101, 150): "orange",
-        (151, 200): "red",
-        (201, 300): "purple",
-        (301, float('inf')): "maroon"
+        'pm10': {
+            (151, 200): "red",
+            (201, 300): "purple",
+            (301, float('inf')): "maroon"
+        },
+        'pm25': {
+            (0, 50): "green",
+            (51, 100): "yellow",
+            (101, 150): "orange",
+            (151, 200): "red",
+            (201, 300): "purple",
+            (301, float('inf')): "maroon"
+        }
     }
 
+    selected_color_range = color_ranges.get(pm_type)
+
     # Add markers for each monitor with appropriate air quality color
-    for index, row in data.dropna(subset=['geo.lat', 'geo.lon', 'pm10']).iterrows():
+    for index, row in data.dropna(subset=['geo.lat', 'geo.lon', pm_type]).iterrows():
         latitude = row['geo.lat']
         longitude = row['geo.lon']
-        pm10_value = row['pm10']
-        img = genTimeGraph(row['sn'])
+        pm_value = row[pm_type]
+
         # Determine the air quality color based on the PM2.5 value
         marker_color = "blue"  # Default color if value doesn't fall into any range
-        for (min_value, max_value), color in color_ranges.items():
-            if min_value <= pm10_value <= max_value:
+        for (min_value, max_value), color in selected_color_range.items():
+            if min_value <= pm_value <= max_value:
                 marker_color = color
                 break
 
-
-        monitor_info = f"""
-        <b>Monitor {index + 1}</b><br>
-        Serial Number: {row['sn']}<br>
-        Latitude: {row['geo.lat']}<br>
-        Longitude: {row['geo.lon']}<br>
-        PM2.5: {row['pm25']}<br>
-        PM10: {row['pm10']}<br>
-        Timestamp: {row['timestamp']}<br>
-        {img}
-
-        """
-
-        # Add marker with appropriate color
         folium.CircleMarker(
-    location=[latitude, longitude],
-    radius=5,
-    popup=folium.Popup(html=monitor_info, max_width=500),
+            location=[latitude, longitude],
+            radius=5,
+            color=marker_color,
+            fill=True,
+            fill_color=marker_color,
+            fill_opacity=1,
+            popup=f"""
+                Serial Number: {row['sn']}<br>
+                Latitude: {latitude}<br>
+                Longitude: {longitude}<br>
+                {pm_type.upper()}: {pm_value}<br>
+                Timestamp: {row['timestamp']}<br>
+            """
+        ).add_to(m)
 
-    color='black',
-    fill=True,
-    fill_color=marker_color,
-    fill_opacity=1,
-).add_to(m)
+    # Adding Dropdown Menu
+    dropdown_html = f"""
+    <form action="/changePMType" method="post">
+    <select id="pm_dropdown" name = pm_type>
+        <option value="pm10" {'selected' if pm_type == 'pm10' else ''}>PM10</option>
+        <option value="pm25" {'selected' if pm_type == 'pm25' else ''}>PM2.5</option>
+    </select>
+    <button type="submit">Change</button>
+    </form>
+    """
 
+    m.get_root().html.add_child(folium.Element(dropdown_html))
 
     # Adding Legend
     legend_html = """
@@ -479,26 +485,9 @@ def mapGeneration(data=None):
                 bottom: 50px; right: 50px; width: 230px; height: 155px;
                 border:3px solid black; z-index:9999; font-size:14px;
                 background-color:#f2f2f2;
-                /* Custom Ornate Border */
                 border-image: url('path/to/ornate-border.png') 30 round;
                 ">
     &nbsp;<b>Legend</b><br>
-    &nbsp;<i class="dot" style="background: green;"></i>&nbsp;Good<br>
-    &nbsp;<i class="dot" style="background: yellow;"></i>&nbsp;Moderate<br>
-    &nbsp;<i class="dot" style="background: orange;"></i>&nbsp;Unhealthy for Sensitive Groups<br>
-    &nbsp;<i class="dot" style="background: red;"></i>&nbsp;Unhealthy<br>
-    &nbsp;<i class="dot" style="background: purple;"></i>&nbsp;Very Unhealthy<br>
-    &nbsp;<i class="dot" style="background: maroon;"></i>&nbsp;Hazardous<br>
-    </div>
-    <style>
-        .dot {
-            height: 10px;
-            width: 10px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 5px;
-        }
-    </style>
     """
 
     m.get_root().html.add_child(folium.Element(legend_html))
@@ -510,6 +499,14 @@ def mapGeneration(data=None):
     # Open the HTML file in the default web browser
     webbrowser.open(html_file_path)
 
+    url = f'http://localhost:3000/map?pm_type={pm_type}'
+    print(url)
+
+   # import sys
+   # if len(sys.argv) > 1:
+   #     mapGeneration(sys.argv[1])  
+   # else:
+   #     mapGeneration()  
 
 #####Added function to perform data analysis on the distribution of PM2.5 values#####
 
