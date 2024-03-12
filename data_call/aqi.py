@@ -5,6 +5,7 @@ from datetime import datetime
 import matplotlib.pyplot as plt
 import os
 import numpy as np
+apiKey = os.environ['api_key']
 def fetchData():
     ######################################################################################
     ## Inputs:                                                                          ##
@@ -13,7 +14,7 @@ def fetchData():
     ######################################################################################
 
     # apiKey
-    apiKey = os.environ['api-key']
+    #apiKey = os.environ['api-key']
     columns = ['geo.lat', 'geo.lon','sn','pm25','pm10', 'timestamp']
     auth = HTTPBasicAuth(apiKey,"")
     #uses requests to get data from our network
@@ -43,7 +44,29 @@ def fetchData():
     data = pd.DataFrame(edata)
     return data
 
+if __name__ == "__main__":
+    data = fetchData()
+    monitor_ids = data['sn'].unique()  
+    
+    for monitor_id in monitor_ids:
+        monitor_data = data[data['sn'] == monitor_id]
+        timestamps = pd.to_datetime(monitor_data['timestamp'])
+        pm25_values = monitor_data['pm25']
+        pm10_values = monitor_data['pm10']
+        
+        plt.figure(figsize=(10, 6))
+        plt.plot(timestamps, pm25_values, label='PM2.5', color='blue')
+        plt.plot(timestamps, pm10_values, label='PM10', color='red')
+        plt.title(f'PM2.5 and PM10 Over Time for Monitor ID: {monitor_id}')
+        plt.xlabel('Timestamp')
+        plt.ylabel('Concentration')
+        plt.legend()
+        plt.xticks(rotation=45)
+        plt.tight_layout()
+        plt.show()
 
+########################
+        
 
 def calculate_aqi(concentration):
     if concentration is None:
@@ -168,28 +191,3 @@ pm10_data = {
 aqi_values = calculate_aqi_for_all_monitors(pm25_data, pm10_data)
 print_aqi_for_all_monitors(aqi_values)
 
-
-
-##############
-def plot_aqi_over_time(data):
-    monitor_ids = data['sn'].unique()
-    
-    for monitor_id in monitor_ids:
-        monitor_data = data[data['sn'] == monitor_id]
-        timestamps = pd.to_datetime(monitor_data['timestamp'])
-        aqi_pm25 = [calculate_aqi(pm25) for pm25 in monitor_data['pm25']]
-        aqi_pm10 = [calculate_aqi(pm10) for pm10 in monitor_data['pm10']]
-        
-        plt.figure(figsize=(10, 6))
-        plt.plot(timestamps, aqi_pm25, label='AQI_PM2.5')
-        plt.plot(timestamps, aqi_pm10, label='AQI_PM10')
-        plt.title(f'AQI Over Time for Monitor ID: {monitor_id}')
-        plt.xlabel('Timestamp')
-        plt.ylabel('AQI Value')
-        plt.legend()
-        plt.xticks(rotation=45)
-        plt.tight_layout()
-        plt.show()
-
-data = fetchData()
-plot_aqi_over_time(data)
