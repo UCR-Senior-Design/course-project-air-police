@@ -1,8 +1,26 @@
 <!DOCTYPE html>
-<html lang="en", class = "loginBackground">
-  <body class = "loginBackground">
-    <div class="claln">
-        <p class = "loginTitle"> Researcher Login </p>
+<html lang="en", class = "rloginBackground">
+  <head>
+
+    <style>
+        h1 {
+          font-weight: bold;
+          color: white;
+          text-align: center;
+        }
+        .container {
+            width: 40%;
+            margin: auto;
+            margin-top: 10%;
+        }
+    </style>
+
+
+  </head>
+  <body class = "rloginBackground">
+    <div class="container p-1">
+      
+        <h1> Researcher Login </h1>
         {{!-- change class for styling --}}
         <form action="/rlogin" method="POST" id="login-form">
         {{!-- if logins were unsuccessful --}}

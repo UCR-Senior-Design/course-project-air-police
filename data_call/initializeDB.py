@@ -50,7 +50,7 @@ def createDataTable():
 def createDevicesTable():
     mydb = conn()
     mycursor = mydb.cursor()
-    mycursor.execute("CREATE TABLE IF NOT EXISTS Devices (sn VARCHAR(255),id VARCHAR(255), lat DECIMAL(5,2), lon DECIMAL(5,2), pmHealth VARCHAR(20), sdHealth VARCHAR(20), onlne VARCHAR(10), dataFraction DECIMAL(5,4), PRIMARY KEY(sn))")
+    mycursor.execute("CREATE TABLE IF NOT EXISTS Devices (sn VARCHAR(255),description VARCHAR(255), lat DECIMAL(5,2), lon DECIMAL(5,2), pmHealth VARCHAR(20), sdHealth VARCHAR(20), onlne VARCHAR(10), dataFraction DECIMAL(5,4), last_seen VARCHAR(255), PRIMARY KEY(sn))")
 
 def createUserTable():
     mydb = conn()
