@@ -3,6 +3,8 @@ from dotenv import load_dotenv
 load_dotenv()
 import mysql.connector
 
+
+
 def connpreDB():
     mhost = os.environ['mysqlhost']
     muer = os.environ['mysqlUser']
@@ -64,5 +66,10 @@ def initialize():
     createDevicesTable()
     createUserTable()
     print("Initialized")
-
+import data as dc
+def initialFill():
+    dc.grabAllSensor()
+    dc.fillNAs()
+    print("Filled")
 initialize()
+initialFill()
