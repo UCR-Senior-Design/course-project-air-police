@@ -2,6 +2,8 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 import mysql.connector
+import data as dc
+
 
 def connpreDB():
     mhost = os.environ['mysqlhost']
@@ -63,6 +65,7 @@ def initialize():
     createDataTable()
     createDevicesTable()
     createUserTable()
+    dc.fillNAs()
     print("Initialized")
 
 initialize()
