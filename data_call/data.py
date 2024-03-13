@@ -320,11 +320,11 @@ def getAllRecent():
     recent = []
     mydb = connect()
     mycursor = mydb.cursor()
-    query = "SELECT Devices.*, Data.* FROM Devices LEFT JOIN ( SELECT d1.* FROM Data d1 JOIN ( SELECT sn, MAX(timestamp) AS max_timestamp FROM Data GROUP BY sn ) d2 ON d1.sn = d2.sn AND d1.timestamp = d2.max_timestamp ) AS Data ON Data.sn = Devices.sn ORDER BY Devices.sn;"
+    query = "SELECT Devices.sn, Devices.description, Devices.lat, Devices.lon, Devices.pmHealth, Devices.sdHealth, Devices.onlne, Devices.datafraction,  Data.pm25, Data.pm10, Data.timestamp FROM Devices LEFT JOIN ( SELECT d1.* FROM Data d1 JOIN ( SELECT sn, MAX(timestamp) AS max_timestamp FROM Data GROUP BY sn ) d2 ON d1.sn = d2.sn AND d1.timestamp = d2.max_timestamp ) AS Data ON Data.sn = Devices.sn ORDER BY Devices.sn;"
     mycursor.execute(query)
     recent = mycursor.fetchall()
-    recent = pd.DataFrame(recent).dropna(how='all', axis = 0).drop(columns=8, axis = 1)
-    recent = recent.rename(columns = {0: 'sn',1:'description', 2:'geo.lat', 3:'geo.lon', 4:'pmHealth',5:'sdHealth', 6:'status', 7:'Data Fraction', 9:'pm25', 10: "pm10", 11: "timestamp"})
+    recent = pd.DataFrame(recent).dropna(how='all', axis = 0)
+    recent = recent.rename(columns = {0: 'sn',1:'description', 2:'geo.lat', 3:'geo.lon', 4:'pmHealth',5:'sdHealth', 6:'status', 7:'Data Fraction', 8:'pm25', 9: "pm10", 10: "timestamp"})
     recent.replace(0, np.nan, inplace=True)
     return recent
 
@@ -456,6 +456,9 @@ def mapGeneration(data=None, pm_type='pm10'):
     # Define air quality color ranges based on PM2.5 values
     color_ranges = {
         'pm10': {
+            (0, 50): "green",
+            (51, 100): "yellow",
+            (101, 150): "orange",
             (151, 200): "red",
             (201, 300): "purple",
             (301, float('inf')): "maroon"
@@ -471,13 +474,12 @@ def mapGeneration(data=None, pm_type='pm10'):
     }
 
     selected_color_range = color_ranges.get(pm_type)
-
     # Add markers for each monitor with appropriate air quality color
     for index, row in data.dropna(subset=['geo.lat', 'geo.lon', pm_type]).iterrows():
         latitude = row['geo.lat']
         longitude = row['geo.lon']
         pm_value = row[pm_type]
-
+        img = genTimeGraph(row['sn'])
         # Determine the air quality color based on the PM2.5 value
         marker_color = "blue"  # Default color if value doesn't fall into any range
         for (min_value, max_value), color in selected_color_range.items():
@@ -498,6 +500,7 @@ def mapGeneration(data=None, pm_type='pm10'):
                 Longitude: {longitude}<br>
                 {pm_type.upper()}: {pm_value}<br>
                 Timestamp: {row['timestamp']}<br>
+                {img}
             """
         ).add_to(m)
 
@@ -520,11 +523,27 @@ def mapGeneration(data=None, pm_type='pm10'):
                 bottom: 50px; right: 50px; width: 230px; height: 155px;
                 border:3px solid black; z-index:9999; font-size:14px;
                 background-color:#f2f2f2;
+                /* Custom Ornate Border */
                 border-image: url('path/to/ornate-border.png') 30 round;
                 ">
     &nbsp;<b>Legend</b><br>
+    &nbsp;<i class="dot" style="background: green;"></i>&nbsp;Good<br>
+    &nbsp;<i class="dot" style="background: yellow;"></i>&nbsp;Moderate<br>
+    &nbsp;<i class="dot" style="background: orange;"></i>&nbsp;Unhealthy for Sensitive Groups<br>
+    &nbsp;<i class="dot" style="background: red;"></i>&nbsp;Unhealthy<br>
+    &nbsp;<i class="dot" style="background: purple;"></i>&nbsp;Very Unhealthy<br>
+    &nbsp;<i class="dot" style="background: maroon;"></i>&nbsp;Hazardous<br>
+    </div>
+    <style>
+        .dot {
+            height: 10px;
+            width: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+    </style>
     """
-
     m.get_root().html.add_child(folium.Element(legend_html))
 
     # Save the map as an HTML file

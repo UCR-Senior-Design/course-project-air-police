@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { PythonShell } = require("python-shell");
+let { PythonShell } = require("python-shell");
 
 // Getting all
 //router.get('/', (req,res) => {

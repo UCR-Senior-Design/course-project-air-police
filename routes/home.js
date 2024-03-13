@@ -14,10 +14,10 @@ let { PythonShell } = require("python-shell");
 
 let options = {
   mode: "text",
-  pythonPath: ".venv/Scripts/python",
+  pythonPath: ".venv/bin/python",
   pythonOptions: ["-u"], // get print results in real-time
+  args: ["pm25"],
 };
-
 
 PythonShell.run("data_call/generateMap.py", options);
 
