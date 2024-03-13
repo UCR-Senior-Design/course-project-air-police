@@ -323,8 +323,8 @@ def getAllRecent():
     query = "SELECT Devices.*, Data.* FROM Devices LEFT JOIN ( SELECT d1.* FROM Data d1 JOIN ( SELECT sn, MAX(timestamp) AS max_timestamp FROM Data GROUP BY sn ) d2 ON d1.sn = d2.sn AND d1.timestamp = d2.max_timestamp ) AS Data ON Data.sn = Devices.sn ORDER BY Devices.sn;"
     mycursor.execute(query)
     recent = mycursor.fetchall()
-    recent = pd.DataFrame(recent).dropna(how='all', axis = 0).drop(columns=8, axis = 1)
-    recent = recent.rename(columns = {0: 'sn',1:'description', 2:'geo.lat', 3:'geo.lon', 4:'pmHealth',5:'sdHealth', 6:'status', 7:'Data Fraction', 9:'pm25', 10: "pm10", 11: "timestamp"})
+    recent = pd.DataFrame(recent).dropna(how='all', axis = 0).drop(columns=[8,9], axis = 1)
+    recent = recent.rename(columns = {0: 'sn',1:'description', 2:'geo.lat', 3:'geo.lon', 4:'pmHealth',5:'sdHealth', 6:'status', 7:'Data Fraction', 10:'pm25', 11: "pm10", 12: "timestamp"})
     recent.replace(0, np.nan, inplace=True)
     return recent
 
@@ -471,7 +471,7 @@ def mapGeneration(data=None, pm_type='pm10'):
     }
 
     selected_color_range = color_ranges.get(pm_type)
-
+    print(data)
     # Add markers for each monitor with appropriate air quality color
     for index, row in data.dropna(subset=['geo.lat', 'geo.lon', pm_type]).iterrows():
         latitude = row['geo.lat']

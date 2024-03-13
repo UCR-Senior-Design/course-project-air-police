@@ -479,12 +479,12 @@ app.post("/changePMType", async (req, res) => {
   console.log(selectedPMType);
   let options = {
     mode: "text",
-    pythonPath: ".venv/Scripts/python",
+    pythonPath: ".venv/bin/python",
 
     pythonOptions: ["-u"], // get print results in real-time
     args: [selectedPMType],
   };
-
+  let { PythonShell } = require("python-shell");
   await PythonShell.run("data_call/generateMap.py", options, (err, results) => {
     if (err) throw err;
     console.log("Map generation completed");
