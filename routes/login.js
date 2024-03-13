@@ -19,7 +19,7 @@ async function fetchMonitorDesc() {
         database: process.env.mysqlDB,
     };
     var con = mysql.createConnection(sqlConfig);
-    var query1 = "SELECT id FROM Devices;"
+    var query1 = "SELECT description FROM Devices;"
 
     await con.promise().query(query1)
     .then(([rows, fields]) => {
@@ -36,7 +36,7 @@ function checkValid(monitorId) {
 
     // Check if entered monitor ID is in the list
     for (var i in monitorKeys) {
-        if (monitorId === monitorKeys[i].id) {
+        if (monitorId === monitorKeys[i].description) {
             return true;
         }
     }
