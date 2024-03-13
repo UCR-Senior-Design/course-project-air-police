@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 import mysql.connector
-import data as dc
+
 
 
 def connpreDB():
@@ -65,7 +65,11 @@ def initialize():
     createDataTable()
     createDevicesTable()
     createUserTable()
-    dc.fillNAs()
     print("Initialized")
-
+import data as dc
+def initialFill():
+    dc.grabAllSensor()
+    dc.fillNAs()
+    print("Filled")
 initialize()
+initialFill()
