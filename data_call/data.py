@@ -84,7 +84,7 @@ def grabAllSensor():
         return None
     deviceListJson = req.json()
     datajson = deviceListJson['data']
-    columns = ["sn", "id", "lat", "lon"]
+    columns = ["sn", "description", "lat", "lon", "last_seen"]
     edata = {col: [] for col in columns}
     print(pd.DataFrame(datajson).keys())
     ##loops through all entries in djson data section
@@ -101,23 +101,23 @@ def grabAllSensor():
     print(data)
     mydb = connect()
     mycursor = mydb.cursor()
-    query = "INSERT INTO Devices (sn,id, lat, lon) VALUES (%s,%s, %s, %s) ON DUPLICATE KEY UPDATE lat = VALUES(lat), lon = VALUES(lon)"
+    query = "INSERT INTO Devices (sn,description, lat, lon, last_seen) VALUES (%s,%s, %s, %s, %s) ON DUPLICATE KEY UPDATE lat = VALUES(lat), lon = VALUES(lon), last_seen = VALUES(last_seen)"
     values = data.values.tolist()
     mycursor.executemany(query, values)
     mydb.commit()
     print(mycursor.rowcount, "was inserted")
 # grabAllSensor()
-def mapIdToSN(id):
-    mydb = connect()
-    mycursor = mydb.cursor()
-    query = "SELECT d.sn FROM Devices d WHERE d.id = %s"
-    values = [id]
-    mycursor.execute(query, values)
-    # print(mycursor.fetchone()[0])
-    sn = mycursor.fetchone()
-    if sn == None:
-        return ""
-    return sn[0]
+# def mapIdToSN(id):
+#     mydb = connect()
+#     mycursor = mydb.cursor()
+#     query = "SELECT d.sn FROM Devices d WHERE d.id = %s"
+#     values = [id]
+#     mycursor.execute(query, values)
+#     # print(mycursor.fetchone()[0])
+#     sn = mycursor.fetchone()
+#     if sn == None:
+#         return ""
+#     return sn[0]
 def getUniqueDevices():
     #######################################################################
     ## gets all of the unique devices                                    ##
@@ -156,6 +156,7 @@ def pushFullDB():
             return None
         # print(req)
         jsondata = req.json()
+        columns = ['sn','pm25','pm10', 'timestamp']
         edata = {col: [] for col in columns}
         ##loops through all entries in djson data section
         for entry in jsondata["data"]:
@@ -170,6 +171,40 @@ def pushFullDB():
         mycursor.close()
         mydb.close()
     print("Finished")
+
+def fillNAs():
+    mydb = connect()
+    mycursor = mydb.cursor()
+
+    query = "SELECT sn, last_seen FROM Devices"
+    mycursor.execute(query);
+    data = pd.DataFrame(mycursor.fetchall())
+    for i, d in data.iterrows():
+        date = d[1][0:10]
+        print(date)
+        httpreq = "https://api.quant-aq.com/device-api/v1/devices/" + d[0] + "/data-by-date/" + date + "/?network_id=9"
+        auth = HTTPBasicAuth(apiKey,"")
+        req = requests.request("get",httpreq, headers = None, auth = auth)
+        jsdata = req.json()
+        columns = ['sn','pm25','pm10', 'timestamp']
+        edata = {col: [] for col in columns}
+        ##loops through all entries in djson data section
+        for entry in jsdata["data"]:
+            for col in columns:
+                edata[col].append(entry[col])
+        data = pd.DataFrame(edata).fillna(0)
+        query = "INSERT INTO Data (sn, pm25, pm10, timestamp) VALUES (%s,%s,%s,%s) ON DUPLICATE KEY UPDATE pm25 = VALUES(pm25), pm10= VALUES(pm10)"
+        values = data.values.tolist()
+        mycursor.close()
+        mycursor = mydb.cursor()
+        mycursor.executemany(query, values)
+        mydb.commit()
+        print(mycursor.rowcount, "was inserted")
+
+    mycursor.close()
+    mydb.close()
+
+
 
 def checkOffline():
     auth = HTTPBasicAuth(apiKey,"")
@@ -289,7 +324,7 @@ def getAllRecent():
     mycursor.execute(query)
     recent = mycursor.fetchall()
     recent = pd.DataFrame(recent).dropna(how='all', axis = 0).drop(columns=8, axis = 1)
-    recent = recent.rename(columns = {0: 'sn',1:'id', 2:'geo.lat', 3:'geo.lon', 4:'pmHealth',5:'sdHealth', 6:'status', 7:'Data Fraction', 9:'pm25', 10: "pm10", 11: "timestamp"})
+    recent = recent.rename(columns = {0: 'sn',1:'description', 2:'geo.lat', 3:'geo.lon', 4:'pmHealth',5:'sdHealth', 6:'status', 7:'Data Fraction', 9:'pm25', 10: "pm10", 11: "timestamp"})
     recent.replace(0, np.nan, inplace=True)
     return recent
 
@@ -504,9 +539,9 @@ def mapGeneration(data=None, pm_type='pm10'):
 
    # import sys
    # if len(sys.argv) > 1:
-   #     mapGeneration(sys.argv[1])  
+   #     mapGeneration(sys.argv[1])
    # else:
-   #     mapGeneration()  
+   #     mapGeneration()
 
 #####Added function to perform data analysis on the distribution of PM2.5 values#####
 
@@ -607,46 +642,7 @@ def calculate_aqi_for_all_monitors(pm25_data, pm10_data):
         else:
             print(f"Missing data for monitor ID: {monitor_id}")
     return aqi_values
-pm25_data = {
-    'MOD-PM-00637': 114.10195979899497, 'MOD-PM-00661': 36.25833333333333, 'MOD-PM-00673': 8.983333333333334,
-    'MOD-PM-00691': 19.633333333333333, 'MOD-PM-00690': 9.1125, 'MOD-PM-00645': 19.079166666666666,
-    'MOD-PM-00655': 130.61914572864322, 'MOD-PM-00692': 7.212500000000001, 'MOD-PM-00642': 11.845833333333333,
-    'MOD-PM-00666': 15.279166666666667, 'MOD-PM-00682': 32.483333333333334, 'MOD-PM-00687': 11.283333333333335,
-    'MOD-PM-00665': 40.733333333333334, 'MOD-PM-00678': 17.508333333333333, 'MOD-PM-00703': 5.370833333333334,
-    'MOD-PM-00676': 28.833333333333336, 'MOD-PM-00639': 2.816666666666667, 'MOD-PM-00695': 6.862500000000001,
-    'MOD-PM-00651': 20.062500000000004, 'MOD-PM-00677': float('nan'), 'MOD-PM-00704': 9.829166666666667,
-    'MOD-PM-00688': 1.3041666666666667, 'MOD-PM-00672': 5.7125, 'MOD-PM-00709': 6.075,
-    'MOD-PM-00656': 52.05781115879828, 'MOD-PM-00654': 4.9625, 'MOD-PM-00668': 4.2124999999999995,
-    'MOD-PM-00659': 37.28333333333334, 'MOD-PM-00674': 60.93459227467812, 'MOD-PM-00653': 31.27916666666667,
-    'MOD-PM-00641': 44.400000000000006, 'MOD-PM-00635': 9.316666666666668, 'MOD-PM-00683': 0.5333333333333334,
-    'MOD-PM-00711': 19.42916666666667, 'MOD-PM-00640': 14.175, 'MOD-PM-00675': 4.545833333333333,
-    'MOD-PM-00646': 51.29231759656653, 'MOD-PM-00696': 0.7583333333333334, 'MOD-PM-00652': 24.6125,
-    'MOD-PM-00660': 4.375000000000001
-}
 
-pm10_data = {
-    'MOD-PM-00637': 50.61443434343434, 'MOD-PM-00661': 25.336111111111112, 'MOD-PM-00673': 5.549074074074074,
-    'MOD-PM-00691': 4.423148148148148, 'MOD-PM-00690': 2.025, 'MOD-PM-00645': 15.852777777777776,
-    'MOD-PM-00655': 44.00833333333334, 'MOD-PM-00692': 3.713888888888889, 'MOD-PM-00642': 18.328703703703706,
-    'MOD-PM-00666': 5.110185185185185, 'MOD-PM-00682': 8.624074074074073, 'MOD-PM-00687': 13.337962962962962,
-    'MOD-PM-00665': 10.252777777777778, 'MOD-PM-00678': 5.8462962962962965, 'MOD-PM-00703': 1.9861111111111112,
-    'MOD-PM-00676': 32.931481481481484, 'MOD-PM-00639': 14.626851851851853, 'MOD-PM-00695': 3.003703703703704,
-    'MOD-PM-00651': 6.882407407407407, 'MOD-PM-00677': float('nan'), 'MOD-PM-00704': 2.55,
-    'MOD-PM-00688': 0.2898148148148148, 'MOD-PM-00672': 3.222222222222
-}
-
-aqi_values = calculate_aqi_for_all_monitors(pm25_data, pm10_data)
-for monitor_id, aqi_data in aqi_values.items():
-    print(f"Monitor ID: {monitor_id}")
-    if aqi_data['AQI_PM2.5'] is not None:
-        print(f"AQI_PM2.5: {aqi_data['AQI_PM2.5']:.2f}")
-    else:
-        print("AQI_PM2.5: N/A")
-    if aqi_data['AQI_PM10'] is not None:
-        print(f"AQI_PM10: {aqi_data['AQI_PM10']:.2f}")
-    else:
-        print("AQI_PM10: N/A")
-    print()
 def print_aqi_for_all_monitors(aqi_values):
     if aqi_values:
         for monitor_id, aqi_data in aqi_values.items():
@@ -662,40 +658,6 @@ def print_aqi_for_all_monitors(aqi_values):
             print()
     else:
         print("No AQI data available for any monitors.")
-
-pm25_data = {
-    'MOD-PM-00637': 114.10195979899497, 'MOD-PM-00661': 36.25833333333333, 'MOD-PM-00673': 8.983333333333334,
-    'MOD-PM-00691': 19.633333333333333, 'MOD-PM-00690': 9.1125, 'MOD-PM-00645': 19.079166666666666,
-    'MOD-PM-00655': 130.61914572864322, 'MOD-PM-00692': 7.212500000000001, 'MOD-PM-00642': 11.845833333333333,
-    'MOD-PM-00666': 15.279166666666667, 'MOD-PM-00682': 32.483333333333334, 'MOD-PM-00687': 11.283333333333335,
-    'MOD-PM-00665': 40.733333333333334, 'MOD-PM-00678': 17.508333333333333, 'MOD-PM-00703': 5.370833333333334,
-    'MOD-PM-00676': 28.833333333333336, 'MOD-PM-00639': 2.816666666666667, 'MOD-PM-00695': 6.862500000000001,
-    'MOD-PM-00651': 20.062500000000004, 'MOD-PM-00677': float('nan'), 'MOD-PM-00704': 9.829166666666667,
-    'MOD-PM-00688': 1.3041666666666667, 'MOD-PM-00672': 5.7125, 'MOD-PM-00709': 6.075,
-    'MOD-PM-00656': 52.05781115879828, 'MOD-PM-00654': 4.9625, 'MOD-PM-00668': 4.2124999999999995,
-    'MOD-PM-00659': 37.28333333333334, 'MOD-PM-00674': 60.93459227467812, 'MOD-PM-00653': 31.27916666666667,
-    'MOD-PM-00641': 44.400000000000006, 'MOD-PM-00635': 9.316666666666668, 'MOD-PM-00683': 0.5333333333333334,
-    'MOD-PM-00711': 19.42916666666667, 'MOD-PM-00640': 14.175, 'MOD-PM-00675': 4.545833333333333,
-    'MOD-PM-00646': 51.29231759656653, 'MOD-PM-00696': 0.7583333333333334, 'MOD-PM-00652': 24.6125,
-    'MOD-PM-00660': 4.375000000000001
-}
-
-pm10_data = {
-    'MOD-PM-00637': 50.61443434343434, 'MOD-PM-00661': 25.336111111111112, 'MOD-PM-00673': 5.549074074074074,
-    'MOD-PM-00691': 4.423148148148148, 'MOD-PM-00690': 2.025, 'MOD-PM-00645': 15.852777777777776,
-    'MOD-PM-00655': 44.00833333333334, 'MOD-PM-00692': 3.713888888888889, 'MOD-PM-00642': 18.328703703703706,
-    'MOD-PM-00666': 5.110185185185185, 'MOD-PM-00682': 8.624074074074073, 'MOD-PM-00687': 13.337962962962962,
-    'MOD-PM-00665': 10.252777777777778, 'MOD-PM-00678': 5.8462962962962965, 'MOD-PM-00703': 1.9861111111111112,
-    'MOD-PM-00676': 32.931481481481484, 'MOD-PM-00639': 14.626851851851853, 'MOD-PM-00695': 3.003703703703704,
-    'MOD-PM-00651': 6.882407407407407, 'MOD-PM-00677': float('nan'), 'MOD-PM-00704': 2.55,
-    'MOD-PM-00688': 0.2898148148148148, 'MOD-PM-00672': 3.222222222222
-}
-
-aqi_values = calculate_aqi_for_all_monitors(pm25_data, pm10_data)
-print_aqi_for_all_monitors(aqi_values)
-
-
-
 
 # import glob
 def updateDataFractionForToday(serialNumber):
