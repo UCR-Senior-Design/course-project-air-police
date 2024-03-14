@@ -2,10 +2,10 @@
 
 require("dotenv").config();
 const bodyParser = require("body-parser");
-var bcrypt = require("bcryptjs");
-var jwt = require("jsonwebtoken");
-const nodemailer = require("nodemailer");
-const hash = process.env.hash;
+// var bcrypt = require("bcryptjs");
+// var jwt = require("jsonwebtoken");
+// const nodemailer = require("nodemailer");
+// const hash = process.env.hash;
 // const mysql = require("mysql2");
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const { request } = require("http");
@@ -135,13 +135,13 @@ app.use(express.static(path.join(__dirname, "public")));
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "hbs");
 
-app.use(
-  session({
-    secret: "secret",
-    resave: true,
-    saveUninitialized: true,
-  }),
-);
+// app.use(
+//   session({
+//     secret: "secret",
+//     resave: true,
+//     saveUninitialized: true,
+//   }),
+// );
 // --------------- end of code for setting up the application ---------------
 
 // --------------- code for routing to pages ---------------
