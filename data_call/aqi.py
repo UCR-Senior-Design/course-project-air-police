@@ -1,11 +1,21 @@
 import requests
+import datetime
 from requests.auth import HTTPBasicAuth
 import pandas as pd
 from datetime import datetime
 import matplotlib.pyplot as plt
 import os
+from dotenv import load_dotenv
+load_dotenv()
 import numpy as np
+import mysql.connector
+
+###########################################
+
+
+#load_dotenv()
 apiKey = os.environ['api_key']
+#ik it was said not to use fetchdata here... but i cant find a way to call the database without it
 def fetchData():
     ######################################################################################
     ## Inputs:                                                                          ##
@@ -14,7 +24,6 @@ def fetchData():
     ######################################################################################
 
     # apiKey
-    #apiKey = os.environ['api-key']
     columns = ['geo.lat', 'geo.lon','sn','pm25','pm10', 'timestamp']
     auth = HTTPBasicAuth(apiKey,"")
     #uses requests to get data from our network
@@ -43,31 +52,8 @@ def fetchData():
     #converts dictionary to dataframe object
     data = pd.DataFrame(edata)
     return data
-
-if __name__ == "__main__":
-    data = fetchData()
-    monitor_ids = data['sn'].unique()  
-    
-    for monitor_id in monitor_ids:
-        monitor_data = data[data['sn'] == monitor_id]
-        timestamps = pd.to_datetime(monitor_data['timestamp'])
-        pm25_values = monitor_data['pm25']
-        pm10_values = monitor_data['pm10']
-        
-        plt.figure(figsize=(10, 6))
-        plt.plot(timestamps, pm25_values, label='PM2.5', color='blue')
-        plt.plot(timestamps, pm10_values, label='PM10', color='red')
-        plt.title(f'PM2.5 and PM10 Over Time for Monitor ID: {monitor_id}')
-        plt.xlabel('Timestamp')
-        plt.ylabel('Concentration')
-        plt.legend()
-        plt.xticks(rotation=45)
-        plt.tight_layout()
-        plt.show()
-
-########################
-        
-
+"""
+################aqi values
 def calculate_aqi(concentration):
     if concentration is None:
         return None
@@ -104,90 +90,105 @@ def calculate_aqi_for_all_monitors(pm25_data, pm10_data):
         else:
             print(f"Missing data for monitor ID: {monitor_id}")
     return aqi_values
-pm25_data = {
-    'MOD-PM-00637': 114.10195979899497, 'MOD-PM-00661': 36.25833333333333, 'MOD-PM-00673': 8.983333333333334,
-    'MOD-PM-00691': 19.633333333333333, 'MOD-PM-00690': 9.1125, 'MOD-PM-00645': 19.079166666666666,
-    'MOD-PM-00655': 130.61914572864322, 'MOD-PM-00692': 7.212500000000001, 'MOD-PM-00642': 11.845833333333333,
-    'MOD-PM-00666': 15.279166666666667, 'MOD-PM-00682': 32.483333333333334, 'MOD-PM-00687': 11.283333333333335,
-    'MOD-PM-00665': 40.733333333333334, 'MOD-PM-00678': 17.508333333333333, 'MOD-PM-00703': 5.370833333333334,
-    'MOD-PM-00676': 28.833333333333336, 'MOD-PM-00639': 2.816666666666667, 'MOD-PM-00695': 6.862500000000001,
-    'MOD-PM-00651': 20.062500000000004, 'MOD-PM-00677': float('nan'), 'MOD-PM-00704': 9.829166666666667,
-    'MOD-PM-00688': 1.3041666666666667, 'MOD-PM-00672': 5.7125, 'MOD-PM-00709': 6.075,
-    'MOD-PM-00656': 52.05781115879828, 'MOD-PM-00654': 4.9625, 'MOD-PM-00668': 4.2124999999999995,
-    'MOD-PM-00659': 37.28333333333334, 'MOD-PM-00674': 60.93459227467812, 'MOD-PM-00653': 31.27916666666667,
-    'MOD-PM-00641': 44.400000000000006, 'MOD-PM-00635': 9.316666666666668, 'MOD-PM-00683': 0.5333333333333334,
-    'MOD-PM-00711': 19.42916666666667, 'MOD-PM-00640': 14.175, 'MOD-PM-00675': 4.545833333333333,
-    'MOD-PM-00646': 51.29231759656653, 'MOD-PM-00696': 0.7583333333333334, 'MOD-PM-00652': 24.6125,
-    'MOD-PM-00660': 4.375000000000001
-}
 
-pm10_data = {
-    'MOD-PM-00637': 50.61443434343434, 'MOD-PM-00661': 25.336111111111112, 'MOD-PM-00673': 5.549074074074074,
-    'MOD-PM-00691': 4.423148148148148, 'MOD-PM-00690': 2.025, 'MOD-PM-00645': 15.852777777777776,
-    'MOD-PM-00655': 44.00833333333334, 'MOD-PM-00692': 3.713888888888889, 'MOD-PM-00642': 18.328703703703706,
-    'MOD-PM-00666': 5.110185185185185, 'MOD-PM-00682': 8.624074074074073, 'MOD-PM-00687': 13.337962962962962,
-    'MOD-PM-00665': 10.252777777777778, 'MOD-PM-00678': 5.8462962962962965, 'MOD-PM-00703': 1.9861111111111112,
-    'MOD-PM-00676': 32.931481481481484, 'MOD-PM-00639': 14.626851851851853, 'MOD-PM-00695': 3.003703703703704,
-    'MOD-PM-00651': 6.882407407407407, 'MOD-PM-00677': float('nan'), 'MOD-PM-00704': 2.55,
-    'MOD-PM-00688': 0.2898148148148148, 'MOD-PM-00672': 3.222222222222
-}
-
-aqi_values = calculate_aqi_for_all_monitors(pm25_data, pm10_data)
-for monitor_id, aqi_data in aqi_values.items():
-    print(f"Monitor ID: {monitor_id}")
-    if aqi_data['AQI_PM2.5'] is not None:
-        print(f"AQI_PM2.5: {aqi_data['AQI_PM2.5']:.2f}")
-    else:
-        print("AQI_PM2.5: N/A")
-    if aqi_data['AQI_PM10'] is not None:
-        print(f"AQI_PM10: {aqi_data['AQI_PM10']:.2f}")
-    else:
-        print("AQI_PM10: N/A")
-    print()
 def print_aqi_for_all_monitors(aqi_values):
     if aqi_values:
         for monitor_id, aqi_data in aqi_values.items():
             print(f"Monitor ID: {monitor_id}")
             if aqi_data['AQI_PM2.5'] is not None:
-                print(f"AQI_PM2.5: {aqi_data['AQI_PM2.5']:.2f}")
-            else:
-                print("AQI_PM2.5: N/A")
-            if aqi_data['AQI_PM10'] is not None:
-                print(f"AQI_PM10: {aqi_data['AQI_PM10']:.2f}")
-            else:
-                print("AQI_PM10: N/A")
-            print()
+                print(f"AQI_PM2.5")
+
+
+
+######################PM2.5 and PM10 values on a graph
+
+#apiKey = os.environ['api_key']
+import data as dc
+if __name__ == "__main__":
+    data = dc.fetchData()
+    monitor_ids = data['sn'].unique()
+
+    for description in monitor_ids:
+        monitor_data = data[data['sn'] == description]
+        timestamps = pd.to_datetime(monitor_data['timestamp'])
+        pm25_values = monitor_data['pm25']
+        pm10_values = monitor_data['pm10']
+
+        plt.figure(figsize=(10, 6))
+        plt.plot(timestamps, pm25_values, label='PM2.5', color='blue')
+        plt.plot(timestamps, pm10_values, label='PM10', color='red')
+        plt.title(f'PM2.5 and PM10 Over Time: {description}')
+        plt.xlabel('Timestamp')
+        plt.ylabel('Concentration')
+        plt.legend()
+        plt.xticks(rotation=45)
+        plt.tight_layout()
+        plt.show()
+
+########################
+#var con = mysql.createConnection(sqlConfig);
+#    var query1 = "SELECT description FROM Devices;"
+"""
+def execute_query(conn, query):
+    try:
+        cursor = conn.cursor()
+        cursor.execute(query)
+        result = cursor.fetchall()
+        cursor.close()
+        return result
+    except mysql.connector.Error as err:
+        print(f"Error executing MySQL query: {err}")
+        return None
+
+def calculate_aqi(pm_value, pm_type):
+    if pm_type == 'PM2.5':
+        breakpoints = [0, 12.1, 35.5, 55.5, 150.5, 250.5, 350.5, 500.5]
+        aqi_ranges = [0, 50, 100, 150, 200, 300, 400, 500]
+    elif pm_type == 'PM10':
+        breakpoints = [0, 54, 154, 254, 354, 424, 504, 604]
+        aqi_ranges = [0, 50, 100, 150, 200, 300, 400, 500]
     else:
-        print("No AQI data available for any monitors.")
+        return None
 
-pm25_data = {
-    'MOD-PM-00637': 114.10195979899497, 'MOD-PM-00661': 36.25833333333333, 'MOD-PM-00673': 8.983333333333334,
-    'MOD-PM-00691': 19.633333333333333, 'MOD-PM-00690': 9.1125, 'MOD-PM-00645': 19.079166666666666,
-    'MOD-PM-00655': 130.61914572864322, 'MOD-PM-00692': 7.212500000000001, 'MOD-PM-00642': 11.845833333333333,
-    'MOD-PM-00666': 15.279166666666667, 'MOD-PM-00682': 32.483333333333334, 'MOD-PM-00687': 11.283333333333335,
-    'MOD-PM-00665': 40.733333333333334, 'MOD-PM-00678': 17.508333333333333, 'MOD-PM-00703': 5.370833333333334,
-    'MOD-PM-00676': 28.833333333333336, 'MOD-PM-00639': 2.816666666666667, 'MOD-PM-00695': 6.862500000000001,
-    'MOD-PM-00651': 20.062500000000004, 'MOD-PM-00677': float('nan'), 'MOD-PM-00704': 9.829166666666667,
-    'MOD-PM-00688': 1.3041666666666667, 'MOD-PM-00672': 5.7125, 'MOD-PM-00709': 6.075,
-    'MOD-PM-00656': 52.05781115879828, 'MOD-PM-00654': 4.9625, 'MOD-PM-00668': 4.2124999999999995,
-    'MOD-PM-00659': 37.28333333333334, 'MOD-PM-00674': 60.93459227467812, 'MOD-PM-00653': 31.27916666666667,
-    'MOD-PM-00641': 44.400000000000006, 'MOD-PM-00635': 9.316666666666668, 'MOD-PM-00683': 0.5333333333333334,
-    'MOD-PM-00711': 19.42916666666667, 'MOD-PM-00640': 14.175, 'MOD-PM-00675': 4.545833333333333,
-    'MOD-PM-00646': 51.29231759656653, 'MOD-PM-00696': 0.7583333333333334, 'MOD-PM-00652': 24.6125,
-    'MOD-PM-00660': 4.375000000000001
-}
+    for i in range(len(breakpoints) - 1):
+        if pm_value >= breakpoints[i] and pm_value <= breakpoints[i + 1]:
+            aqi = ((aqi_ranges[i + 1] - aqi_ranges[i]) / (breakpoints[i + 1] - breakpoints[i])) * (pm_value - breakpoints[i]) + aqi_ranges[i]
+            return int(aqi)
 
-pm10_data = {
-    'MOD-PM-00637': 50.61443434343434, 'MOD-PM-00661': 25.336111111111112, 'MOD-PM-00673': 5.549074074074074,
-    'MOD-PM-00691': 4.423148148148148, 'MOD-PM-00690': 2.025, 'MOD-PM-00645': 15.852777777777776,
-    'MOD-PM-00655': 44.00833333333334, 'MOD-PM-00692': 3.713888888888889, 'MOD-PM-00642': 18.328703703703706,
-    'MOD-PM-00666': 5.110185185185185, 'MOD-PM-00682': 8.624074074074073, 'MOD-PM-00687': 13.337962962962962,
-    'MOD-PM-00665': 10.252777777777778, 'MOD-PM-00678': 5.8462962962962965, 'MOD-PM-00703': 1.9861111111111112,
-    'MOD-PM-00676': 32.931481481481484, 'MOD-PM-00639': 14.626851851851853, 'MOD-PM-00695': 3.003703703703704,
-    'MOD-PM-00651': 6.882407407407407, 'MOD-PM-00677': float('nan'), 'MOD-PM-00704': 2.55,
-    'MOD-PM-00688': 0.2898148148148148, 'MOD-PM-00672': 3.222222222222
-}
+if __name__ == "__main__":
+    connection = connect_to_mysql()
+    if connection:
+        data = dc.fetchData()
+        monitor_ids = data['sn'].unique()
 
-aqi_values = calculate_aqi_for_all_monitors(pm25_data, pm10_data)
-print_aqi_for_all_monitors(aqi_values)
+        query1 = "SELECT description FROM Devices;"
+        descriptions_result = execute_query(connection, query1)
 
+        if descriptions_result:
+            descriptions = [row[0] for row in descriptions_result]
+            print("Descriptions from MySQL database:")
+            for desc in descriptions:
+                print(desc)
+                description_data = data[data['description'] == desc]
+                description_data['AQI_PM2.5'] = description_data['pm2.5'].apply(lambda x: calculate_aqi(x, 'PM2.5'))
+                description_data['AQI_PM10'] = description_data['pm10'].apply(lambda x: calculate_aqi(x, 'PM10'))
+                #PM2.5 and PM10 values over time
+                plt.figure(figsize=(10, 5))
+                plt.plot(description_data['timestamp'], description_data['pm2.5'], label='PM2.5')
+                plt.plot(description_data['timestamp'], description_data['pm10'], label='PM10')
+                plt.xlabel('Timestamp')
+                plt.ylabel('Concentration (µg/m³)')
+                plt.title(f'PM2.5 and PM10 Concentrations for {desc}')
+                plt.legend()
+                plt.show()
+                plt.figure(figsize=(10, 5))
+                plt.plot(description_data['timestamp'], description_data['AQI_PM2.5'], label='AQI PM2.5')
+                plt.plot(description_data['timestamp'], description_data['AQI_PM10'], label='AQI PM10')
+                plt.xlabel('Timestamp')
+                plt.ylabel('AQI')
+                plt.title(f'AQI Values for {desc}')
+                plt.legend()
+                plt.show()
+
+        else:
+            print("Failed to fetch descriptions from MySQL.")
