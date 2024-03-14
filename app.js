@@ -2,11 +2,11 @@
 
 require("dotenv").config();
 const bodyParser = require("body-parser");
-// var bcrypt = require("bcryptjs");
-// var jwt = require("jsonwebtoken");
-// const nodemailer = require("nodemailer");
-// const hash = process.env.hash;
-// const mysql = require("mysql2");
+var bcrypt = require("bcryptjs");
+var jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
+const hash = process.env.hash;
+const mysql = require("mysql2");
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const { request } = require("http");
 
