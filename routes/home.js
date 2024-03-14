@@ -10,15 +10,15 @@ router.get("/", (req, res) => {
 });
 
 // Runs test.py once the website starts running
-let { PythonShell } = require("python-shell");
+// let { PythonShell } = require("python-shell");
 
-let options = {
-  mode: "text",
-  pythonPath: ".venv/bin/python",
-  pythonOptions: ["-u"], // get print results in real-time
-  args: ["pm25"],
-};
+// let options = {
+//   mode: "text",
+//   pythonPath: ".venv/bin/python",
+//   pythonOptions: ["-u"], // get print results in real-time
+//   args: ["pm25"],
+// };
 
-PythonShell.run("data_call/generateMap.py", options);
+// PythonShell.run("data_call/generateMap.py", options);
 
 module.exports = router;
