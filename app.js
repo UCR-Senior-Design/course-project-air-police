@@ -493,7 +493,7 @@ app.use("", homeRouter);
 //   res.redirect("/map"); //redirects back to the map page
 // });
 //Export the router
-module.exports = router;
+// module.exports = router;
 /////////////////////////////////////////////////////////////
 // --------------- end of code for routing to pages ---------------
 
