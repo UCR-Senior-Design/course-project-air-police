@@ -10,42 +10,42 @@ const mysql = require("mysql2");
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const { request } = require("http");
 
-// const sqlConfig = {
-//   connectionLimit: 10,
-//   host: process.env.mysqlhost,
-//   port: 3306,
-//   user: process.env.mysqlUser,
-//   password: process.env.mysqlPassword,
-//   database: process.env.mysqlDB,
-// };
+const sqlConfig = {
+  connectionLimit: 10,
+  host: process.env.mysqlhost,
+  port: 3306,
+  user: process.env.mysqlUser,
+  password: process.env.mysqlPassword,
+  database: process.env.mysqlDB,
+};
 
-// async function createNewUser(eml, usr, pswd) {
-//   // const usrs = await User.findOne( {$or: [{ username: usr}, {email:eml}]}).lean();
-//   var con = mysql.createConnection(sqlConfig);
-//   var query = "SELECT * FROM User WHERE username = ?";
-//   let value = [usr];
-//   var result;
-//   await con
-//     .promise()
-//     .query(query, value)
-//     .then(([rows, fields]) => {
-//       result = rows;
-//     })
-//     .catch((err) => {
-//       console.error(err);
-//     });
-//   if (result.length === 0 || !result) {
-//     // const hashs = bcrypt.hashSync(pswd, hash);
-//     bcrypt.genSalt(parseInt(process.env.hash), function (err, salt) {
-//       bcrypt.hash(pswd, salt, function (err, hashs) {
-//         let query = "INSERT INTO user (email, username, pwd) VALUES ( ?, ?, ?)";
-//         let values = [eml, usr, hashs];
-//         con.promise().query(query, values);
-//       });
-//     });
-//   }
+async function createNewUser(eml, usr, pswd) {
+  // const usrs = await User.findOne( {$or: [{ username: usr}, {email:eml}]}).lean();
+  var con = mysql.createConnection(sqlConfig);
+  var query = "SELECT * FROM User WHERE username = ?";
+  let value = [usr];
+  var result;
+  await con
+    .promise()
+    .query(query, value)
+    .then(([rows, fields]) => {
+      result = rows;
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+  if (result.length === 0 || !result) {
+    // const hashs = bcrypt.hashSync(pswd, hash);
+    bcrypt.genSalt(parseInt(process.env.hash), function (err, salt) {
+      bcrypt.hash(pswd, salt, function (err, hashs) {
+        let query = "INSERT INTO user (email, username, pwd) VALUES ( ?, ?, ?)";
+        let values = [eml, usr, hashs];
+        con.promise().query(query, values);
+      });
+    });
+  }
 //   //add error things here
-// }
+}
 
 // var tableData;
 // var errorTable;
