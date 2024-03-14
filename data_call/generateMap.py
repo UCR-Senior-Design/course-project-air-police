@@ -1,7 +1,5 @@
 import data as dc
-import mysql.connector
 import sys
-import folium
 import webbrowser
 
 #dc.mapGeneration()
