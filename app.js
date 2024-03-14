@@ -354,75 +354,75 @@ app.use("", homeRouter);
 // const registerRouter = require("./routes/register.js");
 // app.use("/register", registerRouter);
 
-// app.route("/rlogin").post(async (req, res) => {
-//   var con = mysql.createConnection({
-//     connectionLimit: 10,
-//     host: process.env.mysqlhost,
-//     port: 3306,
-//     user: process.env.mysqlUser,
-//     password: process.env.mysqlPassword,
-//     database: process.env.mysqlDB,
-//   });
-//   const { username, password } = req.body;
-//   var query = "SELECT * FROM User WHERE username = ?";
-//   let value = [username];
-//   var result;
-//   await con
-//     .promise()
-//     .query(query, value)
-//     .then(([rows, fields]) => {
-//       result = rows;
-//     })
-//     .catch((err) => {
-//       console.error(err);
-//     });
-//   // const user  = await User.findOne({username: username})
-//   errorpage = "/rlogin?error=";
-//   haserror = false;
-//   if (!username) {
-//     errorpage += "usr2";
-//     haserror = true;
-//   }
-//   if (result.length === 0) {
-//     errorpage += "usr1";
-//     haserror = true;
-//   } else {
-//     if (!password) {
-//       errorpage += "pw2";
-//       haserror = true;
-//     }
-//     var input = result[0].pwd;
-//     const response = bcrypt.compareSync(password, input);
-//     if (response == true) {
-//       if (!haserror) {
-//         req.session.logged_in = true;
-//         req.session.token = jwt.sign(
-//           { username: result[0].username },
-//           process.env.key,
-//           {
-//             algorithm: "HS256",
-//             allowInsecureKeySizes: true,
-//             expiresIn: 7200, // 24 hours
-//           },
-//         );
-//         res.redirect("/table");
-//       }
-//     }
-//     if (response == false) {
-//       errorpage += "pw1";
-//       haserror = true;
-//     }
-//   }
+app.route("/rlogin").post(async (req, res) => {
+  var con = mysql.createConnection({
+    connectionLimit: 10,
+    host: process.env.mysqlhost,
+    port: 3306,
+    user: process.env.mysqlUser,
+    password: process.env.mysqlPassword,
+    database: process.env.mysqlDB,
+  });
+  const { username, password } = req.body;
+  var query = "SELECT * FROM User WHERE username = ?";
+  let value = [username];
+  var result;
+  await con
+    .promise()
+    .query(query, value)
+    .then(([rows, fields]) => {
+      result = rows;
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+  // const user  = await User.findOne({username: username})
+  errorpage = "/rlogin?error=";
+  haserror = false;
+  if (!username) {
+    errorpage += "usr2";
+    haserror = true;
+  }
+  if (result.length === 0) {
+    errorpage += "usr1";
+    haserror = true;
+  } else {
+    if (!password) {
+      errorpage += "pw2";
+      haserror = true;
+    }
+    var input = result[0].pwd;
+    const response = bcrypt.compareSync(password, input);
+    if (response == true) {
+      if (!haserror) {
+        req.session.logged_in = true;
+        req.session.token = jwt.sign(
+          { username: result[0].username },
+          process.env.key,
+          {
+            algorithm: "HS256",
+            allowInsecureKeySizes: true,
+            expiresIn: 7200, // 24 hours
+          },
+        );
+        res.redirect("/table");
+      }
+    }
+    if (response == false) {
+      errorpage += "pw1";
+      haserror = true;
+    }
+  }
 
-//   if (haserror) {
-//     res.redirect(errorpage);
-//   }
+  if (haserror) {
+    res.redirect(errorpage);
+  }
 
-//   // res.redirect('/rlogin?error=pw1')
-// });
+  // res.redirect('/rlogin?error=pw1')
+});
 
-// const rloginRouter = require("./routes/rlogin.js");
-// app.use("/rlogin", rloginRouter);
+const rloginRouter = require("./routes/rlogin.js");
+app.use("/rlogin", rloginRouter);
 
 // const tableRouter = require("./routes/table.js");
 // app.use("/table", tableRouter);
