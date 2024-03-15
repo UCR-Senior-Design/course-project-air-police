@@ -33,23 +33,14 @@ router.get("/", async (req, res) => {
   } else {
     isPorter = false;
   }
-  // console.log("user" + user);
+
   var query = "SELECT username FROM usrs WHERE username = $1";
   let value = [user];
   var result;
-  // await con
-  //   .promise()
-  //   .query(query, value)
-  //   .then(([rows, fields]) => {
-  //     result = rows;
-  //   })
-  //   .catch((err) => {
-  //     console.error(err);
-  //   });
   try {
     result = await con.query(query, value);
     const rows = result.rows;
-    console.log(rows.username);
+
     if (rows.length > 0) {
       res.render("table", {
         title: "AirPolice Map",
