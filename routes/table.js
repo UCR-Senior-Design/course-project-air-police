@@ -1,19 +1,20 @@
 const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
-const mysql = require("mysql2");
+// const mysql = require("mysql2");
+const { Client } = require("pg");
 // Getting all
+const postgreConfig = {
+  user: process.env.postgreUser,
+  host: process.env.postgreHost,
+  database: process.env.postgreDB,
+  password: process.env.postgrePassword,
+  port: process.env.postgrePort,
+};
 router.get("/", async (req, res) => {
-  var con = mysql.createConnection({
-    connectionLimit: 10,
-    host: process.env.mysqlhost,
-    port: 3306,
-    user: process.env.mysqlUser,
-    password: process.env.mysqlPassword,
-    database: process.env.mysqlDB,
-  });
-  var query = "SELECT * FROM User WHERE username = ?";
-
+  var con = new Client(postgreConfig);
+  await con.connect();
+  var query = "SELECT * FROM usrs WHERE username = $1";
   const token = req.session.token;
   let user;
   let isPorter = false;
@@ -32,27 +33,36 @@ router.get("/", async (req, res) => {
   } else {
     isPorter = false;
   }
+  // console.log("user" + user);
+  var query = "SELECT username FROM usrs WHERE username = $1";
   let value = [user];
   var result;
-  await con
-    .promise()
-    .query(query, value)
-    .then(([rows, fields]) => {
-      result = rows;
-    })
-    .catch((err) => {
-      console.error(err);
-    });
-  if (result.length != 0) {
-    res.render("table", {
-      title: "AirPolice Map",
-      body: "success",
-      isLoggedIn: true,
-      isPorterUser: isPorter,
-    });
-    res.status(200);
-  } else {
-    res.redirect("/rlogin?error=ngl");
+  // await con
+  //   .promise()
+  //   .query(query, value)
+  //   .then(([rows, fields]) => {
+  //     result = rows;
+  //   })
+  //   .catch((err) => {
+  //     console.error(err);
+  //   });
+  try {
+    result = await con.query(query, value);
+    const rows = result.rows;
+    console.log(rows.username);
+    if (rows.length > 0) {
+      res.render("table", {
+        title: "AirPolice Map",
+        body: "success",
+        isLoggedIn: true,
+        isPorterUser: isPorter,
+      });
+      res.status(200);
+    } else {
+      res.redirect("/rlogin?error=ngl");
+    }
+  } catch (error) {
+    console.error(error);
   }
 });
 

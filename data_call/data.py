@@ -348,11 +348,11 @@ def pullData(serialNumber=None):
     mydb = connect()
     mycursor = mydb.cursor()
     if serialNumber == None:
-        query = "SELECT * FROM Data LEFT OUTER JOIN Devices ON Data.sn = Devices.sn"
+        query = "SELECT Data.sn, Devices.description, Data.pm25, Data.pm10, Data.timestamp, Devices.lat, Devices.lon, Devices.pmHealth, Devices.sdHealth FROM Data LEFT OUTER JOIN Devices ON Data.sn = Devices.sn"
         mycursor.execute(query)
         data = mycursor.fetchall()
-        data = pd.DataFrame(data).dropna(how='all', axis = 0).drop(columns=4, axis = 1)
-        data = data.rename(columns = {0: 'sn', 1:'pm25', 2:'pm10', 3:'timestamp', 5:'geo.lat', 6:'geo.lon', 7:'pmHealth', 8:'sdHealh'})
+        data = pd.DataFrame(data).dropna(how='all', axis = 0)
+        data = data.rename(columns = {0: 'sn',1: 'description', 2:'pm25', 3:'pm10', 4:'timestamp', 5:'geo.lat', 6:'geo.lon', 7:'pmHealth', 8:'sdHealh'})
         return data
 
 
@@ -421,13 +421,13 @@ def pullDataTime(serialNumber, time=30):
     curDate = datetime.now()
     threshold = timedelta(days=time)
     thresh = (curDate - threshold).strftime('%Y-%m-%dT%H:%M:%S')
-    query = "SELECT Data.sn, Data.pm25, Data.pm10, Data.timestamp, Devices.lat, Devices.lon FROM Data LEFT OUTER JOIN Devices ON Data.sn = Devices.sn WHERE Data.sn = %s AND  Data.timestamp > %s"
+    query = "SELECT Data.sn, Devices.description, Data.pm25, Data.pm10, Data.timestamp, Devices.lat, Devices.lon FROM Data LEFT OUTER JOIN Devices ON Data.sn = Devices.sn WHERE Data.sn = %s AND  Data.timestamp > %s"
     values = [serialNumber, thresh]
     mydb = connect()
     mycursor = mydb.cursor()
     mycursor.execute(query, values)
     data = mycursor.fetchall()
-    pdData = pd.DataFrame(data).rename(columns = {0: 'sn',1: 'pm25', 2:'pm10', 3:'timestamp', 4:'geo.lat',5:'geo.lon'})
+    pdData = pd.DataFrame(data).rename(columns = {0: 'sn',1: 'description',2: 'pm25', 3:'pm10', 4:'timestamp', 5:'geo.lat',6:'geo.lon'})
     print(pdData)
     return pdData
 # pullDataTime('MOD-PM-00645', 30);

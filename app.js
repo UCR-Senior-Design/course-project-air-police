@@ -7,6 +7,7 @@ var jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const hash = process.env.hash;
 const mysql = require("mysql2");
+const { Client } = require("pg");
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const { request } = require("http");
 
@@ -19,78 +20,95 @@ const sqlConfig = {
   database: process.env.mysqlDB,
 };
 
+const postgreConfig = {
+  user: process.env.postgreUser,
+  host: process.env.postgreHost,
+  database: process.env.postgreDB,
+  password: process.env.postgrePassword,
+  port: process.env.postgrePort,
+};
+
 async function createNewUser(eml, usr, pswd) {
   // const usrs = await User.findOne( {$or: [{ username: usr}, {email:eml}]}).lean();
-  var con = mysql.createConnection(sqlConfig);
-  var query = "SELECT * FROM User WHERE username = ?";
-  let value = [usr];
-  var result;
-  await con
-    .promise()
-    .query(query, value)
-    .then(([rows, fields]) => {
-      result = rows;
-    })
-    .catch((err) => {
-      console.error(err);
-    });
-  if (result.length === 0 || !result) {
-    // const hashs = bcrypt.hashSync(pswd, hash);
-    bcrypt.genSalt(parseInt(process.env.hash), function (err, salt) {
-      bcrypt.hash(pswd, salt, function (err, hashs) {
-        let query = "INSERT INTO user (email, username, pwd) VALUES ( ?, ?, ?)";
-        let values = [eml, usr, hashs];
-        con.promise().query(query, values);
+  // var con = mysql.createConnection(sqlConfig);
+  try {
+    var con = new Client(postgreConfig);
+    await con.connect();
+    var query = "SELECT * FROM usrs WHERE username = $1 ";
+    let value = [usr];
+    var result;
+    result = await con.query(query, value);
+    if (result.rows.length === 0 || !result) {
+      // const hashs = bcrypt.hashSync(pswd, hash);
+      bcrypt.genSalt(parseInt(process.env.hash), function (err, salt) {
+        bcrypt.hash(pswd, salt, function (err, hashs) {
+          let query =
+            "INSERT INTO usrs (email, username, pwd) VALUES ( $1, $2, $3) RETURNING *;";
+          let values = [eml, usr, hashs];
+          con.query(query, values);
+        });
       });
-    });
+    }
+  } catch (error) {
+    console.error(error);
+  } finally {
+    // await con.end();
   }
   //add error things here
 }
-
+createNewUser("tno@gmail.com", "pyTest", "1234");
 var tableData;
 var errorTable;
 async function fetchTableData() {
   // pull researcher table data from sql db, export it as json response
-  var con = mysql.createConnection(sqlConfig);
+  // var con = mysql.createConnection(sqlConfig);
+  var con = new Client(postgreConfig);
+  await con.connect();
   var query1 =
     "SELECT Devices.sn, Devices.pmHealth, Devices.sdHealth,Devices.onlne, Devices.dataFraction, CONCAT(ROUND(Devices.dataFraction*100,2),'%') AS dataFraction, Data.pm25, Data.pm10,  SUBSTRING(Data.timestamp,1,10) AS timestamp FROM Devices LEFT JOIN ( SELECT d1.* FROM Data d1 JOIN ( SELECT sn, MAX(timestamp) AS max_timestamp FROM Data GROUP BY sn ) d2 ON d1.sn = d2.sn AND d1.timestamp = d2.max_timestamp ) AS Data ON Data.sn = Devices.sn ORDER BY Devices.sn;";
-  await con
-    .promise()
-    .query(query1)
-    .then(([rows, fields]) => {
-      tableData = rows;
-    })
-    .catch((err) => {
-      console.error(err);
-    });
-
+  // await con
+  //   .promise()
+  //   .query(query1)
+  //   .then(([rows, fields]) => {
+  //     tableData = rows;
+  //   })
+  //   .catch((err) => {
+  //     console.error(err);
+  //   });
+  var result = await con.query(query1);
+  tableData = result.rows;
   var query2 =
     "SELECT Devices.sn, Devices.description, Devices.pmHealth, Devices.sdHealth, Devices.onlne, CONCAT(ROUND(Devices.dataFraction*100,2),'%') AS dataFraction , SUBSTRING(Devices.last_seen,1,10) AS last_seen FROM Devices WHERE Devices.sdHealth = 'ERROR' OR Devices.pmHealth='ERROR' OR Devices.onlne = 'offline' ORDER BY Devices.onlne, Devices.sdHealth DESC, Devices.pmHealth DESC;";
-
-  await con
-    .promise()
-    .query(query2)
-    .then(([rows, fields]) => {
-      errorTable = rows;
-    })
-    .catch((err) => {
-      console.error(err);
-    });
+  result = await con.query(query2);
+  errorTable = result.rows;
+  // await con
+  //   .promise()
+  //   .query(query2)
+  //   .then(([rows, fields]) => {
+  //     errorTable = rows;
+  //   })
+  //   .catch((err) => {
+  //     console.error(err);
+  //   });
+  // await con.end();
 }
 fetchTableData();
 var addedResearchers;
 async function emailGet() {
-  var con = mysql.createConnection(sqlConfig);
-  var query = "SELECT email FROM User";
-  await con
-    .promise()
-    .query(query)
-    .then(([rows, fields]) => {
-      addedResearchers = rows;
-    })
-    .catch((err) => {
-      console.error(err);
-    });
+  // var con = mysql.createConnection(sqlConfig);
+  var con = new Client(postgreConfig);
+  var query = "SELECT email FROM usrs";
+  // await con
+  //   .promise()
+  //   .query(query)
+  //   .then(([rows, fields]) => {
+  //     addedResearchers = rows;
+  //   })
+  //   .catch((err) => {
+  //     console.error(err);
+  //   });
+  await con.connect();
+  await con.query(query);
 }
 emailGet();
 async function run() {
@@ -184,28 +202,31 @@ app.use("/view-data", viewDataRouter);
 
 //////////////////////
 app.route("/invite").post(async (req, res) => {
-  var con = mysql.createConnection({
-    connectionLimit: 10,
-    host: process.env.mysqlhost,
-    port: 3306,
-    user: process.env.mysqlUser,
-    password: process.env.mysqlPassword,
-    database: process.env.mysqlDB,
-  });
+  // var con = mysql.createConnection({
+  //   connectionLimit: 10,
+  //   host: process.env.mysqlhost,
+  //   port: 3306,
+  //   user: process.env.mysqlUser,
+  //   password: process.env.mysqlPassword,
+  //   database: process.env.mysqlDB,
+  // });
+  var con = new Client(postgreConfig);
+  await con.connect();
   const { email } = req.body;
-  var query = "SELECT * FROM User WHERE email = ?";
+  var query = "SELECT * FROM usrs WHERE email = ?";
   let value = [email];
   var result;
-  await con
-    .promise()
-    .query(query, value)
-    .then(([rows, fields]) => {
-      result = rows;
-    })
-    .catch((err) => {
-      console.error(err);
-    });
-  if (result.length !== 0) {
+  // await con
+  //   .promise()
+  //   .query(query, value)
+  //   .then(([rows, fields]) => {
+  //     result = rows;
+  //   })
+  //   .catch((err) => {
+  //     console.error(err);
+  //   });
+  result = await con.query(query, value);
+  if (result.rows.length !== 0) {
     res.redirect('/invite?error="usrE');
     return;
   }
@@ -262,14 +283,16 @@ const inviteRouter = require("./routes/invite.js");
 app.use("/invite", inviteRouter);
 
 app.route("/register").post(async (req, res) => {
-  var con = mysql.createConnection({
-    connectionLimit: 10,
-    host: process.env.mysqlhost,
-    port: 3306,
-    user: process.env.mysqlUser,
-    password: process.env.mysqlPassword,
-    database: process.env.mysqlDB,
-  });
+  // var con = mysql.createConnection({
+  //   connectionLimit: 10,
+  //   host: process.env.mysqlhost,
+  //   port: 3306,
+  //   user: process.env.mysqlUser,
+  //   password: process.env.mysqlPassword,
+  //   database: process.env.mysqlDB,
+  // });
+  var con = new Client(postgreConfig);
+  await con.connect();
   const { token, username, password, retype } = req.body;
   if (!token) {
     res.redirect("/home");
@@ -283,19 +306,20 @@ app.route("/register").post(async (req, res) => {
     errorpage += "usr2";
     haserror = true;
   }
-  var query = "SELECT * FROM User WHERE username = ?";
+  var query = "SELECT * FROM usrs WHERE username = ?";
   let value = [username];
   var result;
-  await con
-    .promise()
-    .query(query, value)
-    .then(([rows, fields]) => {
-      result = rows;
-    })
-    .catch((err) => {
-      console.error(err);
-    });
-  if (result.length !== 0) {
+  // await con
+  //   .promise()
+  //   .query(query, value)
+  //   .then(([rows, fields]) => {
+  //     result = rows;
+  //   })
+  //   .catch((err) => {
+  //     console.error(err);
+  //   });
+  result = await con.query(query, value);
+  if (result.rows.length !== 0) {
     errorpage += "usr1";
     haserror = true;
   } else {
@@ -326,20 +350,21 @@ app.route("/register").post(async (req, res) => {
         console.log(email);
       });
       // const user = await User.findOne({email: email});
-      var query = "SELECT * FROM User WHERE username = ?";
+      var query = "SELECT * FROM usrs WHERE username = ?";
       let value = [username];
       var result2;
-      await con
-        .promise()
-        .query(query, value)
-        .then(([rows, fields]) => {
-          result2 = rows;
-        })
-        .catch((err) => {
-          console.error(err);
-        });
+      // await con
+      //   .promise()
+      //   .query(query, value)
+      //   .then(([rows, fields]) => {
+      //     result2 = rows;
+      //   })
+      //   .catch((err) => {
+      //     console.error(err);
+      //   });
+      result2 = await con.query(query, value);
 
-      if (result2.length === 0) {
+      if (result2.rows.length === 0) {
         await createNewUser(email, username, password);
         res.redirect("/rlogin");
       } else {
@@ -355,27 +380,30 @@ const registerRouter = require("./routes/register.js");
 app.use("/register", registerRouter);
 
 app.route("/rlogin").post(async (req, res) => {
-  var con = mysql.createConnection({
-    connectionLimit: 10,
-    host: process.env.mysqlhost,
-    port: 3306,
-    user: process.env.mysqlUser,
-    password: process.env.mysqlPassword,
-    database: process.env.mysqlDB,
-  });
+  // var con = mysql.createConnection({
+  //   connectionLimit: 10,
+  //   host: process.env.mysqlhost,
+  //   port: 3306,
+  //   user: process.env.mysqlUser,
+  //   password: process.env.mysqlPassword,
+  //   database: process.env.mysqlDB,
+  // });
+  var con = new Client(postgreConfig);
+  await con.connect();
   const { username, password } = req.body;
-  var query = "SELECT * FROM User WHERE username = ?";
+  var query = "SELECT * FROM usrs WHERE username = $1";
   let value = [username];
   var result;
-  await con
-    .promise()
-    .query(query, value)
-    .then(([rows, fields]) => {
-      result = rows;
-    })
-    .catch((err) => {
-      console.error(err);
-    });
+  // await con
+  //   .promise()
+  //   .query(query, value)
+  //   .then(([rows, fields]) => {
+  //     result = rows;
+  //   })
+  //   .catch((err) => {
+  //     console.error(err);
+  //   });
+  result = await con.query(query, value);
   // const user  = await User.findOne({username: username})
   errorpage = "/rlogin?error=";
   haserror = false;
@@ -383,7 +411,7 @@ app.route("/rlogin").post(async (req, res) => {
     errorpage += "usr2";
     haserror = true;
   }
-  if (result.length === 0) {
+  if (result.rows.length === 0) {
     errorpage += "usr1";
     haserror = true;
   } else {
@@ -391,13 +419,15 @@ app.route("/rlogin").post(async (req, res) => {
       errorpage += "pw2";
       haserror = true;
     }
-    var input = result[0].pwd;
+    var input = result.rows[0].pwd;
+    console.log(input);
     const response = bcrypt.compareSync(password, input);
     if (response == true) {
+      // console.log(true);
       if (!haserror) {
         req.session.logged_in = true;
         req.session.token = jwt.sign(
-          { username: result[0].username },
+          { username: result.rows[0].username },
           process.env.key,
           {
             algorithm: "HS256",
