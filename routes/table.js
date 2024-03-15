@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
-// const mysql = require("mysql2");
 const { Client } = require("pg");
 // Getting all
 const postgreConfig = {

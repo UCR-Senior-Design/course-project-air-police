@@ -19,8 +19,6 @@ const postgreConfig = {
 };
 
 async function createNewUser(eml, usr, pswd) {
-  // const usrs = await User.findOne( {$or: [{ username: usr}, {email:eml}]}).lean();
-  // var con = mysql.createConnection(sqlConfig);
   try {
     var con = new Client(postgreConfig);
     await con.connect();
@@ -52,7 +50,6 @@ var tableData;
 var errorTable;
 async function fetchTableData() {
   // pull researcher table data from sql db, export it as json response
-  // var con = mysql.createConnection(sqlConfig);
   var con = new Client(postgreConfig);
   await con.connect();
   var query1 =
@@ -68,7 +65,6 @@ async function fetchTableData() {
 fetchTableData();
 var addedResearchers;
 async function emailGet() {
-  // var con = mysql.createConnection(sqlConfig);
   var con = new Client(postgreConfig);
   var query = "SELECT email FROM usrs";
   await con.connect();
