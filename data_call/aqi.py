@@ -10,6 +10,8 @@ from dotenv import load_dotenv
 load_dotenv()
 import numpy as np
 import mysql.connector
+import io
+import base64
 
 
 """
@@ -156,7 +158,7 @@ if __name__ == "__main__":
                 cursor = connection.cursor()
                 cursor.execute(query2, values)
                 mon = cursor.fetchone()
-                print(mon[0])
+                #print(mon[0])
                 data = dc.pullDataTime(mon[0], 1)
                 # print(data)
                 if(data.empty):
@@ -164,7 +166,7 @@ if __name__ == "__main__":
                     continue
                 # data = dc.pullData()
                 # monitor_ids = data['sn'].unique()
-                print(desc)
+                # print(desc)
                 description_data = data[data['description'] == desc]
                 # print(description_data)
                 description_data['AQI_PM25'] = description_data['pm25'].apply(lambda x: calculate_aqi(x, 'PM25'))
@@ -187,6 +189,13 @@ if __name__ == "__main__":
                 plt.title(f'AQI Values for {desc}')
                 plt.legend()
                 plt.show()
+
+                buf = io.BytesIO()
+                plt.savefig(buf, format='png')
+                image_base64 = base64.b64encode(buf.getvalue()).decode('utf-8').replace('\n', '')
+                buf.close()
+
+                print(image_base64)
 
         else:
             print("Failed to fetch descriptions from MySQL.")
