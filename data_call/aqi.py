@@ -10,6 +10,9 @@ from dotenv import load_dotenv
 load_dotenv()
 import numpy as np
 import mysql.connector
+from io import BytesIO
+import io
+import base64
 
 def connect():
     mhost = os.environ['mysqlhost']
@@ -228,6 +231,22 @@ if __name__ == "__main__":
                 plt.title(f'AQI Values for {desc}')
                 plt.legend()
                 plt.show()
+                ##################
+                fig = plt.figure()
+                plt.plot(range(10))
+                figdata = BytesIO()
+                fig.savefig(figdata, format='png')
+                buf = io.BytesIO()
+
+                plt.savefig(buf, format='png')
+                image_base64 = base64.b64encode(buf.getvalue()).decode('utf-8').replace('\n', '')
+                buf.close()
+
+                plt.savefig(f'data_call/{}vis.png') #path is wrong but idk how to do this properly or in another way
+                plt.close() 
+
+
+
 
         else:
             print("Failed to fetch descriptions from MySQL.")

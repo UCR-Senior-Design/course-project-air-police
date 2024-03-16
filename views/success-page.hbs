@@ -8,5 +8,9 @@
 <body>
     <h1>Success!</h1>
     <p>Welcome! You have successfully logged in with monitor: {{ monitorId }}</p>
+        {{#each imagePaths}}
+        <img src="{{}}" alt="Show Data Visualization">
+    {{/each}}
+
 </body>
 </html>
