@@ -173,7 +173,7 @@ def calculate_aqi(pm_value, pm_type):
         aqi_ranges = [0, 50, 100, 150, 200, 300, 400, 500]
     else:
         return None
-    
+
     #if pm_value is None:
     #    return None
     #if pm_value is not None:
@@ -183,7 +183,7 @@ def calculate_aqi(pm_value, pm_type):
           #      return int(aqi)
     #else:
     #    return None
-    
+
     if pd.isnull(pm_value):
         return None
     elif not isinstance(pm_value, (int, float)):
@@ -210,6 +210,17 @@ if __name__ == "__main__":
             descriptions = [row[0] for row in descriptions_result]
             print("Descriptions from MySQL database:")
             for desc in descriptions:
+                query2 = "SELECT sn FROM Devices WHERE description =%s"
+                values = [desc]
+                cursor = connection.cursor()
+                cursor.execute(query2, values)
+                mon = cursor.fetchone()
+                print(mon[0])
+                data = dc.pullDataTime(mon[0], 1)
+                # print(data)
+                if(data.empty):
+                    data = dc.getAllRecent()
+                    continue
                 print(desc)
                 description_data = data[data['description'] == desc]
                 description_data['AQI_PM25'] = description_data['pm25'].apply(lambda x: calculate_aqi(x, 'PM25'))
@@ -222,7 +233,7 @@ if __name__ == "__main__":
                 plt.ylabel('Concentration (µg/m³)')
                 plt.title(f'PM25 and PM10 Concentrations for {desc}')
                 plt.legend()
-                plt.show()
+                # plt.show()
                 plt.figure(figsize=(10, 5))
                 plt.plot(description_data['timestamp'], description_data['AQI_PM25'], label='AQI PM25')
                 plt.plot(description_data['timestamp'], description_data['AQI_PM10'], label='AQI PM10')
@@ -230,7 +241,7 @@ if __name__ == "__main__":
                 plt.ylabel('AQI')
                 plt.title(f'AQI Values for {desc}')
                 plt.legend()
-                plt.show()
+                # plt.show()
                 ##################
                 fig = plt.figure()
                 plt.plot(range(10))
@@ -239,13 +250,18 @@ if __name__ == "__main__":
                 buf = io.BytesIO()
 
                 plt.savefig(buf, format='png')
-                image_base64 = base64.b64encode(buf.getvalue()).decode('utf-8').replace('\n', '')
-                buf.close()
-
-                plt.savefig(f'data_call/{}vis.png') #path is wrong but idk how to do this properly or in another way
-                plt.close() 
+                # image_base64 = base64.b64encode(buf.getvalue()).decode('utf-8').replace('\n', '')
+                # buf.close()
 
 
+                plt.savefig(f'data_call/{desc}vis.png') #path is wrong but idk how to do this properly or in another way
+                plt.close(fig)
+                with open(f'data_call/{desc}vis.png', 'rb') as file:
+                    img_data = file.read()
+                    img_base64 = base64.b64encode(img_data).decode('utf-8')
+                    img_html = f'<img src="data:image/png;base64,{img_base64}" alt="PM2.5 Graph"style="width:400px; height:200px;">'
+                print(img_html)
+                os.remove(f'data_call/{desc}vis.png')
 
 
         else:
