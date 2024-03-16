@@ -330,7 +330,7 @@ def getAllRecent():
 
 
 #tested and works a little slow but works unless your doing a data visualization you do not need to use this.
-def pullData(serialNumber=None):
+def pullData(desc=None):
     #######################################################################
     ## pulls all data from database                                      ##
     ## PARAMETERS:                                                       ##
@@ -340,12 +340,20 @@ def pullData(serialNumber=None):
     #######################################################################
     mydb = connect()
     mycursor = mydb.cursor()
-    if serialNumber == None:
+    if desc == None:
         query = "SELECT Devices.sn, Devices.description, Devices.lat, Devices.lon, Devices.pmHealth, Devices.sdHealth, Devices.onlne, Devices.datafraction,  Data.pm25, Data.pm10, Data.timestamp FROM Data LEFT OUTER JOIN Devices ON Data.sn = Devices.sn"
         mycursor.execute(query)
         data = mycursor.fetchall()
         data = pd.DataFrame(data).dropna(how='all', axis = 0).drop(columns=4, axis = 1)
         data = data.rename(columns = {0: 'sn',1:'description', 2:'geo.lat', 3:'geo.lon', 4:'pmHealth',5:'sdHealth', 6:'status', 7:'Data Fraction', 8:'pm25', 9: "pm10", 10: "timestamp"})
+        return data
+    else:
+        query = "SELECT pm25, pm10, timestamp FROM Data WHERE sn IN (SELECT sn FROM Devices WHERE description = %s ORDER BY timestamp DESC)" # LIMIT 1
+        values = [desc]
+        mycursor.execute(query, values)
+        data = mycursor.fetchall()
+        #data = pd.DataFrame(data).dropna(how='all', axis = 0).drop(columns=4, axis = 1)
+        #data = data.rename(columns = {0: 'pm25',1:'pm10', 2: "timestamp"})
         return data
 
 

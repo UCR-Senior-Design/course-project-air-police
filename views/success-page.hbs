@@ -1,14 +1,18 @@
 <!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Success Page</title>
-</head>
-<body>
-    <h1>Success!</h1>
-    <p>Welcome! You have successfully logged in with monitor: {{ monitorId }}</p>
 
-    <img alt = "Data Visualization" src = {{img_src}}>
-</body>
+    <head>
+        <title>Success Page</title>
+    </head>
+
+    <body>
+        
+        <div class="container p-3 text-center">
+            <h1>Success!</h1>
+            <p>Welcome! You have successfully logged in with monitor: {{ monitorId }}</p>
+
+            <img class="img-fluid mb-4" src = {{img_src}} alt = "Data Visualization" >
+      </div>
+
+    </body>
 </html>
