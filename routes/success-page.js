@@ -2,18 +2,19 @@ const express = require('express')
 const router = express.Router()
 
 var img_src = "images/refresh.png";
-var monitorId = "SSIF_A3_704"; // replace with "default" to make flexible
+var monitorId = "default"; // while the python script sees "defualt" it will generate a loading img as a placeholder
 
 let { PythonShell } = require("python-shell");
 
-let options = {
-    mode: "text",
-    pythonPath: ".venv/bin/python",
-    pythonOptions: ["-u"], // get print results in real-time
-    args: [monitorId],
-  };
+
   async function makeImgSRC() {
     await new Promise((resolve, reject) => {
+        let options = {
+            mode: "text",
+            pythonPath: ".venv/bin/python",
+            pythonOptions: ["-u"], // get print results in real-time
+            args: [monitorId],
+          };
         PythonShell.run("data_call/aqi.py", options).then((result) => {
             //   if (err) {
             //       console.error('Error fetching AQI data:', err);
