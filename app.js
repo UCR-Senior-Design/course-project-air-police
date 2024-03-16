@@ -53,11 +53,11 @@ async function fetchTableData() {
   var con = new Client(postgreConfig);
   await con.connect();
   var query1 =
-    "SELECT Devices.sn, Devices.pmHealth, Devices.sdHealth,Devices.onlne, Devices.dataFraction, CONCAT(ROUND(Devices.dataFraction*100,2),'%') AS dataFraction, Data.pm25, Data.pm10,  SUBSTRING(Data.timestamp,1,10) AS timestamp FROM Devices LEFT JOIN ( SELECT d1.* FROM Data d1 JOIN ( SELECT sn, MAX(timestamp) AS max_timestamp FROM Data GROUP BY sn ) d2 ON d1.sn = d2.sn AND d1.timestamp = d2.max_timestamp ) AS Data ON Data.sn = Devices.sn ORDER BY Devices.sn;";
+    "SELECT Devices.sn, Devices.pmhealth, Devices.sdhealth,Devices.onlne, CONCAT(ROUND(Devices.datafraction*100,2),'%') AS datafraction, Data.pm25, Data.pm10,  SUBSTRING(Data.timestamp,1,10) AS timestamp FROM Devices LEFT JOIN ( SELECT d1.* FROM Data d1 JOIN ( SELECT sn, MAX(timestamp) AS max_timestamp FROM Data GROUP BY sn ) d2 ON d1.sn = d2.sn AND d1.timestamp = d2.max_timestamp ) AS Data ON Data.sn = Devices.sn ORDER BY Devices.sn;";
   var result = await con.query(query1);
   tableData = result.rows;
   var query2 =
-    "SELECT Devices.sn, Devices.description, Devices.pmHealth, Devices.sdHealth, Devices.onlne, CONCAT(ROUND(Devices.dataFraction*100,2),'%') AS dataFraction , SUBSTRING(Devices.last_seen,1,10) AS last_seen FROM Devices WHERE Devices.sdHealth = 'ERROR' OR Devices.pmHealth='ERROR' OR Devices.onlne = 'offline' ORDER BY Devices.onlne, Devices.sdHealth DESC, Devices.pmHealth DESC;";
+    "SELECT Devices.sn, Devices.description, Devices.pmhealth, Devices.sdhealth, Devices.onlne, CONCAT(ROUND(Devices.datafraction*100,2),'%') AS datafraction , SUBSTRING(Devices.last_seen,1,10) AS last_seen FROM Devices WHERE Devices.sdHealth = 'ERROR' OR Devices.pmHealth='ERROR' OR Devices.onlne = 'offline' ORDER BY Devices.onlne, Devices.sdHealth DESC, Devices.pmHealth DESC;";
   result = await con.query(query2);
   errorTable = result.rows;
   await con.end();
