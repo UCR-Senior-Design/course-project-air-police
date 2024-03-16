@@ -118,17 +118,17 @@ def calculate_aqi(pm_value, pm_type):
         aqi_ranges = [0, 50, 100, 150, 200, 300, 400, 500]
     else:
         return None
-
+    
     #if pm_value is None:
     #    return None
-    if pm_value is not None:
-        for i in range(len(breakpoints) - 1):
-            if pm_value >= breakpoints[i] and pm_value <= breakpoints[i + 1]:
-                aqi = ((aqi_ranges[i + 1] - aqi_ranges[i]) / (breakpoints[i + 1] - breakpoints[i])) * (float(pm_value) - breakpoints[i]) + aqi_ranges[i]
-                return int(aqi)
-    else:
-        return None
-
+    #if pm_value is not None:
+        #for i in range(len(breakpoints) - 1):
+          #  if pm_value >= breakpoints[i] and pm_value <= breakpoints[i + 1]:
+          #      aqi = ((aqi_ranges[i + 1] - aqi_ranges[i]) / (breakpoints[i + 1] - breakpoints[i])) * (pm_value - breakpoints[i]) + aqi_ranges[i]
+          #      return int(aqi)
+    #else:
+    #    return None
+    
     if pd.isnull(pm_value):
         return None
     elif not isinstance(pm_value, (int, float)):
@@ -136,15 +136,17 @@ def calculate_aqi(pm_value, pm_type):
 
     description_data['AQI_PM25'] = description_data['pm25'].apply(lambda x: check_type(x))
 
-
+"""
     for i in range(len(breakpoints) - 1):
         if pm_value >= breakpoints[i] and pm_value <= breakpoints[i + 1]:
-            aqi = ((aqi_ranges[i + 1] - aqi_ranges[i]) / (breakpoints[i + 1] - breakpoints[i])) * (float(pm_value) - breakpoints[i]) + aqi_ranges[i]
+            aqi = ((aqi_ranges[i + 1] - aqi_ranges[i]) / (breakpoints[i + 1] - breakpoints[i])) * (pm_value - breakpoints[i]) + aqi_ranges[i]
             return int(aqi)
-
+"""
 if __name__ == "__main__":
-    connection = dc.connect()
+    connection = connect()
     if connection:
+        data = dc.getAllRecent()
+        monitor_ids = data['sn'].unique()
 
         query1 = "SELECT description FROM Devices;"
         descriptions_result = execute_query(connection, query1)
@@ -153,25 +155,10 @@ if __name__ == "__main__":
             descriptions = [row[0] for row in descriptions_result]
             print("Descriptions from MySQL database:")
             for desc in descriptions:
-                query2 = "SELECT sn FROM Devices WHERE description =%s"
-                values = [desc]
-                cursor = connection.cursor()
-                cursor.execute(query2, values)
-                mon = cursor.fetchone()
-                #print(mon[0])
-                data = dc.pullDataTime(mon[0], 1)
-                # print(data)
-                if(data.empty):
-                    data = dc.getAllRecent()
-                    continue
-                # data = dc.pullData()
-                # monitor_ids = data['sn'].unique()
-                # print(desc)
+                print(desc)
                 description_data = data[data['description'] == desc]
-                # print(description_data)
                 description_data['AQI_PM25'] = description_data['pm25'].apply(lambda x: calculate_aqi(x, 'PM25'))
                 description_data['AQI_PM10'] = description_data['pm10'].apply(lambda x: calculate_aqi(x, 'PM10'))
-                # print(description_data)
                 #PM25 and PM10 values over time
                 plt.figure(figsize=(10, 5))
                 plt.plot(description_data['timestamp'], description_data['pm25'], label='PM25')
@@ -189,13 +176,22 @@ if __name__ == "__main__":
                 plt.title(f'AQI Values for {desc}')
                 plt.legend()
                 plt.show()
-
+                ##################
+                fig = plt.figure()
+                plt.plot(range(10))
+                figdata = BytesIO()
+                fig.savefig(figdata, format='png')
                 buf = io.BytesIO()
+
                 plt.savefig(buf, format='png')
                 image_base64 = base64.b64encode(buf.getvalue()).decode('utf-8').replace('\n', '')
                 buf.close()
 
-                print(image_base64)
+                plt.savefig(f'data_call/{}vis.png') #path is wrong but idk how to do this properly or in another way
+                plt.close() 
+
+
+
 
         else:
             print("Failed to fetch descriptions from MySQL.")
