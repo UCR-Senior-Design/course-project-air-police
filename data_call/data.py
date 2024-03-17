@@ -406,8 +406,8 @@ def notFunctional(data=None):
     return nf
 
 
-# this should help with some of the data visualizations.
-def pullDataTime(serialNumber, time=30):
+# monitor description is unique so it should be able to substitute for primary key sn
+def pullDataTime(description, time=30):
     #########################################################################
     ## pulls data from specific serialNumber within the last time days     ##
     ## PARAMETERS:                                                         ##
@@ -417,21 +417,20 @@ def pullDataTime(serialNumber, time=30):
     ##   data: returns a dson/ dataframe/ list / dataframe  of recent data ##
     #########################################################################
     ## check if serialNumber is None
-    if(serialNumber == None):
+    if(description == None):
         return pd.DataFrame()
     curDate = datetime.now()
     threshold = timedelta(days=time)
     thresh = (curDate - threshold).strftime('%Y-%m-%dT%H:%M:%S')
-    query = "SELECT Data.sn, Devices.description, Data.pm25, Data.pm10, Data.timestamp, Devices.lat, Devices.lon FROM Data LEFT OUTER JOIN Devices ON Data.sn = Devices.sn WHERE Data.sn = %s AND  Data.timestamp > %s"
-    values = [serialNumber, thresh]
+    query = "SELECT Data.sn, Devices.description, Data.pm25, Data.pm10, Data.timestamp, Devices.lat, Devices.lon FROM Data LEFT OUTER JOIN Devices ON Data.sn = Devices.sn WHERE Data.sn IN (SELECT sn FROM Devices WHERE description = %s) AND Data.timestamp > %s"
+    values = [description, thresh]
     mydb = connect()
     mycursor = mydb.cursor()
     mycursor.execute(query, values)
     data = mycursor.fetchall()
-    pdData = pd.DataFrame(data).rename(columns = {0: 'sn',1: 'description',2: 'pm25', 3:'pm10', 4:'timestamp', 5:'geo.lat',6:'geo.lon'})
-    print(pdData)
+    pdData = pd.DataFrame(data).rename(columns = {0: 'sn', 1: 'description',2: 'pm25', 3:'pm10', 4:'timestamp', 5:'geo.lat',6:'geo.lon'})
+    #print(pdData) # uncommenting this will break generated aqi encoding!
     return pdData
-# pullDataTime('MOD-PM-00645', 30);
 
 
 

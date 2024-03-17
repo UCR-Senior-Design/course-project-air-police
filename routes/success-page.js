@@ -30,6 +30,7 @@ router.get('/', (req,res) => {
     monitorId = req.query.monitorId
     makeImgSRC() // uses python-shell to create the img src from aqi.py
     
+    
     if (req.session.logged_in) {
         res.render("success-page", { title: 'SUCCESS PAGE ', monitorId, img_src});
         monitorId = req.query.monitorId

@@ -11,6 +11,7 @@ load_dotenv()
 import numpy as np
 import mysql.connector
 import io
+from io import BytesIO
 import base64
 import sys
 
@@ -152,7 +153,7 @@ else :
 #print(desc)
 
 if __name__ == "__main__":
-
+    
     if (desc == "default" or desc == None):
 
         with open("public/images/refresh.png", "rb") as f:
@@ -161,21 +162,34 @@ if __name__ == "__main__":
 
     else:
 
-        result = dc.pullData(desc) # returns pm25, pm10, timestamp for monitor requested
-        #print("result", result)
+        data = dc.pullDataTime(desc, 1)
+        # print(data)
+        if(data.empty):
+            data = dc.getAllRecent()
 
-        description_data = result
-
+        # print(desc)
+        description_data = data[data['description'] == desc]
+        description_data['AQI_PM25'] = description_data['pm25'].apply(lambda x: calculate_aqi(x, 'PM25'))
+        description_data['AQI_PM10'] = description_data['pm10'].apply(lambda x: calculate_aqi(x, 'PM10'))
         #PM25 and PM10 values over time
         plt.figure(figsize=(10, 5))
-        plt.plot(description_data[0][2], description_data[0][0], label='PM25')
-        plt.plot(description_data[0][2], description_data[0][1], label='PM10')
-
+        plt.plot(description_data['timestamp'], description_data['pm25'], label='PM25')
+        plt.plot(description_data['timestamp'], description_data['pm10'], label='PM10')
         plt.xlabel('Timestamp')
         plt.ylabel('Concentration (µg/m³)')
         plt.title(f'PM25 and PM10 Concentrations for {desc}')
         plt.legend()
         #plt.show()
+
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png')
+        image_base64 = base64.b64encode(buf.getvalue()).decode('utf-8').replace('\n', '')
+        buf.close()
+        print(image_base64)
+
+
+
+
         # plt.figure(figsize=(10, 5))
         # plt.plot(description_data['timestamp'], description_data['AQI_PM25'], label='AQI PM25')
         # plt.plot(description_data['timestamp'], description_data['AQI_PM10'], label='AQI PM10')
@@ -183,13 +197,7 @@ if __name__ == "__main__":
         # plt.ylabel('AQI')
         # plt.title(f'AQI Values for {desc}')
         # plt.legend()
-        # plt.show()
-            ##################
-        
-        buf = io.BytesIO()
-        plt.savefig(buf, format='png')
-        image_base64 = base64.b64encode(buf.getvalue()).decode('utf-8').replace('\n', '')
-        buf.close()
-        print(image_base64)
+        #plt.show()
+        ##################
 
         plt.close() 
