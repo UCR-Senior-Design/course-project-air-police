@@ -1,21 +1,15 @@
 const express = require("express");
 const router = express.Router();
-const { Client } = require("pg");
+const { Pool } = require("pg");
 require("dotenv").config();
 
 // get list of monitor login keys then place them in monitorKeys
 var monitorKeys;
 
 async function fetchMonitorDesc() {
-  const postgreConfig = {
-    user: process.env.postgreUser,
-    host: process.env.postgreHost,
-    database: process.env.postgreDB,
-    password: process.env.postgrePassword,
-    port: process.env.postgrePort,
-  };
+  const postgreConfig = Pool;
   try {
-    var con = new Client(postgreConfig);
+    var con = new Pool(postgreConfig);
     await con.connect();
     var query1 = "SELECT description FROM Devices;";
 

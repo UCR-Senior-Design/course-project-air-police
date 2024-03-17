@@ -1,18 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
-const { Client } = require("pg");
+const { Pool } = require("pg");
 // Getting all
 const postgreConfig = {
-  user: process.env.postgreUser,
-  host: process.env.postgreHost,
-  database: process.env.postgreDB,
-  password: process.env.postgrePassword,
-  port: process.env.postgrePort,
+  connectionString: process.env.POSTGRES_URL ,
 };
 router.get("/", async (req, res) => {
   try {
-    var con = new Client(postgreConfig);
+    var con = new Pool(postgreConfig);
     await con.connect();
     var query = "SELECT * FROM usrs WHERE username = $1";
     const token = req.session.token;

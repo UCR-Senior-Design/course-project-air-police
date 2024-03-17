@@ -6,21 +6,17 @@ var bcrypt = require("bcryptjs");
 var jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const hash = process.env.hash;
-const { Client } = require("pg");
+const { Pool } = require("pg");
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const { request } = require("http");
 
 const postgreConfig = {
-  user: process.env.postgreUser,
-  host: process.env.postgreHost,
-  database: process.env.postgreDB,
-  password: process.env.postgrePassword,
-  port: process.env.postgrePort,
+  connectionString: process.env.POSTGRES_URL ,
 };
 
 async function createNewUser(eml, usr, pswd) {
   try {
-    var con = new Client(postgreConfig);
+    var con = new Pool(postgreConfig);
     await con.connect();
     var query = "SELECT * FROM usrs WHERE username = $1 ";
     let value = [usr];
@@ -51,7 +47,7 @@ var errorTable;
 async function fetchTableData() {
   // pull researcher table data from sql db, export it as json response
   try {
-    var con = new Client(postgreConfig);
+    var con = new Pool(postgreConfig);
     await con.connect();
     var query1 =
       "SELECT Devices.sn, Devices.pmhealth, Devices.sdhealth,Devices.onlne, CONCAT(ROUND(Devices.datafraction*100,2),'%') AS datafraction, Data.pm25, Data.pm10,  SUBSTRING(Data.timestamp,1,10) AS timestamp FROM Devices LEFT JOIN ( SELECT d1.* FROM Data d1 JOIN ( SELECT sn, MAX(timestamp) AS max_timestamp FROM Data GROUP BY sn ) d2 ON d1.sn = d2.sn AND d1.timestamp = d2.max_timestamp ) AS Data ON Data.sn = Devices.sn ORDER BY Devices.sn;";
@@ -72,7 +68,7 @@ fetchTableData();
 var addedResearchers;
 async function emailGet() {
   try {
-    var con = new Client(postgreConfig);
+    var con = new Pool(postgreConfig);
     var query = "SELECT email FROM usrs";
     await con.connect();
     var result = await con.query(query);
@@ -169,7 +165,7 @@ app.use("/view-data", viewDataRouter);
 
 //////////////////////
 app.route("/invite").post(async (req, res) => {
-  var con = new Client(postgreConfig);
+  var con = new Pool(postgreConfig);
   try {
     await con.connect();
     const { email } = req.body;
@@ -241,7 +237,7 @@ app.use("/invite", inviteRouter);
 
 app.route("/register").post(async (req, res) => {
   try {
-    var con = new Client(postgreConfig);
+    var con = new Pool(postgreConfig);
     await con.connect();
     const { token, username, password, retype } = req.body;
     if (!token) {
@@ -317,7 +313,7 @@ app.use("/register", registerRouter);
 
 app.route("/rlogin").post(async (req, res) => {
   try {
-    var con = new Client(postgreConfig);
+    var con = new Pool(postgreConfig);
     await con.connect();
     const { username, password } = req.body;
     var query = "SELECT * FROM usrs WHERE username = $1";
@@ -389,7 +385,7 @@ const router = express.Router();
 
 app.get("/monitorIds", async (req, res) => {
   try {
-    const connection = new Client(postgreConfig);
+    const connection = new Pool(postgreConfig);
     await connection.connect();
     const result = await connection.query("SELECT sn FROM Devices");
     const [rows] = result.rows;
