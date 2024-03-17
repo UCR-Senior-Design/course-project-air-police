@@ -10,7 +10,7 @@ import base64
 from requests.auth import HTTPBasicAuth
 import json
 from datetime import datetime, timedelta
-import mysql.connector
+import psycopg2 as postgre
 import matplotlib.pyplot as plt
 
 #input your apikey here... not sure if there is any safety issues of putting the api key into github, will look
@@ -61,15 +61,22 @@ def fetchData():
 # database stuff cant do it in its own folder
 # connect to mongoclient
 def connect():
-    mhost = os.environ['mysqlhost']
-    muer = os.environ['mysqlUser']
-    mpassword = os.environ['mysqlPassword']
-    mdatabase = os.environ['mysqlDB']
-    mydb = mysql.connector.connect(
-        host = mhost,
-        user = muer,
-        password = mpassword,
-        database = mdatabase
+    # mhost = os.environ['mysqlhost']
+    # muer = os.environ['mysqlUser']
+    # mpassword = os.environ['mysqlPassword']
+    # mdatabase = os.environ['mysqlDB']
+    # mydb = mysql.connector.connect(
+    #     host = mhost,
+    #     user = muer,
+    #     password = mpassword,
+    #     database = mdatabase
+    # )
+    mydb = postgre.connect(
+        database = os.environ['postgreDB'],
+        host = os.environ['postgrehost'],
+        user = os.environ['postgreUser'],
+        password = os.environ['postgrePassword'],
+        port = os.environ['postgrePort']
     )
     return mydb
 
@@ -101,7 +108,7 @@ def grabAllSensor():
     print(data)
     mydb = connect()
     mycursor = mydb.cursor()
-    query = "INSERT INTO Devices (sn,description, lat, lon, last_seen) VALUES (%s,%s, %s, %s, %s) ON DUPLICATE KEY UPDATE lat = VALUES(lat), lon = VALUES(lon), last_seen = VALUES(last_seen)"
+    query = "INSERT INTO Devices (sn,description, lat, lon, last_seen) VALUES (%s,%s, %s, %s, %s) ON CONFLICT (sn)  DO UPDATE SET lat = EXCLUDED.lat, lon = EXCLUDED.lon, last_seen = EXCLUDED.last_seen"
     values = data.values.tolist()
     mycursor.executemany(query, values)
     mydb.commit()
@@ -163,7 +170,7 @@ def pushFullDB():
             for col in columns:
                 edata[col].append(entry[col])
         data = pd.DataFrame(edata).fillna(0)
-        query = "INSERT INTO Data (sn, pm25, pm10, timestamp) VALUES (%s,%s,%s,%s) ON DUPLICATE KEY UPDATE pm25 = VALUES(pm25), pm10= VALUES(pm10)"
+        query = "INSERT INTO Data (sn, pm25, pm10, timestamp) VALUES (%s,%s,%s,%s) ON CONFLICT (sn,timestamp) DO UPDATE SET pm25 = EXCLUDED.pm25, pm10= EXCLUDED.pm10"
         values = data.values.tolist()
         mycursor.executemany(query,values)
         mydb.commit()
@@ -193,7 +200,7 @@ def fillNAs():
             for col in columns:
                 edata[col].append(entry[col])
         data = pd.DataFrame(edata).fillna(0)
-        query = "INSERT INTO Data (sn, pm25, pm10, timestamp) VALUES (%s,%s,%s,%s) ON DUPLICATE KEY UPDATE pm25 = VALUES(pm25), pm10= VALUES(pm10)"
+        query = "INSERT INTO Data (sn, pm25, pm10, timestamp) VALUES (%s,%s,%s,%s) ON CONFLICT (sn,timestamp) DO UPDATE SET pm25 = EXCLUDED.pm25, pm10= EXCLUDED.pm10"
         values = data.values.tolist()
         mycursor.close()
         mycursor = mydb.cursor()
@@ -300,7 +307,7 @@ def pushDB(data):
     datas = data.fillna(0)
     datas = datas.drop('geo.lat', axis = 1)
     datas = datas.drop('geo.lon', axis = 1)
-    query = "INSERT INTO Data (sn, pm25, pm10, timestamp) VALUES (%s,%s,%s,%s) ON DUPLICATE KEY UPDATE pm25 = VALUES(pm25), pm10= VALUES(pm10)"
+    query = "INSERT INTO Data (sn, pm25, pm10, timestamp) VALUES (%s,%s,%s,%s) ON CONFLICT (sn, timestamp) DO UPDATE SET pm25 = EXCLUDED.pm25, pm10= EXCLUDED.pm10"
     values = datas.values.tolist()
     mycursor.executemany(query,values)
     mydb.commit()
@@ -341,11 +348,11 @@ def pullData(serialNumber=None):
     mydb = connect()
     mycursor = mydb.cursor()
     if serialNumber == None:
-        query = "SELECT * FROM Data LEFT OUTER JOIN Devices ON Data.sn = Devices.sn"
+        query = "SELECT Data.sn, Devices.description, Data.pm25, Data.pm10, Data.timestamp, Devices.lat, Devices.lon, Devices.pmHealth, Devices.sdHealth FROM Data LEFT OUTER JOIN Devices ON Data.sn = Devices.sn"
         mycursor.execute(query)
         data = mycursor.fetchall()
-        data = pd.DataFrame(data).dropna(how='all', axis = 0).drop(columns=4, axis = 1)
-        data = data.rename(columns = {0: 'sn', 1:'pm25', 2:'pm10', 3:'timestamp', 5:'geo.lat', 6:'geo.lon', 7:'pmHealth', 8:'sdHealh'})
+        data = pd.DataFrame(data).dropna(how='all', axis = 0)
+        data = data.rename(columns = {0: 'sn',1: 'description', 2:'pm25', 3:'pm10', 4:'timestamp', 5:'geo.lat', 6:'geo.lon', 7:'pmHealth', 8:'sdHealh'})
         return data
 
 
@@ -414,13 +421,13 @@ def pullDataTime(serialNumber, time=30):
     curDate = datetime.now()
     threshold = timedelta(days=time)
     thresh = (curDate - threshold).strftime('%Y-%m-%dT%H:%M:%S')
-    query = "SELECT Data.sn, Data.pm25, Data.pm10, Data.timestamp, Devices.lat, Devices.lon FROM Data LEFT OUTER JOIN Devices ON Data.sn = Devices.sn WHERE Data.sn = %s AND  Data.timestamp > %s"
+    query = "SELECT Data.sn, Devices.description, Data.pm25, Data.pm10, Data.timestamp, Devices.lat, Devices.lon FROM Data LEFT OUTER JOIN Devices ON Data.sn = Devices.sn WHERE Data.sn = %s AND  Data.timestamp > %s"
     values = [serialNumber, thresh]
     mydb = connect()
     mycursor = mydb.cursor()
     mycursor.execute(query, values)
     data = mycursor.fetchall()
-    pdData = pd.DataFrame(data).rename(columns = {0: 'sn',1: 'pm25', 2:'pm10', 3:'timestamp', 4:'geo.lat',5:'geo.lon'})
+    pdData = pd.DataFrame(data).rename(columns = {0: 'sn',1: 'description',2: 'pm25', 3:'pm10', 4:'timestamp', 5:'geo.lat',6:'geo.lon'})
     print(pdData)
     return pdData
 # pullDataTime('MOD-PM-00645', 30);
