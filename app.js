@@ -50,26 +50,37 @@ var tableData;
 var errorTable;
 async function fetchTableData() {
   // pull researcher table data from sql db, export it as json response
-  var con = new Client(postgreConfig);
-  await con.connect();
-  var query1 =
-    "SELECT Devices.sn, Devices.pmhealth, Devices.sdhealth,Devices.onlne, CONCAT(ROUND(Devices.datafraction*100,2),'%') AS datafraction, Data.pm25, Data.pm10,  SUBSTRING(Data.timestamp,1,10) AS timestamp FROM Devices LEFT JOIN ( SELECT d1.* FROM Data d1 JOIN ( SELECT sn, MAX(timestamp) AS max_timestamp FROM Data GROUP BY sn ) d2 ON d1.sn = d2.sn AND d1.timestamp = d2.max_timestamp ) AS Data ON Data.sn = Devices.sn ORDER BY Devices.sn;";
-  var result = await con.query(query1);
-  tableData = result.rows;
-  var query2 =
-    "SELECT Devices.sn, Devices.description, Devices.pmhealth, Devices.sdhealth, Devices.onlne, CONCAT(ROUND(Devices.datafraction*100,2),'%') AS datafraction , SUBSTRING(Devices.last_seen,1,10) AS last_seen FROM Devices WHERE Devices.sdHealth = 'ERROR' OR Devices.pmHealth='ERROR' OR Devices.onlne = 'offline' ORDER BY Devices.onlne, Devices.sdHealth DESC, Devices.pmHealth DESC;";
-  result = await con.query(query2);
-  errorTable = result.rows;
-  await con.end();
+  try {
+    var con = new Client(postgreConfig);
+    await con.connect();
+    var query1 =
+      "SELECT Devices.sn, Devices.pmhealth, Devices.sdhealth,Devices.onlne, CONCAT(ROUND(Devices.datafraction*100,2),'%') AS datafraction, Data.pm25, Data.pm10,  SUBSTRING(Data.timestamp,1,10) AS timestamp FROM Devices LEFT JOIN ( SELECT d1.* FROM Data d1 JOIN ( SELECT sn, MAX(timestamp) AS max_timestamp FROM Data GROUP BY sn ) d2 ON d1.sn = d2.sn AND d1.timestamp = d2.max_timestamp ) AS Data ON Data.sn = Devices.sn ORDER BY Devices.sn;";
+    var result = await con.query(query1);
+    if (result) {
+      tableData = result.rows;
+    }
+    var query2 =
+      "SELECT Devices.sn, Devices.description, Devices.pmhealth, Devices.sdhealth, Devices.onlne, CONCAT(ROUND(Devices.datafraction*100,2),'%') AS datafraction , SUBSTRING(Devices.last_seen,1,10) AS last_seen FROM Devices WHERE Devices.sdHealth = 'ERROR' OR Devices.pmHealth='ERROR' OR Devices.onlne = 'offline' ORDER BY Devices.onlne, Devices.sdHealth DESC, Devices.pmHealth DESC;";
+    result = await con.query(query2);
+    errorTable = result.rows;
+    await con.end();
+  } catch (error) {
+    console.error(error);
+  }
 }
 fetchTableData();
 var addedResearchers;
 async function emailGet() {
-  var con = new Client(postgreConfig);
-  var query = "SELECT email FROM usrs";
-  await con.connect();
-  var result = await con.query(query);
-  addedResearchers = result.rows;
+  try {
+    var con = new Client(postgreConfig);
+    var query = "SELECT email FROM usrs";
+    await con.connect();
+    var result = await con.query(query);
+    addedResearchers = result.rows;
+    await con.end();
+  } catch (error) {
+    console.error(error);
+  }
 }
 emailGet();
 async function run() {
@@ -159,17 +170,22 @@ app.use("/view-data", viewDataRouter);
 //////////////////////
 app.route("/invite").post(async (req, res) => {
   var con = new Client(postgreConfig);
-  await con.connect();
-  const { email } = req.body;
-  var query = "SELECT * FROM usrs WHERE email = $1";
-  let value = [email];
-  var result;
+  try {
+    await con.connect();
+    const { email } = req.body;
+    var query = "SELECT * FROM usrs WHERE email = $1";
+    let value = [email];
+    var result;
 
-  result = await con.query(query, value);
-  if (result.rows.length !== 0) {
+    result = await con.query(query, value);
+    if (result.rows.length !== 0) {
+      await con.end();
+      res.redirect('/invite?error="usrE');
+      return;
+    }
     await con.end();
-    res.redirect('/invite?error="usrE');
-    return;
+  } catch (error) {
+    console.error(error);
   }
   const token = jwt.sign({ email: email }, process.env.key, {
     algorithm: "HS256",
@@ -224,131 +240,138 @@ const inviteRouter = require("./routes/invite.js");
 app.use("/invite", inviteRouter);
 
 app.route("/register").post(async (req, res) => {
-  var con = new Client(postgreConfig);
-  await con.connect();
-  const { token, username, password, retype } = req.body;
-  if (!token) {
-    res.redirect("/home");
-  }
+  try {
+    var con = new Client(postgreConfig);
+    await con.connect();
+    const { token, username, password, retype } = req.body;
+    if (!token) {
+      res.redirect("/home");
+    }
 
-  var errorpage = "/register?token=" + token + "&error=";
-  var haserror = false;
-  if (!username) {
-    errorpage += "usr2";
-    haserror = true;
-  }
-  var query = "SELECT * FROM usrs WHERE username = $1";
-  let value = [username];
-  var result;
+    var errorpage = "/register?token=" + token + "&error=";
+    var haserror = false;
+    if (!username) {
+      errorpage += "usr2";
+      haserror = true;
+    }
+    var query = "SELECT * FROM usrs WHERE username = $1";
+    let value = [username];
+    var result;
 
-  result = await con.query(query, value);
-  if (result.rows.length !== 0) {
-    errorpage += "usr1";
-    haserror = true;
-  } else {
-    if (!password) {
-      errorpage += "pw2";
+    result = await con.query(query, value);
+    if (result.rows.length !== 0) {
+      errorpage += "usr1";
       haserror = true;
-    }
-    //add regex checking here
-    const passwordPattern =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&-])[A-Za-z\d@$!%*?&-]{8,}$/;
-    if (!passwordPattern.test(password)) {
-      haserror = true;
-      errorpage += "pw1";
-    }
-    if (password != retype) {
-      errorpage += "pw3";
-      haserror = true;
-    }
-    if (!haserror) {
-      var email;
-      jwt.verify(token, process.env.key, (error, decoded) => {
-        if (error) {
-          haserror = true;
-          //  add errors here redirecting
-          // res.redirect('/home');
+    } else {
+      if (!password) {
+        errorpage += "pw2";
+        haserror = true;
+      }
+      //add regex checking here
+      const passwordPattern =
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&-])[A-Za-z\d@$!%*?&-]{8,}$/;
+      if (!passwordPattern.test(password)) {
+        haserror = true;
+        errorpage += "pw1";
+      }
+      if (password != retype) {
+        errorpage += "pw3";
+        haserror = true;
+      }
+      if (!haserror) {
+        var email;
+        jwt.verify(token, process.env.key, (error, decoded) => {
+          if (error) {
+            haserror = true;
+            //  add errors here redirecting
+            // res.redirect('/home');
+          }
+          email = decoded.email;
+          console.log(email);
+        });
+        // wtf is this shit
+        var query = "SELECT * FROM usrs WHERE email = $1";
+        let value = [email];
+        var result2;
+        result2 = await con.query(query, value);
+
+        if (result2.rows.length === 0) {
+          await con.end();
+          await createNewUser(email, username, password);
+          res.redirect("/rlogin");
+        } else {
+          await con.end();
+          res.redirect("/rlogin?error=ngl2");
         }
-        email = decoded.email;
-        console.log(email);
-      });
-      // wtf is this shit
-      var query = "SELECT * FROM usrs WHERE email = $1";
-      let value = [email];
-      var result2;
-      result2 = await con.query(query, value);
-
-      if (result2.rows.length === 0) {
-        await con.end();
-        await createNewUser(email, username, password);
-        res.redirect("/rlogin");
-      } else {
-        await con.end();
-        res.redirect("/rlogin?error=ngl2");
       }
     }
-  }
-  if (haserror) {
-    res.redirect(errorpage);
+    if (haserror) {
+      res.redirect(errorpage);
+    }
+  } catch (error) {
+    console.error(error);
   }
 });
 const registerRouter = require("./routes/register.js");
 app.use("/register", registerRouter);
 
 app.route("/rlogin").post(async (req, res) => {
-  var con = new Client(postgreConfig);
-  await con.connect();
-  const { username, password } = req.body;
-  var query = "SELECT * FROM usrs WHERE username = $1";
-  let value = [username];
-  var result;
+  try {
+    var con = new Client(postgreConfig);
+    await con.connect();
+    const { username, password } = req.body;
+    var query = "SELECT * FROM usrs WHERE username = $1";
+    let value = [username];
+    var result;
 
-  result = await con.query(query, value);
-  errorpage = "/rlogin?error=";
-  haserror = false;
-  if (!username) {
-    errorpage += "usr2";
-    haserror = true;
-  }
-  if (result.rows.length === 0) {
-    errorpage += "usr1";
-    haserror = true;
-  } else {
-    if (!password) {
-      errorpage += "pw2";
+    result = await con.query(query, value);
+    errorpage = "/rlogin?error=";
+    haserror = false;
+    if (!username) {
+      errorpage += "usr2";
       haserror = true;
     }
-    var input = result.rows[0].pwd;
-    console.log(input);
-    const response = bcrypt.compareSync(password, input);
-    if (response == true) {
-      // console.log(true);
-      if (!haserror) {
-        req.session.logged_in = true;
-        req.session.token = jwt.sign(
-          { username: result.rows[0].username },
-          process.env.key,
-          {
-            algorithm: "HS256",
-            allowInsecureKeySizes: true,
-            expiresIn: 7200, // 24 hours
-          },
-        );
-        await con.end();
-        res.redirect("/table");
+    if (result.rows.length === 0) {
+      errorpage += "usr1";
+      haserror = true;
+    } else {
+      if (!password) {
+        errorpage += "pw2";
+        haserror = true;
+      }
+      var input = result.rows[0].pwd;
+      console.log(input);
+      const response = bcrypt.compareSync(password, input);
+      if (response == true) {
+        // console.log(true);
+        if (!haserror) {
+          req.session.logged_in = true;
+          req.session.token = jwt.sign(
+            { username: result.rows[0].username },
+            process.env.key,
+            {
+              algorithm: "HS256",
+              allowInsecureKeySizes: true,
+              expiresIn: 7200, // 24 hours
+            },
+          );
+          await con.end();
+          res.redirect("/table");
+        }
+      }
+      if (response == false) {
+        errorpage += "pw1";
+        haserror = true;
       }
     }
-    if (response == false) {
-      errorpage += "pw1";
-      haserror = true;
+
+    if (haserror) {
+      await con.end();
+      res.redirect(errorpage);
     }
+  } catch (error) {
+    console.error(error);
   }
-
-  if (haserror) {
-    await con.end();
-    res.redirect(errorpage);
-  }
-
   // res.redirect('/rlogin?error=pw1')
 });
 

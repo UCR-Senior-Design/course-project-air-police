@@ -21,28 +21,28 @@ const postgreConfig = {
 };
 
 router.get("/", async (req, res) => {
-  var con = new Client(postgreConfig);
-  await con.connect();
-  const token = req.session.token;
-  let user;
-  let isPorter = false;
-  if (token) {
-    jwt.verify(token, process.env.key, (error, decoded) => {
-      if (error) {
-        isPorter = false;
-      }
-      user = decoded.username;
-    });
-  }
-  if (user === process.env.porterUser) {
-    isPorter = true;
-  } else {
-    isPorter = false;
-  }
-  var query = "SELECT username FROM usrs WHERE username = $1";
-  let value = [user];
-  var result;
   try {
+    var con = new Client(postgreConfig);
+    await con.connect();
+    const token = req.session.token;
+    let user;
+    let isPorter = false;
+    if (token) {
+      jwt.verify(token, process.env.key, (error, decoded) => {
+        if (error) {
+          isPorter = false;
+        }
+        user = decoded.username;
+      });
+    }
+    if (user === process.env.porterUser) {
+      isPorter = true;
+    } else {
+      isPorter = false;
+    }
+    var query = "SELECT username FROM usrs WHERE username = $1";
+    let value = [user];
+    var result;
     result = await con.query(query, value);
     const rows = result.rows;
     if (rows.length > 0) {

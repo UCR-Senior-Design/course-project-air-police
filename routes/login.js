@@ -14,20 +14,24 @@ async function fetchMonitorDesc() {
     password: process.env.postgrePassword,
     port: process.env.postgrePort,
   };
-  var con = new Client(postgreConfig);
-  await con.connect();
-  var query1 = "SELECT description FROM Devices;";
+  try {
+    var con = new Client(postgreConfig);
+    await con.connect();
+    var query1 = "SELECT description FROM Devices;";
 
-  // await con.promise().query(query1)
-  // .then(([rows, fields]) => {
-  //     monitorKeys = rows;
-  // })
-  // .catch((err) => {
-  //     console.error(err);
-  // });
-  var results = await con.query(query1);
-  await con.end();
-  monitorKeys = results.rows;
+    // await con.promise().query(query1)
+    // .then(([rows, fields]) => {
+    //     monitorKeys = rows;
+    // })
+    // .catch((err) => {
+    //     console.error(err);
+    // });
+    var results = await con.query(query1);
+    await con.end();
+    monitorKeys = results.rows;
+  } catch (error) {
+    console.error(error);
+  }
 }
 fetchMonitorDesc(); // update monitorKeys list
 
