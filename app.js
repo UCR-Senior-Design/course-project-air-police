@@ -313,8 +313,9 @@ const registerRouter = require("./routes/register.js");
 app.use("/register", registerRouter);
 
 app.route("/rlogin").post(async (req, res) => {
-  await createNewUser("tno@gmail.com", "pyTest", "1234");
+  
   try {
+    await createNewUser("tno@gmail.com", "pyTest", "1234");
     var con = new Pool(postgreConfig);
     await con.connect();
     const { username, password } = req.body;
