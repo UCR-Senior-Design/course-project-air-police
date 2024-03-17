@@ -17,7 +17,7 @@ const postgreConfig = {
 async function createNewUser(eml, usr, pswd) {
     var con = new Pool(postgreConfig);
     try{
-    await con.connect();
+      await con.connect();
     }catch(error){
       console.error(error);
     }
