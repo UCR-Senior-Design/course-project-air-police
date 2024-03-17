@@ -46,7 +46,7 @@ async function createNewUser(eml, usr, pswd) {
         });
       });
     }
-    await con.end()
+
 
     // await con.end();
   //add error things here
