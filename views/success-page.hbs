@@ -11,8 +11,11 @@
             <h1>Success!</h1>
             <p>Welcome! You have successfully logged in with monitor: {{ monitorId }}. Please refresh the page if necessary.</p>
 
+            <p>AQI PM25: {{ aqi.AQI_PM25 }}</p>
+            <p>AQI PM10: {{ aqi.AQI_PM10 }}</p>
 
-            <p>AQI: {{ aqi }}</p>
+            
+            <!-- <p>AQI: {{ aqi }}</p> -->
             {{#if aqi}}
             {{#if aqi '<' 100}}
                 <p>You have wonderful air quality!</p>
