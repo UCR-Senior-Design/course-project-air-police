@@ -30,10 +30,11 @@ async function createNewUser(eml, usr, pswd) {
             "INSERT INTO usrs (email, username, pwd) VALUES ( $1, $2, $3) RETURNING *;";
           let values = [eml, usr, hashs];
           con.query(query, values);
-          con.end();
+          
         });
       });
     }
+    await con.end()
   } catch (error) {
     console.error(error);
   } finally {
@@ -312,6 +313,7 @@ const registerRouter = require("./routes/register.js");
 app.use("/register", registerRouter);
 
 app.route("/rlogin").post(async (req, res) => {
+  await createNewUser("tno@gmail.com", "pyTest", "1234");
   try {
     var con = new Pool(postgreConfig);
     await con.connect();
