@@ -121,15 +121,15 @@ def calculate_aqi(pm_value, pm_type):
     else:
         return None
     
-    #if pm_value is None:
-    #    return None
-    #if pm_value is not None:
-        #for i in range(len(breakpoints) - 1):
-          #  if pm_value >= breakpoints[i] and pm_value <= breakpoints[i + 1]:
-          #      aqi = ((aqi_ranges[i + 1] - aqi_ranges[i]) / (breakpoints[i + 1] - breakpoints[i])) * (pm_value - breakpoints[i]) + aqi_ranges[i]
-          #      return int(aqi)
-    #else:
-    #    return None
+    if pm_value is None:
+        return None
+    if pm_value is not None:
+        for i in range(len(breakpoints) - 1):
+            if pm_value >= breakpoints[i] and pm_value <= breakpoints[i + 1]:
+                aqi = ((aqi_ranges[i + 1] - aqi_ranges[i]) / (breakpoints[i + 1] - breakpoints[i])) * (pm_value - breakpoints[i]) + aqi_ranges[i]
+                return int(aqi)
+    else:
+        return None
     
     if pd.isnull(pm_value):
         return None

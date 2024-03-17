@@ -11,6 +11,16 @@
             <h1>Success!</h1>
             <p>Welcome! You have successfully logged in with monitor: {{ monitorId }}</p>
 
+            <p>AQI: {{ aqi }}</p>
+                    {{#if aqi}}
+            {{#if aqi '<' 100}}
+                <p>You have wonderful air quality!</p>
+            {{else}}
+                <p>Your air quality ain't looking so good. How are you breathing?</p>
+            {{/if}}
+        {{/if}}
+
+
             <img class="img-fluid mb-4" src = {{img_src}} alt = "Data Visualization" >
       </div>
 

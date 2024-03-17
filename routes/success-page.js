@@ -6,12 +6,46 @@ var monitorId = "default"; // while the python script sees "defualt" it will gen
 
 let { PythonShell } = require("python-shell");
 
+router.get('/', async (req, res) => {
+    const monitorId = req.query.monitorId;
+    
+    //calculate AQI
+    async function calculateAQI(desc) {
+        return new Promise((resolve, reject) => {
+            let options = {
+                mode: 'text',
+                pythonPath: '.venv/Scripts/python',
+                pythonOptions: ['-u'],
+                args: [desc]
+            };
+
+            PythonShell.run('data_call/aqi.py', options, (err, result) => {
+                if (err) reject(err);
+                resolve(result);
+            });
+        });
+    }
+
+    if (req.session.logged_in) {
+        try {
+            const img_src = await calculateAQI(monitorId);
+            res.render('success-page', { title: 'SUCCESS PAGE', monitorId, img_src });
+        } catch (error) {
+            console.error('Error calculating AQI:', error);
+            res.status(500).send('Error calculating AQI');
+        }
+    } else {
+        res.redirect('/login');
+    }
+});
+
+
 
   async function makeImgSRC() {
     await new Promise((resolve, reject) => {
         let options = {
             mode: "text",
-            pythonPath: ".venv/bin/python",
+            pythonPath: ".venv/Scripts/python",
             pythonOptions: ["-u"], // get print results in real-time
             args: [monitorId],
           };
