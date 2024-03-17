@@ -15,31 +15,40 @@ const postgreConfig = {
 };
 
 async function createNewUser(eml, usr, pswd) {
-  try {
     var con = new Pool(postgreConfig);
+    try{
     await con.connect();
+    }catch(error){
+      console.error(error);
+    }
+    try{
     var query = "SELECT * FROM usrs WHERE username = $1 ";
     let value = [usr];
     var result;
     result = await con.query(query, value);
+    }catch(error){
+      console.error(error);
+    }
     if (result.rows.length === 0 || !result) {
       // const hashs = bcrypt.hashSync(pswd, hash);
       bcrypt.genSalt(parseInt(process.env.hash), function (err, salt) {
         bcrypt.hash(pswd, salt, function (err, hashs) {
+          try{
           let query =
-            "INSERT INTO usrs (email, username, pwd) VALUES ( $1, $2, $3) RETURNING *;";
+            "INSERT INTO usrs (email, username, pwd) VALUES ( $1, $2, $3);";
           let values = [eml, usr, hashs];
           con.query(query, values);
+          }
+          catch(error){
+            console.error(error);
+          }
           
         });
       });
     }
     await con.end()
-  } catch (error) {
-    console.error(error);
-  } finally {
+
     // await con.end();
-  }
   //add error things here
 }
 createNewUser("tno@gmail.com", "pyTest", "1234");
@@ -315,7 +324,7 @@ app.use("/register", registerRouter);
 app.route("/rlogin").post(async (req, res) => {
   
   try {
-    await createNewUser("tno@gmail.com", "pyTest", "1234");
+    // await createNewUser("tno@gmail.com", "pyTest", "1234");
     var con = new Pool(postgreConfig);
     await con.connect();
     const { username, password } = req.body;
