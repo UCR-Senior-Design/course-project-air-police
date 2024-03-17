@@ -16,13 +16,14 @@
 
             
             <!-- <p>AQI: {{ aqi }}</p> -->
-            {{#if aqi}}
-            {{#if aqi '<' 100}}
+            {{#if aqi.PM25}}
+                {{#if aqi.PM25 '<' 100}}
                 <p>You have wonderful air quality!</p>
-            {{else}}
-                <p>Your air quality ain't looking so good.</p>
+                    {{else}}
+                    <p>Your air quality ain't looking so good.</p>
+                {{/if}}
             {{/if}}
-            {{/if}}
+
 
             <div>
             <h2>Air Quality Index (AQI):</h2>
