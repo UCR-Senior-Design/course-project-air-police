@@ -16,6 +16,42 @@
                 Your  aqi for pm10 is {{aqi.PM10}}
             </h2>
 
+            {{#if (aqi.PM25 >= 0 && aqi.PM25 <= 50)}}
+    <img class="img-fluid mb-4" src="public/images/aqi_colors1.png" alt="AQI Image for PM2.5">
+{{/if}}
+{{#if (aqi.PM10 >= 0 && aqi.PM10 <= 50)}}
+    <img class="img-fluid mb-4" src="public/images/aqi_colors1.png" alt="AQI Image for PM10">
+{{/if}}
+
+{{#if (aqi.PM25 >= 51 && aqi.PM25 <= 100)}}
+    <img class="img-fluid mb-4" src="public/images/aqi_colors2.png" alt="AQI Image for PM2.5">
+{{/if}}
+{{#if (aqi.PM10 >= 51 && aqi.PM10 <= 100)}}
+    <img class="img-fluid mb-4" src="public/images/aqi_colors2.png" alt="AQI Image for PM10">
+{{/if}}
+
+{{#if (aqi.PM25 >= 101 && aqi.PM25 <= 150)}}
+    <img class="img-fluid mb-4" src="public/images/aqi_colors3.png" alt="AQI Image for PM2.5">
+{{/if}}
+{{#if (aqi.PM10 >= 101 && aqi.PM10 <= 150)}}
+    <img class="img-fluid mb-4" src="public/images/aqi_colors3.png" alt="AQI Image for PM10">
+{{/if}}
+
+{{#if (aqi.PM25 >= 151 && aqi.PM25 <= 200)}}
+    <img class="img-fluid mb-4" src="public/images/aqi_colors4.png" alt="AQI Image for PM2.5">
+{{/if}}
+{{#if (aqi.PM10 >= 151 && aqi.PM10 <= 200)}}
+    <img class="img-fluid mb-4" src="public/images/aqi_colors4.png" alt="AQI Image for PM10">
+{{/if}}
+
+{{#if (aqi.PM25 >= 201 && aqi.PM25 <= 300)}}
+    <img class="img-fluid mb-4" src="public/images/aqi_colors5.png" alt="AQI Image for PM2.5">
+{{/if}}
+{{#if (aqi.PM10 >= 201 && aqi.PM10 <= 300)}}
+    <img class="img-fluid mb-4" src="public/images/aqi_colors5.png" alt="AQI Image for PM10">
+{{/if}}
+
+
         {{!-- <% if (aqi.PM25 >= 0 && aqi.PM25 <= 50) { %>
             green
         <% } else if (aqi.PM25 >= 51 && aqi.PM25 <= 100) { %>
