@@ -325,8 +325,9 @@ app.route("/rlogin").post(async (req, res) => {
   
   try {
     // await createNewUser("tno@gmail.com", "pyTest", "1234");
-    var con = new Pool(postgreConfig);
-    await con.connect();
+    var pool = new Pool(postgreConfig);
+    const con = await pool.connect();
+
     const { username, password } = req.body;
     var query = "SELECT * FROM usrs WHERE username = $1";
     let value = [username];
