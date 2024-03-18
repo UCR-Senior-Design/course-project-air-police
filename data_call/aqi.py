@@ -16,18 +16,6 @@ import base64
 import sys
 
 
-
-def execute_query(conn, query):
-    try:
-        cursor = conn.cursor()
-        cursor.execute(query)
-        result = cursor.fetchall()
-        cursor.close()
-        return result
-    except mysql.connector.Error as err:
-        print(f"Error executing MySQL query: {err}")
-        return None
-
 def check_type(x):
     if isinstance(x, (int, float)):
         return calculate_aqi(x, 'pm25')
@@ -35,9 +23,10 @@ def check_type(x):
         print(f"Non-numeric value found: {x}")
         return None
 
-import pandas as pd
-
 def calculate_aqi(pm_value, pm_type):
+
+    return None
+    
     if pm_type == 'PM25':
         breakpoints = [0, 12.1, 35.5, 55.5, 150.5, 250.5, 350.5, 500.5]
         aqi_ranges = [0, 50, 100, 150, 200, 300, 400, 500]
@@ -64,7 +53,6 @@ def calculate_aqi(pm_value, pm_type):
             return int(aqi)
     
     return None
-
 
 """
     for i in range(len(breakpoints) - 1):
@@ -95,7 +83,6 @@ if __name__ == "__main__":
         if(data.empty):
             data = dc.getAllRecent()
 
-        # print(desc)
         description_data = data[data['description'] == desc]
         description_data['AQI_PM25'] = description_data['pm25'].apply(lambda x: calculate_aqi(x, 'PM25'))
         description_data['AQI_PM10'] = description_data['pm10'].apply(lambda x: calculate_aqi(x, 'PM10'))
@@ -114,18 +101,5 @@ if __name__ == "__main__":
         image_base64 = base64.b64encode(buf.getvalue()).decode('utf-8').replace('\n', '')
         buf.close()
         print(image_base64)
-
-
-
-
-        # plt.figure(figsize=(10, 5))
-        # plt.plot(description_data['timestamp'], description_data['AQI_PM25'], label='AQI PM25')
-        # plt.plot(description_data['timestamp'], description_data['AQI_PM10'], label='AQI PM10')
-        # plt.xlabel('Timestamp')
-        # plt.ylabel('AQI')
-        # plt.title(f'AQI Values for {desc}')
-        # plt.legend()
-        #plt.show()
-        ##################
 
         plt.close() 

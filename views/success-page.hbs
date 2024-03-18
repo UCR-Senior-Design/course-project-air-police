@@ -10,26 +10,29 @@
         <div class="container p-3 text-center">
             <h1>Success!</h1>
             <p>Welcome! You have successfully logged in with monitor: {{ monitorId }}. Please refresh the page if necessary.</p>
+            
+            <h2 class = "text-primary"> {{! this is how to set text color with bootstrap}}
+                Your aqi is {{ aqi }}
+            </h2>
 
-            <div class="aqi-value" style="color: 
-    <% if (aqi.PM25 >= 0 && aqi.PM25 <= 50) { %>
-        green
-    <% } else if (aqi.PM25 >= 51 && aqi.PM25 <= 100) { %>
-        yellow
-    <% } else if (aqi.PM25 >= 101 && aqi.PM25 <= 150) { %>
-        orange
-    <% } else if (aqi.PM25 >= 151 && aqi.PM25 <= 200) { %>
-        red
-    <% } else if (aqi.PM25 >= 201 && aqi.PM25 <= 300) { %>
-        purple
-    <% } else { %>
-        maroon
-    <% } %>;">
-    <%= aqi.PM25 %>
-</div>
+        {{!-- <% if (aqi.PM25 >= 0 && aqi.PM25 <= 50) { %>
+            green
+        <% } else if (aqi.PM25 >= 51 && aqi.PM25 <= 100) { %>
+            yellow
+        <% } else if (aqi.PM25 >= 101 && aqi.PM25 <= 150) { %>
+            orange
+        <% } else if (aqi.PM25 >= 151 && aqi.PM25 <= 200) { %>
+            red
+        <% } else if (aqi.PM25 >= 201 && aqi.PM25 <= 300) { %>
+            purple
+        <% } else { %>
+            maroon
+        <% } %>;">
+        <%= aqi.PM25 %> --}}
+            </div>
 
 
-<img class="img-fluid mb-4" src="/images/aqi_colors1.png" style="display: 
+{{!-- <img class="img-fluid mb-4" src="/images/aqi_colors1.png" style="display: 
     <% if (aqi.PM25 >= 0 && aqi.PM25 <= 50) { %>
         block
     <% } else { %>
@@ -64,10 +67,10 @@
         block
     <% } else { %>
         none
-    <% } %>;">
+    <% } %>;"> --}}
 
 
-            <p>AQI PM25: {{ aqi.AQI_PM25 }}</p>
+            {{!-- <p>AQI PM25: {{ aqi.AQI_PM25 }}</p>
             <p>AQI PM10: {{ aqi.AQI_PM10 }}</p>
 
             
@@ -78,38 +81,41 @@
                     {{else}}
                     <p>Your air quality ain't looking so good.</p>
                 {{/if}}
-            {{/if}}
+            {{/if}} --}}
 
-
+        <div class="container p-3 text-center">
             <div>
-            <h2>Air Quality Index (AQI):</h2>
-            <p>The Air Quality Index (AQI) is a numerical scale used to show how polluted 
-                the air currently is. It provides a way to understand the potential health hazards of 
-                different levels of air pollution. The AQI ranges from 0 to 500, where lower values indicate 
-                better air quality and higher values indicate worse air quality.</p>
-            <p>The AQI is divided into different categories, each associated with a color code and indicating 
-                the level of hazards. The image below has a more detailed description of how the colors 
-                correspond to the AQI value.</p>
-        </div>
-        <img class="img-fluid mb-4" src="/images/aqi_colors.png" alt="AQI Colors and Values, and What They Mean">
+                <h2>Air Quality Index (AQI):</h2>
+                <p>The Air Quality Index (AQI) is a numerical scale used to show how polluted 
+                    the air currently is. It provides a way to understand the potential health hazards of 
+                    different levels of air pollution. The AQI ranges from 0 to 500, where lower values indicate 
+                    better air quality and higher values indicate worse air quality.</p>
+                <p>The AQI is divided into different categories, each associated with a color code and indicating 
+                    the level of hazards. The image below has a more detailed description of how the colors 
+                    correspond to the AQI value.</p>
+            </div>
+            <img class="img-fluid mb-4" src="/images/aqi_colors.png" alt="AQI Colors and Values, and What They Mean">
 
+                <div>
+                <h2>PM2.5 and PM10 Values:</h2>
+                <p>PM2.5 refers to particulate matter or air pollutants that have a diameter of 2.5 micrometers 
+                    or less. PM10 refers to particulate matter with a diameter of 10 micrometers or less. These 
+                    particles can include dust, pollen, and other pollutants. Monitoring these values helps to 
+                    show any indication of potential health impacts from the air quality.</p>
+            </div>
+        </div>
+
+        <div class="container p-3 text-center">
             <div>
-            <h2>PM2.5 and PM10 Values:</h2>
-            <p>PM2.5 refers to particulate matter or air pollutants that have a diameter of 2.5 micrometers 
-                or less. PM10 refers to particulate matter with a diameter of 10 micrometers or less. These 
-                particles can include dust, pollen, and other pollutants. Monitoring these values helps to 
-                show any indication of potential health impacts from the air quality.</p>
-        </div>
-
-        <div>
-            <h2>Data Visualization:</h2>
-            <p>The data visualization shows the concentrations of PM2.5 and PM10 pollutants over time in your area. 
-                The x-axis represents the timestamp, and the y-axis represents the concentration in micrograms 
-                per cubic meter (µg/m³). This visualization helps to see the trends and patterns in your air pollution 
-                levels.</p>
-        </div>
-
+                <h2>Data Visualization:</h2>
+                <p>The data visualization shows the concentrations of PM2.5 and PM10 pollutants over time in your area. 
+                    The x-axis represents the timestamp, and the y-axis represents the concentration in micrograms 
+                    per cubic meter (µg/m³). This visualization helps to see the trends and patterns in your air pollution 
+                    levels.</p>
+            </div>
             <img class="img-fluid mb-4" src = {{img_src}} alt = "Data Visualization" >
+        </div>
+
       </div>
 
     </body>
