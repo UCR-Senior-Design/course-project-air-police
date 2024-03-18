@@ -8,8 +8,8 @@ const postgreConfig = {
 };
 router.get("/", async (req, res) => {
   try {
-    var con = new Pool(postgreConfig);
-    await con.connect();
+    var pool = new Pool(postgreConfig);
+    const con = await pool.connect();
     var query = "SELECT * FROM usrs WHERE username = $1";
     const token = req.session.token;
     let user;
@@ -37,6 +37,7 @@ router.get("/", async (req, res) => {
     const rows = result.rows;
 
     if (rows.length > 0) {
+      await con.release();
       res.render("table", {
         title: "AirPolice Map",
         body: "success",
@@ -45,6 +46,7 @@ router.get("/", async (req, res) => {
       });
       res.status(200);
     } else {
+      await con.release();
       res.redirect("/rlogin?error=ngl");
     }
   } catch (error) {
