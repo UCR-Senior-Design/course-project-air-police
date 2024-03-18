@@ -12,21 +12,59 @@
             <p>Welcome! You have successfully logged in with monitor: {{ monitorId }}. Please refresh the page if necessary.</p>
 
             <div class="aqi-value" style="color: 
-                <% if (aqi.PM25 >= 0 && aqi.PM25 <= 50) { %>
-                    green
-                 <% } else if (aqi.PM25 >= 51 && aqi.PM25 <= 100) { %>
-                     yellow
-                <% } else if (aqi.PM25 >= 101 && aqi.PM25 <= 150) { %>
-                     orange
-                <% } else if (aqi.PM25 >= 151 && aqi.PM25 <= 200) { %>
-                        red
-                <% } else if (aqi.PM25 >= 201 && aqi.PM25 <= 300) { %>
-                      purple
-                 <% } else { %>
-                       maroon
-                <% } %>;">
-            <%= aqi.PM25 %>
-        </div>
+    <% if (aqi.PM25 >= 0 && aqi.PM25 <= 50) { %>
+        green
+    <% } else if (aqi.PM25 >= 51 && aqi.PM25 <= 100) { %>
+        yellow
+    <% } else if (aqi.PM25 >= 101 && aqi.PM25 <= 150) { %>
+        orange
+    <% } else if (aqi.PM25 >= 151 && aqi.PM25 <= 200) { %>
+        red
+    <% } else if (aqi.PM25 >= 201 && aqi.PM25 <= 300) { %>
+        purple
+    <% } else { %>
+        maroon
+    <% } %>;">
+    <%= aqi.PM25 %>
+</div>
+
+
+<img class="img-fluid mb-4" src="/images/aqi_colors1.png" style="display: 
+    <% if (aqi.PM25 >= 0 && aqi.PM25 <= 50) { %>
+        block
+    <% } else { %>
+        none
+    <% } %>;">
+<img class="img-fluid mb-4" src="/images/aqi_colors2.png" style="display: 
+    <% if (aqi.PM25 >= 51 && aqi.PM25 <= 100) { %>
+        block
+    <% } else { %>
+        none
+    <% } %>;">
+<img class="img-fluid mb-4" src="/images/aqi_colors3.png" style="display: 
+    <% if (aqi.PM25 >= 101 && aqi.PM25 <= 150) { %>
+        block
+    <% } else { %>
+        none
+    <% } %>;">
+<img class="img-fluid mb-4" src="/images/aqi_colors4.png" style="display: 
+    <% if (aqi.PM25 >= 151 && aqi.PM25 <= 200) { %>
+        block
+    <% } else { %>
+        none
+    <% } %>;">
+<img class="img-fluid mb-4" src="/images/aqi_colors5.png" style="display: 
+    <% if (aqi.PM25 >= 201 && aqi.PM25 <= 300) { %>
+        block
+    <% } else { %>
+        none
+    <% } %>;">
+<img class="img-fluid mb-4" src="/images/aqi_colors6.png" style="display: 
+    <% if (aqi.PM25 > 300) { %>
+        block
+    <% } else { %>
+        none
+    <% } %>;">
 
 
             <p>AQI PM25: {{ aqi.AQI_PM25 }}</p>
