@@ -145,7 +145,7 @@ async function fetchPMValues(monitorId) {
         throw error;
     }
 }
-
+/*
 async function getAQIValues(monitorId) {
     try {
         const pmValues = await fetchPMValues(monitorId);
@@ -164,12 +164,30 @@ async function getAQIValues(monitorId) {
     
     // console.log(aqiPM25);
 }
+*/
+async function getAQIValues(monitorId) {
+    try {
+        const pmValues = await fetchPMValues(monitorId);
+        let aqiPM25 = -1;
+        let aqiPM10 = -1;
+        if (pmValues) {
+            aqiPM25 = calculateAQI(pmValues.pm25, 'PM25');
+            aqiPM10 = calculateAQI(pmValues.pm10, 'PM10');
+        }
+        //average AQI
+        const averageAQI = Math.round((aqiPM25 + aqiPM10) / 2);
+        return averageAQI;
+    } catch (error) {
+        console.error('Error fetching PM values:', error);
+        // Handle error appropriately
+    }
+}
 
 async function makeImgSRC() {
     await new Promise((resolve, reject) => {
         let options = {
             mode: "text",
-            pythonPath: ".venv/bin/python",
+            pythonPath: ".venv/Scripts/python",
             pythonOptions: ["-u"], // get print results in real-time
             args: [monitorId],
           };
