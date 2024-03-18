@@ -364,7 +364,7 @@ app.route("/rlogin").post(async (req, res) => {
             },
           );
           await con.end();
-          res.redirect("/table");
+          res.redirect("/map");
         }
       }
       if (response == false) {

@@ -450,6 +450,8 @@ from folium.plugins import HeatMap
 def mapGeneration(data=None, pm_type='pm10'):
     if data is None:
         data = getAllRecent()
+    if(data.empty):
+        return
 
     # Generate a map with a central location of the Salton Sea area
     central_latitude = data['geo.lat'].mean()
