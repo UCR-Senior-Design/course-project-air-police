@@ -83,21 +83,21 @@ var monitorId = "default"; // while the python script sees "defualt" it will gen
 
 function calculateAQI(pm_value, pm_type) {
     let breakpoints, aqi_ranges;
-
-    if (pm_type === 'PM2.5') {
+    if (pm_type === 'PM25') {
         breakpoints = [0, 12.1, 35.5, 55.5, 150.5, 250.5, 350.5, 500.5];
         aqi_ranges = [0, 50, 100, 150, 200, 300, 400, 500];
     } else if (pm_type === 'PM10') {
         breakpoints = [0, 54, 154, 254, 354, 424, 504, 604];
         aqi_ranges = [0, 50, 100, 150, 200, 300, 400, 500];
     } else {
-        return null;
+        return -1;
     }
 
     pm_value = parseFloat(pm_value);
 
     if (isNaN(pm_value)) {
-        return null;
+        print("hello")
+        return -1;
     }
 
     for (let i = 0; i < breakpoints.length - 1; i++) {
@@ -107,7 +107,7 @@ function calculateAQI(pm_value, pm_type) {
         }
     }
 
-    return null;
+    return -1;
 }
 
 
@@ -124,16 +124,23 @@ async function fetchPMValues(monitorId) {
     };
     var con = mysql.createConnection(sqlConfig);
     try {
-        const query = 'SELECT pm25, pm10, timestamp FROM Data WHERE sn IN (SELECT sn FROM Devices WHERE description = ?) ORDER BY timestamp DESC LIMIT 1';
+        const query = "SELECT pm25, pm10, timestamp FROM Data, Devices WHERE Data.sn = Devices.sn AND Devices.description = ? ORDER BY timestamp DESC LIMIT 1";
         const values = [monitorId];
-        await con.promise().query(query, values)
-        .then(([rows, fields]) => {
-            pmValues = rows[0];
-        })
-        .catch((err) => {
-            console.error(err);
-        });
-        //return result[0]; 
+
+        // await con.promise().query(query, values)
+        // .then(([rows, fields]) => {
+        //     // console.log(rows);
+        //     result = rows[0];
+        //     console.log(result);
+        //     return result; 
+        // })
+        // .catch((err) => {
+        //     console.error(err);
+        // });
+        const [rows, fields] = await con.promise().query(query, values);
+        const result = rows[0];
+        return result;
+        
     } catch (error) {
         throw error;
     }
@@ -141,13 +148,21 @@ async function fetchPMValues(monitorId) {
 
 async function getAQIValues(monitorId) {
     try {
-        await fetchPMValues(monitorId);
-        const aqiPM25 = calculateAQI(pmValues.pm25, 'PM25');
-        const aqiPM10 = calculateAQI(pmValues.pm10, 'PM10');
+        const pmValues = await fetchPMValues(monitorId);
+        let aqiPM25 = -1;
+        let aqiPM10 = -1;
+        if(pmValues){
+            aqiPM25 = calculateAQI(pmValues.pm25, 'PM25');
+            aqiPM10 = calculateAQI(pmValues.pm10, 'PM10');
+        }
+        // Once the fetchPMValues promise is resolved, calculate AQI
         return { PM25: aqiPM25, PM10: aqiPM10 };
     } catch (error) {
-        throw error;
+        console.error('Error fetching PM values:', error);
+        // Handle error appropriately
     }
+    
+    // console.log(aqiPM25);
 }
 
 async function makeImgSRC() {
@@ -184,11 +199,11 @@ async function makeImgSRC() {
 
 var aqi = 50; // default value
 
-router.get('/', (req,res) => {
+router.get('/', async (req,res) => {
     monitorId = req.query.monitorId
     makeImgSRC() // uses python-shell to create the img src from aqi.py
 
-    // aqi = getAQIValues(monitorId); // this just returns a pending promise so I'm commenting it out for now
+    aqi = await getAQIValues(monitorId); // this just returns a pending promise so I'm commenting it out for now
     
     if (req.session.logged_in) {
         res.render("success-page", { title: 'SUCCESS PAGE ', aqi, monitorId, img_src});

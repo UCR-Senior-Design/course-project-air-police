@@ -12,7 +12,8 @@
             <p>Welcome! You have successfully logged in with monitor: {{ monitorId }}. Please refresh the page if necessary.</p>
             
             <h2 class = "text-primary"> {{! this is how to set text color with bootstrap}}
-                Your aqi is {{ aqi }}
+                Your aqi for pm2.5 is {{ aqi.PM25 }} <br>
+                Your  aqi for pm10 is {{aqi.PM10}}
             </h2>
 
         {{!-- <% if (aqi.PM25 >= 0 && aqi.PM25 <= 50) { %>
