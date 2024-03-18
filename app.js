@@ -365,6 +365,7 @@ app.route("/rlogin").post(async (req, res) => {
             },
           );
           await con.release();
+          await fetchTableData();
           res.redirect("/table");
         }
       }
