@@ -11,7 +11,7 @@ const { Pool } = require("pg");
 const { request } = require("http");
 
 const postgreConfig = {
-  connectionString: process.env.POSTGRES_URL ,
+  connectionString: process.env.POSTGRES_URL
 };
 
 async function createNewUser(eml, usr, pswd) {
@@ -354,16 +354,16 @@ app.route("/rlogin").post(async (req, res) => {
         // console.log(true);
         if (!haserror) {
           req.session.logged_in = true;
-          // req.session.token = jwt.sign(
-          //   { username: result.rows[0].username },
-          //   process.env.key,
-          //   {
-          //     algorithm: "HS256",
-          //     allowInsecureKeySizes: true,
-          //     expiresIn: 7200, // 24 hours
-          //   },
-          // );
-          await con.end();
+          req.session.token = jwt.sign(
+            { username: result.rows[0].username },
+            process.env.key,
+            {
+              algorithm: "HS256",
+              allowInsecureKeySizes: true,
+              expiresIn: 7200, // 24 hours
+            },
+          );
+          await con.release();
           res.redirect("/home");
         }
       }
@@ -374,12 +374,13 @@ app.route("/rlogin").post(async (req, res) => {
     }
 
     if (haserror) {
-      await con.end();
+      await con.release();
       res.redirect(errorpage);
     }
   } catch (error) {
     console.error(error);
   }
+  await con.release();
   // res.redirect('/rlogin?error=pw1')
 });
 
