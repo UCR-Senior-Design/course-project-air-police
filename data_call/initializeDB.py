@@ -5,15 +5,14 @@ import psycopg2 as postgre
 
 
 def conn():
-    mhost = os.environ['postgrehost']
-    muer = os.environ['postgreUser']
-    mpassword = os.environ['postgrePassword']
-    mdatabase = os.environ['postgreDB']
+    # mhost = os.environ['postgrehost']
+    # muer = os.environ['postgreUser']
+    # mpassword = os.environ['postgrePassword']
+    # mdatabase = os.environ['postgreDB']
     mydb = postgre.connect(
-        host = mhost,
-        user = muer,
-        password = mpassword,
-        database = mdatabase
+        os.environ['POSTGRES_URL'],
+        user = os.environ['POSTGRES_USER'],
+        password = os.environ['POSTGRES_PASSWORD'],
     )
     return mydb
 

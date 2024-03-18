@@ -72,11 +72,9 @@ def connect():
     #     database = mdatabase
     # )
     mydb = postgre.connect(
-        database = os.environ['postgreDB'],
-        host = os.environ['postgrehost'],
-        user = os.environ['postgreUser'],
-        password = os.environ['postgrePassword'],
-        port = os.environ['postgrePort']
+        os.environ['POSTGRES_URL'],
+        user = os.environ['POSTGRES_USER'],
+        password = os.environ['POSTGRES_PASSWORD'],
     )
     return mydb
 
