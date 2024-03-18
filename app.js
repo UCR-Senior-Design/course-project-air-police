@@ -381,7 +381,6 @@ app.route("/rlogin").post(async (req, res) => {
   } catch (error) {
     console.error(error);
   }
-  await con.release();
   // res.redirect('/rlogin?error=pw1')
 });
 
