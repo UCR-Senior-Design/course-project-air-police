@@ -74,7 +74,7 @@ async function fetchTableData() {
     console.error(error);
   }
 }
-fetchTableData();
+// fetchTableData();
 var addedResearchers;
 async function emailGet() {
   try {
@@ -364,7 +364,7 @@ app.route("/rlogin").post(async (req, res) => {
             },
           );
           await con.end();
-          res.redirect("/map");
+          res.redirect("/home");
         }
       }
       if (response == false) {
