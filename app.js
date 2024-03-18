@@ -354,15 +354,15 @@ app.route("/rlogin").post(async (req, res) => {
         // console.log(true);
         if (!haserror) {
           req.session.logged_in = true;
-          req.session.token = jwt.sign(
-            { username: result.rows[0].username },
-            process.env.key,
-            {
-              algorithm: "HS256",
-              allowInsecureKeySizes: true,
-              expiresIn: 7200, // 24 hours
-            },
-          );
+          // req.session.token = jwt.sign(
+          //   { username: result.rows[0].username },
+          //   process.env.key,
+          //   {
+          //     algorithm: "HS256",
+          //     allowInsecureKeySizes: true,
+          //     expiresIn: 7200, // 24 hours
+          //   },
+          // );
           await con.end();
           res.redirect("/home");
         }
