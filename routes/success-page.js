@@ -3,7 +3,8 @@ const router = express.Router()
 let { PythonShell } = require("python-shell");
 
 // sql imports
-const mysql = require("mysql2");
+// const mysql = require("mysql2");
+const { Pool } = require("pg");
 require("dotenv").config();
 
 
@@ -44,16 +45,13 @@ function calculateAQI(pm_value, pm_type) {
 var pmValues
 
 async function fetchPMValues(monitorId) {
-    const sqlConfig = {
-        connectionLimit: 10,
-        host: process.env.mysqlhost,
-        port: 3306,
-        user: process.env.mysqlUser,
-        password: process.env.mysqlPassword,
-        database: process.env.mysqlDB,
-    };
-    var con = mysql.createConnection(sqlConfig);
+    const postgreConfig = {
+        connectionString: process.env.POSTGRES_URL ,
+      };
+
     try {
+        var pool = new Pool(postgreConfig);
+        const con = await pool.connect();
         const query = "SELECT pm25, pm10, timestamp FROM Data, Devices WHERE Data.sn = Devices.sn AND Devices.description = ? ORDER BY timestamp DESC LIMIT 1";
         const values = [monitorId];
 
@@ -67,9 +65,12 @@ async function fetchPMValues(monitorId) {
         // .catch((err) => {
         //     console.error(err);
         // });
-        const [rows, fields] = await con.promise().query(query, values);
-        const result = rows[0];
-        return result;
+        // const [rows, fields] = await con.promise().query(query, values);
+        var result;
+        result = await con.query(query, value);
+        const rows = result.rows
+        // const result = rows[0];
+        return rows;
         
     } catch (error) {
         throw error;
