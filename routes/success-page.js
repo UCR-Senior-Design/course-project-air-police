@@ -90,16 +90,7 @@ let { PythonShell } = require("python-shell");
 
 async function makeImgSRC() {
     await new Promise((resolve, reject) => {
-        // let options = {
-        //     mode: "text",
-        //     pythonPath: ".venv/bin/python",
-        //     pythonOptions: ["-u"], // get print results in real-time
-        //     args: [monitorId],
-        //   };
-        // PythonShell.run("data_call/aqi.py", options).then((result) => {
-        //     img_src = "data:image/png;base64,";
-        //     img_src = img_src.concat(result)
-        // });
+        
         exec(`python data_call/aqi.py ${monitorId}`, (error, stdout, stderr)=>{
             if(error){
             console.error('exec error: ${error}');
@@ -108,7 +99,7 @@ async function makeImgSRC() {
             img_src = "data:image/png;base64,";
             img_src = img_src.concat(stdout)
             resolve(img_src);
-      })
+         });
     });
   } 
 
@@ -118,19 +109,21 @@ var aqi = 50; // default value
 router.get('/', async (req,res) => {
     monitorId = req.query.monitorId
     // uses python-shell to create the img src from aqi.py
+    try{
     await makeImgSRC() 
     console.log(img_src)
     aqi = await getAQIValues(monitorId); 
     
     if (monitorId) {
         res.render("success-page", { title: 'SUCCESS PAGE ', aqiScore : (aqi.PM25 + aqi.PM10)/2, monitorId, img_src});
-        monitorId = req.query.monitorId
-
         res.status(200);
     }
     else {
         res.redirect('/login');
     }
+}catch(error){
+    res.redirect('/login')
+}
 
 })
 
