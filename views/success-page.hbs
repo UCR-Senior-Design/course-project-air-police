@@ -3,16 +3,89 @@
 
     <head>
         <title>Success Page</title>
+
     </head>
 
-    <body>
+    <body class="loginBackground">
         
         <div class="container p-3 text-center">
-            <h1>Success!</h1>
-            <p>Welcome! You have successfully logged in with monitor: {{ monitorId }}</p>
+            <h5>Welcome! You have successfully logged in with monitor: {{ monitorId }}.</h5>
+            
+            <h2 id = 'aqi'> {{! this is how to set text color with bootstrap}}
+                Your aqi score is {{ aqiScore }} 
+            </h2>
+        </div>
 
+
+        <div class="container p-3 mt-3 text-center">
+
+            <div class="row">
+                <div class = "col-sm">
+                    <h2>Air Quality Index (AQI):</h2>
+                    <p>The Air Quality Index (AQI) is a numerical scale used to show how polluted 
+                        the air currently is. It provides a way to understand the potential health hazards of 
+                        different levels of air pollution. The AQI ranges from 0 to 500, where lower values indicate 
+                        better air quality and higher values indicate worse air quality.</p>
+                    <p>The AQI is divided into different categories, each associated with a color code and indicating 
+                        the level of hazards. The image below has a more detailed description of how the colors 
+                        correspond to the AQI value.</p>
+                </div>
+                <div class = "col-sm">
+                    <img id = 'aqiChart' class="img-fluid mb-4" src="/images/aqi_colors.png" alt="AQI Colors and Values, and What They Mean">
+                </div>
+            </div>
+
+        </div>
+            
+
+        <script>
+            if ({{ aqiScore }} <= 50) {
+                document.getElementById('aqi').style.color = "lime";
+                document.getElementById('aqiChart').src = "/images/aqi_colors1.png";
+            }
+            else if ({{ aqiScore }} <= 100) {
+                document.getElementById('aqi').style.color = "yellow";
+                document.getElementById('aqiChart').src = "/images/aqi_colors2.png";
+            }
+            else if ({{ aqiScore }} <= 150) {
+                document.getElementById('aqi').style.color = "orange";
+                document.getElementById('aqiChart').src = "/images/aqi_colors3.png";
+            }
+            else if ({{ aqiScore }} <= 200) {
+                document.getElementById('aqi').style.color = "red";
+                document.getElementById('aqiChart').src = "/images/aqi_colors4.png";
+            }
+            else if ({{ aqiScore }} <= 300) {
+                document.getElementById('aqi').style.color = "purple";
+                document.getElementById('aqiChart').src = "/images/aqi_colors4.png";
+            }
+            else {
+                document.getElementById('aqi').style.color = "maroon";
+                document.getElementById('aqiChart').src = "/images/aqi_colors6.png";
+            }
+        </script>
+
+        <div class="container p-3 text-center">
+            <div class="row">
+                <div class = "col-sm">
+
+                    <h2>PM2.5 and PM10 Values:</h2>
+                    <p>PM2.5 refers to particulate matter or air pollutants that have a diameter of 2.5 micrometers 
+                        or less. PM10 refers to particulate matter with a diameter of 10 micrometers or less. These 
+                        particles can include dust, pollen, and other pollutants. Monitoring these values helps to 
+                        show any indication of potential health impacts from the air quality.</p>
+
+                </div>
+                <div class = "col-sm">
+                    <h2>Data Visualization:</h2>
+                    <p>The data visualization shows the concentrations of PM2.5 and PM10 pollutants over time in your area. 
+                        The x-axis represents the timestamp, and the y-axis represents the concentration in micrograms 
+                        per cubic meter (µg/m³). This visualization helps to see the trends and patterns in your air pollution 
+                        levels.</p>
+                </div>
+            </div>
             <img class="img-fluid mb-4" src = {{img_src}} alt = "Data Visualization" >
-      </div>
+        </div>
 
     </body>
 </html>
