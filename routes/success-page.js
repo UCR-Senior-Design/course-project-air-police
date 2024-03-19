@@ -85,7 +85,6 @@ async function getAQIValues(monitorId) {
     // console.log(aqiPM25);
 }
 const { exec } = require('child_process');
-let { PythonShell } = require("python-shell");
 
 
 async function makeImgSRC() {
