@@ -16,20 +16,14 @@ const postgreConfig = {
 
 
 async function createNewUser(eml, usr, pswd) {
-    var con = new Pool(postgreConfig);
-    try{
-      await con.connect();
-    }catch(error){
-      console.error(error);
-    }
-    try{
+  try{
+    var pool = new Pool(postgreConfig);
+    const con = await pool.connect();
     var query = "SELECT * FROM usrs WHERE username = $1 ";
     let value = [usr];
     var result;
     result = await con.query(query, value);
-    }catch(error){
-      console.error(error);
-    }
+    
     if (result.rows.length === 0 || !result) {
       // const hashs = bcrypt.hashSync(pswd, hash);
       bcrypt.genSalt(parseInt(process.env.hash), function (err, salt) {
@@ -47,6 +41,9 @@ async function createNewUser(eml, usr, pswd) {
         });
       });
     }
+  }catch(error){
+    console.error(error);
+  }
 
 
     // await con.end();
@@ -82,7 +79,6 @@ async function emailGet() {
     var pool = new Pool(postgreConfig);
     const con = await pool.connect();
     var query = "SELECT email FROM usrs";
-    await con.connect();
     var result = await con.query(query);
     addedResearchers = result.rows;
     await con.release();

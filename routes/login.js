@@ -5,7 +5,9 @@ require("dotenv").config();
 
 // get list of monitor login keys then place them in monitorKeys
 var monitorKeys;
-
+const postgreConfig = {
+  connectionString: process.env.POSTGRES_URL ,
+};
 async function fetchMonitorDesc() {
 
   try {
