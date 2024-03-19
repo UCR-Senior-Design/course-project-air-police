@@ -93,7 +93,7 @@ async function makeImgSRC() {
         
         exec(`python data_call/aqi.py ${monitorId}`, (error, stdout, stderr)=>{
             if(error){
-            console.error('exec error: ${error}');
+            console.error(`oops: ${error}`);
             reject();
             }
             img_src = "data:image/png;base64,";
