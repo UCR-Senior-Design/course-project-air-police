@@ -69,6 +69,7 @@ async function fetchPMValues(monitorId) {
         var result;
         result = await con.query(query, value);
         const rows = result.rows
+        await con.release();
         // const result = rows[0];
         return rows;
         
@@ -129,7 +130,7 @@ router.get('/', async (req,res) => {
 
     aqi = await getAQIValues(monitorId); 
     
-    if (req.session.logged_in) {
+    if (monitorId) {
         res.render("success-page", { title: 'SUCCESS PAGE ', aqiScore : (aqi.PM25 + aqi.PM10)/2, monitorId, img_src});
         monitorId = req.query.monitorId
 
