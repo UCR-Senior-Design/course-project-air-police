@@ -62,20 +62,19 @@ def calculate_aqi(pm_value, pm_type):
 """
 
 # this will be passed into the file as an argument
-if len(sys.argv) < 2:
-    desc = "default"
-else :
-    desc = sys.argv[1:][0]
-#print(desc)
+# if len(sys.argv) < 2:
+#     desc = "default"
+# else :
+#     desc = sys.argv[1:][0]
+# #print(desc)
 
-if __name__ == "__main__":
-    
+
+def generateAqi( desc="default" ):
     if (desc == "default" or desc == None):
-
         with open("public/images/refresh.png", "rb") as f:
             data = f.read()
-            print(base64.b64encode(data))
-
+            return base64.b64encode(data)
+            
     else:
 
         data = dc.pullDataTime(desc, 1)
@@ -100,6 +99,10 @@ if __name__ == "__main__":
         plt.savefig(buf, format='png')
         image_base64 = base64.b64encode(buf.getvalue()).decode('utf-8').replace('\n', '')
         buf.close()
-        print(image_base64)
+        plt.close()
+        # print(image_base64)
+        return image_base64
 
-        plt.close() 
+
+
+ 
