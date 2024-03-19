@@ -320,16 +320,16 @@ app.route("/register").post(async (req, res) => {
 });
 const registerRouter = require("./routes/register.js");
 app.use("/register", registerRouter);
-
+const { exec } = require('child_process');
 app.route("/rlogin").post(async (req, res) => {
   
-  // const param = "pm25";
-  // exec(`python data_call/generateMap.py ${param}`, (error, stdout, stderr)=>{
-  //   if(error){
-  //     console.error('exec error: ${error}');
-  //     return;
-  //   }
-  // })
+  const param = "pm25";
+  exec(`python data_call/generateMap.py ${param}`, (error, stdout, stderr)=>{
+    if(error){
+      console.error('exec error: ${error}');
+      return;
+    }
+  })
   try {
     // await createNewUser("tno@gmail.com", "pyTest", "1234");
     var pool = new Pool(postgreConfig);
