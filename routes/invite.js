@@ -2,6 +2,11 @@ const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
 router.get("/", async (req, res) => {
+  const cookieHeader = req.headers.cookie;
+  if(!cookieHeader){
+    res.redirect('/rlogin');
+    return;
+  }
   const cookies = cookieHeader.split(';');
   const token = cookies.find(cookie => cookie.trim().startsWith('token=')).split('=')[1];
   var username;
