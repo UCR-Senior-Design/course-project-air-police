@@ -14,18 +14,18 @@ router.get("/", async (req, res) => {
   try{
     var pool = new Pool(postgreConfig);
     const con = await pool.connect();
-    const cookieHeader = req.headers.cookie;
-    if(!cookieHeader){
-      res.render("rlogin", {
-        title: "LOGIN ",
-        displayText: "researcher login test",
-      });
-      res.status(200);
-    }
-    const cookies = cookieHeader.split(';');
-    const token = cookies.find(cookie => cookie.trim().startsWith('token=')).split('=')[1];
+    // const cookieHeader = req.headers.cookie;
+    // if(!cookieHeader){
+    //   res.render("rlogin", {
+    //     title: "LOGIN ",
+    //     displayText: "researcher login test",
+    //   });
+    //   res.status(200);
+    // }
+    // const cookies = cookieHeader.split(';');
+    // const token = cookies.find(cookie => cookie.trim().startsWith('token=')).split('=')[1];
   
-    // const token = req.session.token;
+    const token = req.session.token;
     let user;
     if (token) {
       jwt.verify(token, process.env.key, (error, decoded) => {

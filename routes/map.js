@@ -18,14 +18,14 @@ const postgreConfig = {
 };
 
 router.get("/", async (req, res) => {
-  // var map
-  // const param = "pm25";
-  // exec(`python data_call/generateMap.py ${param}`, (error, stdout, stderr)=>{
-  // if(error){
-  //   console.error('exec error: ${error}');
-  // }
-  // map = stdout
-  // })
+  var map
+  const param = "pm25";
+  exec(`python data_call/generateMap.py ${param}`, (error, stdout, stderr)=>{
+  if(error){
+    console.error('exec error: ${error}');
+  }
+  map = stdout
+  })
 
   try {
     var pool = new Pool(postgreConfig);
@@ -59,10 +59,10 @@ router.get("/", async (req, res) => {
     const rows = result.rows;
     await con.release();
     if (rows.length > 0) {
-      res.render("map", {
-        title: "AirPolice Map",
-      });
-      res.status(200);
+      // res.render("map", {
+      //   title: "AirPolice Map",
+      // });
+      // res.status(200);
       // res.status(200).send(map);
     } else {
       res.redirect("/rlogin?error=ngl");
