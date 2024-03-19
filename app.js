@@ -148,10 +148,12 @@ const mapRouter = require("./routes/map.js");
 app.use("/map", mapRouter);
 
 // create route for the researcher table data
-app.get("/data", (req, res) => {
+app.get("/data",  async (req, res) => {
+  await fetchTableData();
   res.json(tableData);
 });
-app.get("/errorData", (req, res) => {
+app.get("/errorData", async (req, res) => {
+  await fetchTableData();
   res.json(errorTable);
 });
 
