@@ -329,7 +329,7 @@ app.route("/rlogin").post(async (req, res) => {
     // await createNewUser("tno@gmail.com", "pyTest", "1234");
     var pool = new Pool(postgreConfig);
     const con = await pool.connect();
-
+    await fetchTableData();
     const { username, password } = req.body;
     var query = "SELECT * FROM usrs WHERE username = $1";
     let value = [username];
@@ -368,7 +368,6 @@ app.route("/rlogin").post(async (req, res) => {
           );
           res.setHeader('Set-Cookie', `token=${token}; Path=/; HttpOnly; SameSite=Strict`);
           await con.release();
-          await fetchTableData();
           res.redirect("/table");
         }
       }
