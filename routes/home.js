@@ -11,7 +11,7 @@ router.get("/", (req, res) => {
 
 
 const param = "pm25";
-exec('python data_call/generateMap.py ${param}', (error, stdout, stderr)=>{
+exec(`python data_call/generateMap.py ${param}`, (error, stdout, stderr)=>{
   if(error){
     console.error('exec error: ${error}');
     return;

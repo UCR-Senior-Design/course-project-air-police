@@ -323,6 +323,13 @@ app.use("/register", registerRouter);
 
 app.route("/rlogin").post(async (req, res) => {
   
+  // const param = "pm25";
+  // exec(`python data_call/generateMap.py ${param}`, (error, stdout, stderr)=>{
+  //   if(error){
+  //     console.error('exec error: ${error}');
+  //     return;
+  //   }
+  // })
   try {
     // await createNewUser("tno@gmail.com", "pyTest", "1234");
     var pool = new Pool(postgreConfig);
