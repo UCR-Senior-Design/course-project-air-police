@@ -11,7 +11,6 @@ temp.json
 test.py
 data_call/pycache
 data_call/__pycache__
-views/map.hbs
 data_call/table.json
 routes/home.js
 data_call/__pycache__/data.cpython-312.pyc
