@@ -13,6 +13,18 @@ const { request } = require("http");
 const postgreConfig = {
   connectionString: process.env.POSTGRES_URL
 };
+function setCookies(token){
+
+}
+
+function getToken(){
+
+}
+
+function clearCookie(){
+
+}
+
 
 async function createNewUser(eml, usr, pswd) {
     var con = new Pool(postgreConfig);
@@ -78,12 +90,13 @@ async function fetchTableData() {
 var addedResearchers;
 async function emailGet() {
   try {
-    var con = new Pool(postgreConfig);
+    var pool = new Pool(postgreConfig);
+    const con = await pool.connect();
     var query = "SELECT email FROM usrs";
     await con.connect();
     var result = await con.query(query);
     addedResearchers = result.rows;
-    await con.end();
+    await con.release();
   } catch (error) {
     console.error(error);
   }
@@ -175,9 +188,9 @@ app.use("/view-data", viewDataRouter);
 
 //////////////////////
 app.route("/invite").post(async (req, res) => {
-  var con = new Pool(postgreConfig);
   try {
-    await con.connect();
+    var pool = new Pool(postgreConfig);
+    const con = await pool.connect();
     const { email } = req.body;
     var query = "SELECT * FROM usrs WHERE email = $1";
     let value = [email];
@@ -185,11 +198,11 @@ app.route("/invite").post(async (req, res) => {
 
     result = await con.query(query, value);
     if (result.rows.length !== 0) {
-      await con.end();
+      await con.release();
       res.redirect('/invite?error="usrE');
       return;
     }
-    await con.end();
+    await con.release();
   } catch (error) {
     console.error(error);
   }
@@ -247,8 +260,8 @@ app.use("/invite", inviteRouter);
 
 app.route("/register").post(async (req, res) => {
   try {
-    var con = new Pool(postgreConfig);
-    await con.connect();
+    var pool = new Pool(postgreConfig);
+    const con = await pool.connect();
     const { token, username, password, retype } = req.body;
     if (!token) {
       res.redirect("/home");
@@ -302,11 +315,11 @@ app.route("/register").post(async (req, res) => {
         result2 = await con.query(query, value);
 
         if (result2.rows.length === 0) {
-          await con.end();
+          await con.release();
           await createNewUser(email, username, password);
           res.redirect("/rlogin");
         } else {
-          await con.end();
+          await con.release();
           res.redirect("/rlogin?error=ngl2");
         }
       }
@@ -399,12 +412,12 @@ const router = express.Router();
 
 app.get("/monitorIds", async (req, res) => {
   try {
-    const connection = new Pool(postgreConfig);
-    await connection.connect();
+    var pool = new Pool(postgreConfig);
+    const connection = await pool.connect();
     const result = await connection.query("SELECT sn FROM Devices");
     const [rows] = result.rows;
 
-    connection.end();
+    connection.release();
 
     const monitorIds = rows.map((row) => row.sn);
 

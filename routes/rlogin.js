@@ -10,12 +10,9 @@ router.get("/", async (req, res) => {
   // if(req.session.logged_in){
   //   res.redirect('/table') // sends status code 302 by default
   // }else{
-    var con = new Pool(postgreConfig);
-  try {
-    await con.connect();
-  } catch(error){
-    console.log(error);
-  }
+  try{
+    var pool = new Pool(postgreConfig);
+    const con = await pool.connect();
     const token = req.session.token;
     let user;
     if (token) {
@@ -26,12 +23,12 @@ router.get("/", async (req, res) => {
         user = decoded.username;
       });
     }
-    try{
     var query = "SELECT username FROM usrs WHERE username = $1";
     let value = [user];
     var result;
     result = await con.query(query, value);
     const rows = result.rows;
+    await con.release();
     if (rows.length > 0) {
       res.redirect("/table");
     } else {
