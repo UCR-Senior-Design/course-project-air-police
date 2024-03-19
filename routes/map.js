@@ -20,7 +20,13 @@ router.get("/", async (req, res) => {
   try {
     var pool = new Pool(postgreConfig);
     const con = await pool.connect();
-    const token = req.session.token;
+    const cookieHeader = req.headers.cookie;
+    if(!cookieHeader){
+      res.redirect('/rlogin');
+      return;
+    }
+    const cookies = cookieHeader.split(';');
+    const token = cookies.find(cookie => cookie.trim().startsWith('token=')).split('=')[1];
     let user;
     let isPorter = false;
     if (token) {

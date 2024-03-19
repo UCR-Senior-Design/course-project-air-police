@@ -13,17 +13,6 @@ const { request } = require("http");
 const postgreConfig = {
   connectionString: process.env.POSTGRES_URL
 };
-function setCookies(token){
-
-}
-
-function getToken(){
-
-}
-
-function clearCookie(){
-
-}
 
 
 async function createNewUser(eml, usr, pswd) {
@@ -368,7 +357,7 @@ app.route("/rlogin").post(async (req, res) => {
         // console.log(true);
         if (!haserror) {
           req.session.logged_in = true;
-          req.session.token = jwt.sign(
+          token = jwt.sign(
             { username: result.rows[0].username },
             process.env.key,
             {
@@ -377,6 +366,7 @@ app.route("/rlogin").post(async (req, res) => {
               expiresIn: 7200, // 24 hours
             },
           );
+          res.setHeader('Set-Cookie', `token=${token}; Path=/; HttpOnly; SameSite=Strict`);
           await con.release();
           await fetchTableData();
           res.redirect("/table");
