@@ -6,100 +6,93 @@ var bcrypt = require("bcryptjs");
 var jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const hash = process.env.hash;
-const mysql = require("mysql2");
+const { Pool } = require("pg");
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const { request } = require("http");
 
-const sqlConfig = {
-  connectionLimit: 10,
-  host: process.env.mysqlhost,
-  port: 3306,
-  user: process.env.mysqlUser,
-  password: process.env.mysqlPassword,
-  database: process.env.mysqlDB,
+const postgreConfig = {
+  connectionString: process.env.POSTGRES_URL
 };
 
+
 async function createNewUser(eml, usr, pswd) {
-  // const usrs = await User.findOne( {$or: [{ username: usr}, {email:eml}]}).lean();
-  var con = mysql.createConnection(sqlConfig);
-  var query = "SELECT * FROM User WHERE username = ?";
-  let value = [usr];
-  var result;
-  await con
-    .promise()
-    .query(query, value)
-    .then(([rows, fields]) => {
-      result = rows;
-    })
-    .catch((err) => {
-      console.error(err);
-    });
-  if (result.length === 0 || !result) {
-    // const hashs = bcrypt.hashSync(pswd, hash);
-    bcrypt.genSalt(parseInt(process.env.hash), function (err, salt) {
-      bcrypt.hash(pswd, salt, function (err, hashs) {
-        let query = "INSERT INTO user (email, username, pwd) VALUES ( ?, ?, ?)";
-        let values = [eml, usr, hashs];
-        con.promise().query(query, values);
+    var con = new Pool(postgreConfig);
+    try{
+      await con.connect();
+    }catch(error){
+      console.error(error);
+    }
+    try{
+    var query = "SELECT * FROM usrs WHERE username = $1 ";
+    let value = [usr];
+    var result;
+    result = await con.query(query, value);
+    }catch(error){
+      console.error(error);
+    }
+    if (result.rows.length === 0 || !result) {
+      // const hashs = bcrypt.hashSync(pswd, hash);
+      bcrypt.genSalt(parseInt(process.env.hash), function (err, salt) {
+        bcrypt.hash(pswd, salt, function (err, hashs) {
+          try{
+          let query =
+            "INSERT INTO usrs (email, username, pwd) VALUES ( $1, $2, $3);";
+          let values = [eml, usr, hashs];
+          con.query(query, values);
+          }
+          catch(error){
+            console.error(error);
+          }
+          
+        });
       });
-    });
-  }
+    }
+
+
+    // await con.end();
   //add error things here
 }
-
+createNewUser("tno@gmail.com", "pyTest", "1234");
 var tableData;
 var errorTable;
 async function fetchTableData() {
   // pull researcher table data from sql db, export it as json response
-  var con = mysql.createConnection(sqlConfig);
-  var query1 =
-    "SELECT Devices.sn, Devices.pmHealth, Devices.sdHealth,Devices.onlne, Devices.dataFraction, CONCAT(ROUND(Devices.dataFraction*100,2),'%') AS dataFraction, Data.pm25, Data.pm10,  SUBSTRING(Data.timestamp,1,10) AS timestamp FROM Devices LEFT JOIN ( SELECT d1.* FROM Data d1 JOIN ( SELECT sn, MAX(timestamp) AS max_timestamp FROM Data GROUP BY sn ) d2 ON d1.sn = d2.sn AND d1.timestamp = d2.max_timestamp ) AS Data ON Data.sn = Devices.sn ORDER BY Devices.sn;";
-  await con
-    .promise()
-    .query(query1)
-    .then(([rows, fields]) => {
-      tableData = rows;
-    })
-    .catch((err) => {
-      console.error(err);
-    });
-
-  var query2 =
-    "SELECT Devices.sn, Devices.description, Devices.pmHealth, Devices.sdHealth, Devices.onlne, CONCAT(ROUND(Devices.dataFraction*100,2),'%') AS dataFraction , SUBSTRING(Devices.last_seen,1,10) AS last_seen FROM Devices WHERE Devices.sdHealth = 'ERROR' OR Devices.pmHealth='ERROR' OR Devices.onlne = 'offline' ORDER BY Devices.onlne, Devices.sdHealth DESC, Devices.pmHealth DESC;";
-
-  await con
-    .promise()
-    .query(query2)
-    .then(([rows, fields]) => {
-      errorTable = rows;
-    })
-    .catch((err) => {
-      console.error(err);
-    });
+  try {
+    var pool = new Pool(postgreConfig);
+    const con = await pool.connect();
+    var query1 =
+      "SELECT Devices.sn, Devices.pmhealth, Devices.sdhealth,Devices.onlne, CONCAT(ROUND(Devices.datafraction*100,2),'%') AS datafraction, Data.pm25, Data.pm10,  SUBSTRING(Data.timestamp,1,10) AS timestamp FROM Devices LEFT JOIN ( SELECT d1.* FROM Data d1 JOIN ( SELECT sn, MAX(timestamp) AS max_timestamp FROM Data GROUP BY sn ) d2 ON d1.sn = d2.sn AND d1.timestamp = d2.max_timestamp ) AS Data ON Data.sn = Devices.sn ORDER BY Devices.sn;";
+    var result = await con.query(query1);
+    // if (result) {
+      tableData = result.rows;
+    // }
+    var query2 =
+      "SELECT Devices.sn, Devices.description, Devices.pmhealth, Devices.sdhealth, Devices.onlne, CONCAT(ROUND(Devices.datafraction*100,2),'%') AS datafraction , SUBSTRING(Devices.last_seen,1,10) AS last_seen FROM Devices WHERE Devices.sdHealth = 'ERROR' OR Devices.pmHealth='ERROR' OR Devices.onlne = 'offline' ORDER BY Devices.onlne, Devices.sdHealth DESC, Devices.pmHealth DESC;";
+    result = await con.query(query2);
+    errorTable = result.rows;
+    await con.release();
+  } catch (error) {
+    console.error(error);
+  }
 }
-fetchTableData();
+// fetchTableData();
 var addedResearchers;
 async function emailGet() {
-  var con = mysql.createConnection(sqlConfig);
-  var query = "SELECT email FROM User";
-  await con
-    .promise()
-    .query(query)
-    .then(([rows, fields]) => {
-      addedResearchers = rows;
-    })
-    .catch((err) => {
-      console.error(err);
-    });
+  try {
+    var pool = new Pool(postgreConfig);
+    const con = await pool.connect();
+    var query = "SELECT email FROM usrs";
+    await con.connect();
+    var result = await con.query(query);
+    addedResearchers = result.rows;
+    await con.release();
+  } catch (error) {
+    console.error(error);
+  }
 }
 emailGet();
 async function run() {
   try {
-    // Connect the client to the server	(optional starting in v4.7)
-    // await client.connect();
-    // // Send a ping to confirm a successful connection
-    // await client.db("SSProject").command({ ping: 1 });
-    // console.log("Pinged your deployment. You successfully connected to MongoDB!");
     await createNewUser("tno@gmail.com", "pyTest", "1234");
   } finally {
     // Ensures that the client will close when you finish/error
@@ -155,10 +148,12 @@ const mapRouter = require("./routes/map.js");
 app.use("/map", mapRouter);
 
 // create route for the researcher table data
-app.get("/data", (req, res) => {
+app.get("/data",  async (req, res) => {
+  await fetchTableData();
   res.json(tableData);
 });
-app.get("/errorData", (req, res) => {
+app.get("/errorData", async (req, res) => {
+  await fetchTableData();
   res.json(errorTable);
 });
 
@@ -184,30 +179,23 @@ app.use("/view-data", viewDataRouter);
 
 //////////////////////
 app.route("/invite").post(async (req, res) => {
-  var con = mysql.createConnection({
-    connectionLimit: 10,
-    host: process.env.mysqlhost,
-    port: 3306,
-    user: process.env.mysqlUser,
-    password: process.env.mysqlPassword,
-    database: process.env.mysqlDB,
-  });
-  const { email } = req.body;
-  var query = "SELECT * FROM User WHERE email = ?";
-  let value = [email];
-  var result;
-  await con
-    .promise()
-    .query(query, value)
-    .then(([rows, fields]) => {
-      result = rows;
-    })
-    .catch((err) => {
-      console.error(err);
-    });
-  if (result.length !== 0) {
-    res.redirect('/invite?error="usrE');
-    return;
+  try {
+    var pool = new Pool(postgreConfig);
+    const con = await pool.connect();
+    const { email } = req.body;
+    var query = "SELECT * FROM usrs WHERE email = $1";
+    let value = [email];
+    var result;
+
+    result = await con.query(query, value);
+    if (result.rows.length !== 0) {
+      await con.release();
+      res.redirect('/invite?error="usrE');
+      return;
+    }
+    await con.release();
+  } catch (error) {
+    console.error(error);
   }
   const token = jwt.sign({ email: email }, process.env.key, {
     algorithm: "HS256",
@@ -262,162 +250,142 @@ const inviteRouter = require("./routes/invite.js");
 app.use("/invite", inviteRouter);
 
 app.route("/register").post(async (req, res) => {
-  var con = mysql.createConnection({
-    connectionLimit: 10,
-    host: process.env.mysqlhost,
-    port: 3306,
-    user: process.env.mysqlUser,
-    password: process.env.mysqlPassword,
-    database: process.env.mysqlDB,
-  });
-  const { token, username, password, retype } = req.body;
-  if (!token) {
-    res.redirect("/home");
-  }
-  // const urlParams = new URLSearchParams(window.location.search);
-  // const myParam = urlParams.get('myParam');
-  // const token = urlParams.get('token')[0];
-  var errorpage = "/register?token=" + token + "&error=";
-  var haserror = false;
-  if (!username) {
-    errorpage += "usr2";
-    haserror = true;
-  }
-  var query = "SELECT * FROM User WHERE username = ?";
-  let value = [username];
-  var result;
-  await con
-    .promise()
-    .query(query, value)
-    .then(([rows, fields]) => {
-      result = rows;
-    })
-    .catch((err) => {
-      console.error(err);
-    });
-  if (result.length !== 0) {
-    errorpage += "usr1";
-    haserror = true;
-  } else {
-    if (!password) {
-      errorpage += "pw2";
-      haserror = true;
+  try {
+    var pool = new Pool(postgreConfig);
+    const con = await pool.connect();
+    const { token, username, password, retype } = req.body;
+    if (!token) {
+      res.redirect("/home");
     }
-    //add regex checking here
-    const passwordPattern =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&-])[A-Za-z\d@$!%*?&-]{8,}$/;
-    if (!passwordPattern.test(password)) {
-      haserror = true;
-      errorpage += "pw1";
-    }
-    if (password != retype) {
-      errorpage += "pw3";
-      haserror = true;
-    }
-    if (!haserror) {
-      var email;
-      jwt.verify(token, process.env.key, (error, decoded) => {
-        if (error) {
-          haserror = true;
-          //  add errors here redirecting
-          // res.redirect('/home');
-        }
-        email = decoded.email;
-        console.log(email);
-      });
-      // const user = await User.findOne({email: email});
-      var query = "SELECT * FROM User WHERE username = ?";
-      let value = [username];
-      var result2;
-      await con
-        .promise()
-        .query(query, value)
-        .then(([rows, fields]) => {
-          result2 = rows;
-        })
-        .catch((err) => {
-          console.error(err);
-        });
 
-      if (result2.length === 0) {
-        await createNewUser(email, username, password);
-        res.redirect("/rlogin");
-      } else {
-        res.redirect("/rlogin?error=ngl2");
+    var errorpage = "/register?token=" + token + "&error=";
+    var haserror = false;
+    if (!username) {
+      errorpage += "usr2";
+      haserror = true;
+    }
+    var query = "SELECT * FROM usrs WHERE username = $1";
+    let value = [username];
+    var result;
+
+    result = await con.query(query, value);
+    if (result.rows.length !== 0) {
+      errorpage += "usr1";
+      haserror = true;
+    } else {
+      if (!password) {
+        errorpage += "pw2";
+        haserror = true;
+      }
+      //add regex checking here
+      const passwordPattern =
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&-])[A-Za-z\d@$!%*?&-]{8,}$/;
+      if (!passwordPattern.test(password)) {
+        haserror = true;
+        errorpage += "pw1";
+      }
+      if (password != retype) {
+        errorpage += "pw3";
+        haserror = true;
+      }
+      if (!haserror) {
+        var email;
+        jwt.verify(token, process.env.key, (error, decoded) => {
+          if (error) {
+            haserror = true;
+            //  add errors here redirecting
+            // res.redirect('/home');
+          }
+          email = decoded.email;
+          console.log(email);
+        });
+        // wtf is this shit
+        var query = "SELECT * FROM usrs WHERE email = $1";
+        let value = [email];
+        var result2;
+        result2 = await con.query(query, value);
+
+        if (result2.rows.length === 0) {
+          await con.release();
+          await createNewUser(email, username, password);
+          res.redirect("/rlogin");
+        } else {
+          await con.release();
+          res.redirect("/rlogin?error=ngl2");
+        }
       }
     }
-  }
-  if (haserror) {
-    res.redirect(errorpage);
+    if (haserror) {
+      res.redirect(errorpage);
+    }
+  } catch (error) {
+    console.error(error);
   }
 });
 const registerRouter = require("./routes/register.js");
 app.use("/register", registerRouter);
 
 app.route("/rlogin").post(async (req, res) => {
-  var con = mysql.createConnection({
-    connectionLimit: 10,
-    host: process.env.mysqlhost,
-    port: 3306,
-    user: process.env.mysqlUser,
-    password: process.env.mysqlPassword,
-    database: process.env.mysqlDB,
-  });
-  const { username, password } = req.body;
-  var query = "SELECT * FROM User WHERE username = ?";
-  let value = [username];
-  var result;
-  await con
-    .promise()
-    .query(query, value)
-    .then(([rows, fields]) => {
-      result = rows;
-    })
-    .catch((err) => {
-      console.error(err);
-    });
-  // const user  = await User.findOne({username: username})
-  errorpage = "/rlogin?error=";
-  haserror = false;
-  if (!username) {
-    errorpage += "usr2";
-    haserror = true;
-  }
-  if (result.length === 0) {
-    errorpage += "usr1";
-    haserror = true;
-  } else {
-    if (!password) {
-      errorpage += "pw2";
+  
+  try {
+    // await createNewUser("tno@gmail.com", "pyTest", "1234");
+    var pool = new Pool(postgreConfig);
+    const con = await pool.connect();
+    await fetchTableData();
+    const { username, password } = req.body;
+    var query = "SELECT * FROM usrs WHERE username = $1";
+    let value = [username];
+    var result;
+
+    result = await con.query(query, value);
+    errorpage = "/rlogin?error=";
+    haserror = false;
+    if (!username) {
+      errorpage += "usr2";
       haserror = true;
     }
-    var input = result[0].pwd;
-    const response = bcrypt.compareSync(password, input);
-    if (response == true) {
-      if (!haserror) {
-        req.session.logged_in = true;
-        req.session.token = jwt.sign(
-          { username: result[0].username },
-          process.env.key,
-          {
-            algorithm: "HS256",
-            allowInsecureKeySizes: true,
-            expiresIn: 7200, // 24 hours
-          },
-        );
-        res.redirect("/table");
+    if (result.rows.length === 0) {
+      errorpage += "usr1";
+      haserror = true;
+    } else {
+      if (!password) {
+        errorpage += "pw2";
+        haserror = true;
+      }
+      var input = result.rows[0].pwd;
+      console.log(input);
+      const response = bcrypt.compareSync(password, input);
+      if (response == true) {
+        // console.log(true);
+        if (!haserror) {
+          req.session.logged_in = true;
+          token = jwt.sign(
+            { username: result.rows[0].username },
+            process.env.key,
+            {
+              algorithm: "HS256",
+              allowInsecureKeySizes: true,
+              expiresIn: 7200, // 24 hours
+            },
+          );
+          res.setHeader('Set-Cookie', `token=${token}; Path=/; HttpOnly; SameSite=Strict`);
+          await con.release();
+          res.redirect("/table");
+        }
+      }
+      if (response == false) {
+        errorpage += "pw1";
+        haserror = true;
       }
     }
-    if (response == false) {
-      errorpage += "pw1";
-      haserror = true;
+
+    if (haserror) {
+      await con.release();
+      res.redirect(errorpage);
     }
+  } catch (error) {
+    console.error(error);
   }
-
-  if (haserror) {
-    res.redirect(errorpage);
-  }
-
   // res.redirect('/rlogin?error=pw1')
 });
 
@@ -435,9 +403,10 @@ const router = express.Router();
 
 app.get("/monitorIds", async (req, res) => {
   try {
-    const connection = await pool.promise().getConnection();
-
-    const [rows] = await connection.query("SELECT sn FROM Devices");
+    var pool = new Pool(postgreConfig);
+    const connection = await pool.connect();
+    const result = await connection.query("SELECT sn FROM Devices");
+    const [rows] = result.rows;
 
     connection.release();
 

@@ -1,37 +1,21 @@
 import os
 from dotenv import load_dotenv
 load_dotenv()
-import mysql.connector
+import psycopg2 as postgre
 
 
-
-def connpreDB():
-    mhost = os.environ['mysqlhost']
-    muer = os.environ['mysqlUser']
-    mpassword = os.environ['mysqlPassword']
-    mdatabase = os.environ['mysqlDB']
-    mydb = mysql.connector.connect(
-        host = mhost,
-        user = muer,
-        password = mpassword
-    )
-    return mydb
 def conn():
-    mhost = os.environ['mysqlhost']
-    muer = os.environ['mysqlUser']
-    mpassword = os.environ['mysqlPassword']
-    mdatabase = os.environ['mysqlDB']
-    mydb = mysql.connector.connect(
-        host = mhost,
-        user = muer,
-        password = mpassword,
-        database = mdatabase
+    # mhost = os.environ['postgrehost']
+    # muer = os.environ['postgreUser']
+    # mpassword = os.environ['postgrePassword']
+    # mdatabase = os.environ['postgreDB']
+    mydb = postgre.connect(
+        os.environ['POSTGRES_URL'],
+        user = os.environ['POSTGRES_USER'],
+        password = os.environ['POSTGRES_PASSWORD'],
     )
     return mydb
-def createDB():
-    mydb = connpreDB()
-    mycursor = mydb.cursor()
-    mycursor.execute("CREATE DATABASE IF NOT EXISTS SaltonSea")
+
 
 def dropTables():
     mydb = conn()
@@ -42,25 +26,34 @@ def dropTables():
     mycursor = mydb.cursor()
     sql = "DROP TABLE IF EXISTS Devices"
     mycursor.execute(sql)
+    mycursor.close()
+    mydb.close()
 
 def createDataTable():
     mydb = conn()
     mycursor = mydb.cursor()
     mycursor.execute("CREATE TABLE IF NOT EXISTS Data (sn VARCHAR(255), pm25 DECIMAL(10,3), pm10 DECIMAL(10,3), timestamp VARCHAR(255), PRIMARY KEY(sn, timestamp))")
+    mydb.commit()
+    mycursor.close()
+    mydb.close()
 # createDataTable()
 
 def createDevicesTable():
     mydb = conn()
     mycursor = mydb.cursor()
     mycursor.execute("CREATE TABLE IF NOT EXISTS Devices (sn VARCHAR(255),description VARCHAR(255), lat DECIMAL(5,2), lon DECIMAL(5,2), pmHealth VARCHAR(20), sdHealth VARCHAR(20), onlne VARCHAR(10), dataFraction DECIMAL(5,4), last_seen VARCHAR(255), PRIMARY KEY(sn))")
-
+    mydb.commit()
+    mycursor.close()
+    mydb.close()
 def createUserTable():
     mydb = conn()
     mycursor = mydb.cursor()
-    mycursor.execute("CREATE TABLE IF NOT EXISTS User (email VARCHAR(255), username VARCHAR(30), pwd TEXT, PRIMARY KEY (username) )")
+    mycursor.execute("CREATE TABLE IF NOT EXISTS usrs (email VARCHAR(255), username VARCHAR(30), pwd TEXT, PRIMARY KEY (username) )")
+    mydb.commit()
+    mycursor.close()
+    mydb.close()
 
 def initialize():
-    createDB()
     dropTables()
     createDataTable()
     createDevicesTable()
