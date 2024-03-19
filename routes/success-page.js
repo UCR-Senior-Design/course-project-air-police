@@ -7,75 +7,6 @@ const mysql = require("mysql2");
 require("dotenv").config();
 
 
-//////////////////////////
-/*
-const express = require('express');
-const router = express.Router();
-const { PythonShell } = require("python-shell");
-
-async function calculateAQI(desc) {
-    return new Promise((resolve, reject) => {
-        let options = {
-            mode: 'text',
-            pythonPath: '.venv/Scripts/python',
-            pythonOptions: ['-u'],
-            args: [desc]
-        };
-
-        PythonShell.run('data_call/aqi.py', options, (err, result) => {
-            if (err) reject(err);
-            resolve(result);
-        });
-    });
-}
-
-async function makeImgSRC(monitorId) {
-    return new Promise((resolve, reject) => {
-        let options = {
-            mode: "text",
-            pythonPath: ".venv/Scripts/python",
-            pythonOptions: ["-u"], // get print results in real-time
-            args: [monitorId],
-        };
-        PythonShell.run("data_call/aqi.py", options).then((result) => {
-            let img_src = "data:image/png;base64,";
-            img_src = img_src.concat(result);
-            resolve(img_src);
-        }).catch(reject);
-    });
-}
-
-router.get('/', async (req, res) => {
-    const monitorId = req.query.monitorId;
-   
-    try {
-        const img_src = await makeImgSRC(monitorId);
-        res.render('success-page', { title: 'SUCCESS PAGE', monitorId, img_src });
-    } catch (error) {
-        console.error('Error calculating AQI:', error);
-        res.status(500).send('Error calculating AQI');
-    }
-
-});
-
-module.exports = router;
-*/
-
-
-// const express = require('express');
-// const router = express.Router();
-// const { PythonShell } = require("python-shell");
-
-// const path = require('path');
-
-// let pool;
-// PythonShell.run(path.join(__dirname, '..', 'data_call', 'initializeDB.py'), null, function (err, result) {
-//     if (err) throw err;
-//     console.log('Database connection pool initialized successfully.');
-//     pool = result;
-// });
-
-
 
 var img_src = "images/refresh.png";
 var monitorId = "default"; // while the python script sees "defualt" it will generate a loading img as a placeholder
@@ -106,7 +37,6 @@ function calculateAQI(pm_value, pm_type) {
             return Math.round(aqi);
         }
     }
-
     return -1;
 }
 
@@ -174,28 +104,12 @@ async function makeImgSRC() {
             args: [monitorId],
           };
         PythonShell.run("data_call/aqi.py", options).then((result) => {
-            //   if (err) {
-            //       console.error('Error fetching AQI data:', err);
-            //       return;
-            //   }
             img_src = "data:image/png;base64,";
             img_src = img_src.concat(result)
         });
       });
   } 
 
-// router.get('/', async (req, res) => {
-//     const monitorId = req.query.monitorId;
-
-//     try {
-//         const aqi = await getAQIValues(monitorId);
-//         const img_src = await makeImgSRC(monitorId);
-//         res.render('success-page', { title: 'SUCCESS PAGE', monitorId, aqi, img_src });
-//     } catch (error) {
-//         console.error('Error fetching AQI values:', error);
-//         res.status(500).send('Error fetching AQI values');
-//     }
-// });
 
 var aqi = 50; // default value
 
@@ -203,10 +117,10 @@ router.get('/', async (req,res) => {
     monitorId = req.query.monitorId
     makeImgSRC() // uses python-shell to create the img src from aqi.py
 
-    aqi = await getAQIValues(monitorId); // this just returns a pending promise so I'm commenting it out for now
+    aqi = await getAQIValues(monitorId); 
     
     if (req.session.logged_in) {
-        res.render("success-page", { title: 'SUCCESS PAGE ', aqi, monitorId, img_src});
+        res.render("success-page", { title: 'SUCCESS PAGE ', aqiScore : (aqi.PM25 + aqi.PM10)/2, monitorId, img_src});
         monitorId = req.query.monitorId
 
         res.status(200);
