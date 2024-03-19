@@ -574,9 +574,9 @@ def mapGeneration(data=None, pm_type='pm10'):
     m.get_root().html.add_child(folium.Element(legend_html))
 
     # Save the map as an HTML file
-    html_file_path = 'views/map.hbs'
-    m.save(html_file_path)
-
+    # html_file_path = 'views/map.hbs'
+    # m.save(html_file_path)
+    print(m)
     
 
     url = f'http://localhost:3000/map?pm_type={pm_type}'
