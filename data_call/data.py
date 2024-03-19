@@ -495,6 +495,8 @@ def mapGeneration(data=None, pm_type='pm10'):
                 marker_color = color
                 break
 
+
+
         folium.CircleMarker(
             location=[latitude, longitude],
             radius=5,
@@ -511,6 +513,14 @@ def mapGeneration(data=None, pm_type='pm10'):
                 {img}
             """
         ).add_to(m)
+        #border color is black now 
+        folium.CircleMarker(
+        location=[latitude, longitude],
+        radius=6,
+        color="black",  
+        fill=False,  
+        ).add_to(m)
+
 
     # Adding Dropdown Menu
     dropdown_html = f"""
