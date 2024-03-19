@@ -617,7 +617,7 @@ def mapGeneration(data=None, pm_type='pm10'):
         content_type_id = 'n21o2'  # Replace 'n21o2' with the actual content type ID
         space = client.spaces().find(space_id)
         environment = space.environments().find(environment_id)
-        entry_id = 'map'
+        entry_id = pm_type
         try:
             entry = client.entries(space_id, environment_id).find(entry_id)
             if(entry):
@@ -625,10 +625,17 @@ def mapGeneration(data=None, pm_type='pm10'):
                 updated_entry = entry.update(entry_data)
                 published_entry = updated_entry.publish()
             else:
-                entry = environment.content_types().find(content_type_id).entries().create('map', entry_data)
+                entry = environment.content_types().find(content_type_id).entries().create(entry_id, entry_data)
                 entry.publish()
         except Exception as e:
             print('Error creating entry:', e)
+            entry = environment.content_types().find(content_type_id).entries().create(entry_id, entry_data)
+            entry.publish()   
+            
+        # environment.close()
+        # space.close()
+        # client.close()
+        # new_entry = space.entries().create(id, entry_data)
     except Exception as e:
         print('Error creating entry:', e)
     url = f'http://localhost:3000/map?pm_type={pm_type}'

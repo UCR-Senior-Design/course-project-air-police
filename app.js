@@ -142,6 +142,7 @@ app.use("", homeRouter);
 // creates map page
 const mapRouter = require("./routes/map.js");
 app.use("/map", mapRouter);
+const {entryID, changeMap} = require('./routes/changepm.js')
 
 // create route for the researcher table data
 app.get("/data",  async (req, res) => {
@@ -449,18 +450,19 @@ app.get("/aqiData", async (req, res) => {
 app.post("/changePMType", async (req, res) => {
   const selectedPMType = req.body.pm_type;
   console.log(selectedPMType);
-  let options = {
-    mode: "text",
-    pythonPath: ".venv/bin/python",
+  changeMap(selectedPMType);
+  // let options = {
+  //   mode: "text",
+  //   pythonPath: ".venv/bin/python",
 
-    pythonOptions: ["-u"], // get print results in real-time
-    args: [selectedPMType],
-  };
-  let { PythonShell } = require("python-shell");
-  await PythonShell.run("data_call/generateMap.py", options, (err, results) => {
-    if (err) throw err;
-    console.log("Map generation completed");
-  });
+  //   pythonOptions: ["-u"], // get print results in real-time
+  //   args: [selectedPMType],
+  // };
+  // let { PythonShell } = require("python-shell");
+  // await PythonShell.run("data_call/generateMap.py", options, (err, results) => {
+  //   if (err) throw err;
+  //   console.log("Map generation completed");
+  // });
 
   res.redirect("/map"); //redirects back to the map page
 });

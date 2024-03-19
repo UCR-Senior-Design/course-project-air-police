@@ -14,6 +14,7 @@ const { createClient } = require('contentful');
 //    });
 //    res.status(200);
 //})
+const {getID, changeMap} = require('./changepm.js')
 const postgreConfig = {
   connectionString: process.env.POSTGRES_URL ,
 };
@@ -21,17 +22,12 @@ const postgreConfig = {
 router.get("/", async (req, res) => {
   const client = createClient({
     space: process.env.ContentfulID,
-    accessToken: process.env.ContentfulApiToken
+    accessToken: process.env.environmentIDs
   });
-
   try {
-    const entries = await client.getEntries({
-      select: 'fields.htmlContent'
-    });
+    const entries = await client.getEntry(getID());
 
-    // Extract HTML content from the fetched entries
-    const htmlContentArray = entries.items.map(entry => entry.fields.htmlContent['en-US']);
-    var map = htmlContentArray[0];
+    var map = entries.fields.htmlContent.content[0].content[0].value;
     var pool = new Pool(postgreConfig);
     const con = await pool.connect();
     const cookieHeader = req.headers.cookie;
@@ -67,7 +63,10 @@ router.get("/", async (req, res) => {
       //   title: "AirPolice Map",
       // });
       // res.status(200);
-      res.status(200).send(map);
+      res.render('map', {
+        mapContent: map // Use the HTML content obtained from Contentful
+      });
+      // res.status(200).send(map);
     } else {
       res.redirect("/rlogin?error=ngl");
     }
@@ -77,3 +76,4 @@ router.get("/", async (req, res) => {
 });
 
 module.exports = router;
+

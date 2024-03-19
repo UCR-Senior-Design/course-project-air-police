@@ -17,6 +17,13 @@ exec(`python data_call/generateMap.py ${param}`, (error, stdout, stderr)=>{
     return;
   }
 })
+const param2 = "pm10";
+exec(`python data_call/generateMap.py ${param2}`, (error, stdout, stderr)=>{
+  if(error){
+    console.error('exec error: ${error}');
+    return;
+  }
+})
 // Runs test.py once the website starts running
 // let { PythonShell } = require("python-shell");
 
