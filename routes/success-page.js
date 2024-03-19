@@ -95,20 +95,29 @@ async function getAQIValues(monitorId) {
     
     // console.log(aqiPM25);
 }
-
+const { exec } = require('child_process');
 async function makeImgSRC() {
     await new Promise((resolve, reject) => {
-        let options = {
-            mode: "text",
-            pythonPath: ".venv/bin/python",
-            pythonOptions: ["-u"], // get print results in real-time
-            args: [monitorId],
-          };
-        PythonShell.run("data_call/aqi.py", options).then((result) => {
+    //     let options = {
+    //         mode: "text",
+    //         pythonPath: ".venv/bin/python",
+    //         pythonOptions: ["-u"], // get print results in real-time
+    //         args: [monitorId],
+    //       };
+    //     PythonShell.run("data_call/aqi.py", options).then((result) => {
+    //         img_src = "data:image/png;base64,";
+    //         img_src = img_src.concat(result)
+    //     });
+      
+        exec(`python data_call/aqi.py`, (error, stdout, stderr)=>{
+            if(error){
+            console.error('exec error: ${error}');
+            return;
+            }
             img_src = "data:image/png;base64,";
-            img_src = img_src.concat(result)
-        });
-      });
+            img_src = img_src.concat(stdout)
+      })
+    });
   } 
 
 

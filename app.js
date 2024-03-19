@@ -468,16 +468,22 @@ app.post("/changePMType", async (req, res) => {
 });
 
 app.post("/force", async (req, res) => {
-  let options = {
-    mode: "text",
-    pythonPath: ".venv/bin/python",
-    pythonOptions: ["-u"], // get print results in real-time
-  };
-  let { PythonShell } = require("python-shell");
-  PythonShell.run("data_call/forceUpdate.py", options, (err, results) => {
-    if (err) throw err;
-    console.log("results");
-  });
+  // let options = {
+  //   mode: "text",
+  //   pythonPath: ".venv/bin/python",
+  //   pythonOptions: ["-u"], // get print results in real-time
+  // };
+  // let { PythonShell } = require("python-shell");
+  // PythonShell.run("data_call/forceUpdate.py", options, (err, results) => {
+  //   if (err) throw err;
+  //   console.log("results");
+  // });
+  exec(`python data_call/forceUpdate.py`, (error, stdout, stderr)=>{
+    if(error){
+      console.error('exec error: ${error}');
+      return;
+    }
+  })
   res.redirect("/table");
 });
 //Export the router
