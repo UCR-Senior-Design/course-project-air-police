@@ -89,7 +89,7 @@ const { exec } = require('child_process');
 
 async function makeImgSRC() {
     await new Promise((resolve, reject) => {
-        
+        exec("chmod +x data_call/aqi.py");
         exec(`${pythonPath} data_call/aqi.py ${monitorId}`, (error, stdout, stderr)=>{
             if(error){
             console.error(`oops: ${error}`);
