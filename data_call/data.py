@@ -577,8 +577,7 @@ def mapGeneration(data=None, pm_type='pm10'):
     html_file_path = 'views/map.hbs'
     m.save(html_file_path)
 
-    # Open the HTML file in the default web browser
-    webbrowser.open(html_file_path)
+    
 
     url = f'http://localhost:3000/map?pm_type={pm_type}'
     print(url)
