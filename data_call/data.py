@@ -448,7 +448,7 @@ import folium
 import webbrowser
 import pandas as pd
 from folium.plugins import HeatMap
-
+from contentful import Client
 
 ###############################################################################################################
 ####                                            mapGeneration                                              ####
@@ -572,13 +572,24 @@ def mapGeneration(data=None, pm_type='pm10'):
     </style>
     """
     m.get_root().html.add_child(folium.Element(legend_html))
-
+    
     # Save the map as an HTML file
     # html_file_path = 'views/map.hbs'
     # m.save(html_file_path)
-    print(m)
-    
-
+    # print(m)
+    client = Client(space_id=os.environ['ContentfulID'], access_token=os.environ['ContentfulApiToken'])
+    entry_data = {
+        'fields': {
+            'htmlContent': {
+                'en-US': m
+            }
+        }
+    }
+    try:
+        new_entry = client.entries().create(entry_data)
+        print('New entry created:', new_entry)
+    except Exception as e:
+        print('Error creating entry:', e)
     url = f'http://localhost:3000/map?pm_type={pm_type}'
     print(url)
 

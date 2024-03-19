@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 // let { PythonShell } = require("python-shell");
 
 const { exec } = require('child_process');
+const { createClient } = require('contentful');
 // Getting all
 //router.get('/', (req,res) => {
 //    res.render('map', {
@@ -18,16 +19,19 @@ const postgreConfig = {
 };
 
 router.get("/", async (req, res) => {
-  var map
-  const param = "pm25";
-  exec(`python data_call/generateMap.py ${param}`, (error, stdout, stderr)=>{
-  if(error){
-    console.error('exec error: ${error}');
-  }
-  map = stdout
-  })
+  const client = createClient({
+    space: process.env.ContentfulID,
+    accessToken: process.env.ContentfulApiToken
+  });
 
   try {
+    const entries = await client.getEntries({
+      select: 'fields.htmlContent'
+    });
+
+    // Extract HTML content from the fetched entries
+    const htmlContentArray = entries.items.map(entry => entry.fields.htmlContent['en-US']);
+    var map = htmlContentArray[0];
     var pool = new Pool(postgreConfig);
     const con = await pool.connect();
     const cookieHeader = req.headers.cookie;
@@ -63,7 +67,7 @@ router.get("/", async (req, res) => {
       //   title: "AirPolice Map",
       // });
       // res.status(200);
-      // res.status(200).send(map);
+      res.status(200).send(map);
     } else {
       res.redirect("/rlogin?error=ngl");
     }
