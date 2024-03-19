@@ -23,11 +23,10 @@ function calculateAQI(pm_value, pm_type) {
     } else {
         return -1;
     }
-
+    // console.log(pm_value)
     pm_value = parseFloat(pm_value);
-
+    
     if (isNaN(pm_value)) {
-        print("hello")
         return -1;
     }
 
@@ -42,32 +41,21 @@ function calculateAQI(pm_value, pm_type) {
 
 
 var pmValues
-
+const postgreConfig = {
+    connectionString: process.env.POSTGRES_URL ,
+  };
 async function fetchPMValues(monitorId) {
-    const postgreConfig = {
-        connectionString: process.env.POSTGRES_URL ,
-      };
+    
 
     try {
         var pool = new Pool(postgreConfig);
         const con = await pool.connect();
         const query = "SELECT pm25, pm10, timestamp FROM Data, Devices WHERE Data.sn = Devices.sn AND Devices.description = $1 ORDER BY timestamp DESC LIMIT 1";
-        const values = [monitorId];
-
-        // await con.promise().query(query, values)
-        // .then(([rows, fields]) => {
-        //     // console.log(rows);
-        //     result = rows[0];
-        //     console.log(result);
-        //     return result; 
-        // })
-        // .catch((err) => {
-        //     console.error(err);
-        // });
-        // const [rows, fields] = await con.promise().query(query, values);
-        var result;
-        result = await con.query(query, values);
-        const rows = result.rows
+        const value = [monitorId];
+        let result;
+        result = await con.query(query, value);
+        const rows = result.rows[0];
+        console.log(rows);
         await con.release();
         // const result = rows[0];
         return rows;
@@ -83,6 +71,7 @@ async function getAQIValues(monitorId) {
         let aqiPM25 = -1;
         let aqiPM10 = -1;
         if(pmValues){
+            console.log('hi');
             aqiPM25 = calculateAQI(pmValues.pm25, 'PM25');
             aqiPM10 = calculateAQI(pmValues.pm10, 'PM10');
         }
@@ -96,26 +85,29 @@ async function getAQIValues(monitorId) {
     // console.log(aqiPM25);
 }
 const { exec } = require('child_process');
+let { PythonShell } = require("python-shell");
+
+
 async function makeImgSRC() {
     await new Promise((resolve, reject) => {
-    //     let options = {
-    //         mode: "text",
-    //         pythonPath: ".venv/bin/python",
-    //         pythonOptions: ["-u"], // get print results in real-time
-    //         args: [monitorId],
-    //       };
-    //     PythonShell.run("data_call/aqi.py", options).then((result) => {
-    //         img_src = "data:image/png;base64,";
-    //         img_src = img_src.concat(result)
-    //     });
-      
-        exec(`python data_call/aqi.py`, (error, stdout, stderr)=>{
+        // let options = {
+        //     mode: "text",
+        //     pythonPath: ".venv/bin/python",
+        //     pythonOptions: ["-u"], // get print results in real-time
+        //     args: [monitorId],
+        //   };
+        // PythonShell.run("data_call/aqi.py", options).then((result) => {
+        //     img_src = "data:image/png;base64,";
+        //     img_src = img_src.concat(result)
+        // });
+        exec(`python data_call/aqi.py ${monitorId}`, (error, stdout, stderr)=>{
             if(error){
             console.error('exec error: ${error}');
             return;
             }
             img_src = "data:image/png;base64,";
             img_src = img_src.concat(stdout)
+            resolve(img_src);
       })
     });
   } 
@@ -125,8 +117,9 @@ var aqi = 50; // default value
 
 router.get('/', async (req,res) => {
     monitorId = req.query.monitorId
-    await makeImgSRC() // uses python-shell to create the img src from aqi.py
-
+    // uses python-shell to create the img src from aqi.py
+    await makeImgSRC() 
+    console.log(img_src)
     aqi = await getAQIValues(monitorId); 
     
     if (monitorId) {
