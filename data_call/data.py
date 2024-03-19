@@ -353,6 +353,9 @@ def pullData(desc=None):
         data = mycursor.fetchall()
         data = pd.DataFrame(data).dropna(how='all', axis = 0).drop(columns=4, axis = 1)
         data = data.rename(columns = {0: 'sn',1:'description', 2:'geo.lat', 3:'geo.lon', 4:'pmHealth',5:'sdHealth', 6:'status', 7:'Data Fraction', 8:'pm25', 9: "pm10", 10: "timestamp"})
+        mycursor.close()
+        mydb.close()
+
         return data
     else:
         query = "SELECT pm25, pm10, timestamp FROM Data WHERE sn IN (SELECT sn FROM Devices WHERE description = %s ORDER BY timestamp DESC)" # LIMIT 1
@@ -361,6 +364,9 @@ def pullData(desc=None):
         data = mycursor.fetchall()
         #data = pd.DataFrame(data).dropna(how='all', axis = 0).drop(columns=4, axis = 1)
         #data = data.rename(columns = {0: 'pm25',1:'pm10', 2: "timestamp"})
+        mycursor.close()
+        mydb.close()
+
         return data
     mycursor.close()
     mydb.close()
@@ -438,6 +444,8 @@ def pullDataTime(description, time=30):
     mycursor.execute(query, values)
     data = mycursor.fetchall()
     pdData = pd.DataFrame(data).rename(columns = {0: 'sn', 1: 'description',2: 'pm25', 3:'pm10', 4:'timestamp', 5:'geo.lat',6:'geo.lon'})
+    mycursor.close()
+    mydb.close()
     #print(pdData) # uncommenting this will break generated aqi encoding!
     return pdData
 
