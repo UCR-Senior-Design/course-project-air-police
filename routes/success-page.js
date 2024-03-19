@@ -51,7 +51,7 @@ async function fetchPMValues(monitorId) {
     try {
         var pool = new Pool(postgreConfig);
         const con = await pool.connect();
-        const query = "SELECT pm25, pm10, timestamp FROM Data, Devices WHERE Data.sn = Devices.sn AND Devices.description = ? ORDER BY timestamp DESC LIMIT 1";
+        const query = "SELECT pm25, pm10, timestamp FROM Data, Devices WHERE Data.sn = Devices.sn AND Devices.description = $1 ORDER BY timestamp DESC LIMIT 1";
         const values = [monitorId];
 
         // await con.promise().query(query, values)
@@ -66,7 +66,7 @@ async function fetchPMValues(monitorId) {
         // });
         // const [rows, fields] = await con.promise().query(query, values);
         var result;
-        result = await con.query(query, value);
+        result = await con.query(query, values);
         const rows = result.rows
         await con.release();
         // const result = rows[0];
@@ -97,7 +97,7 @@ async function getAQIValues(monitorId) {
 }
 const { exec } = require('child_process');
 async function makeImgSRC() {
-
+    await new Promise((resolve, reject) => {
     //     let options = {
     //         mode: "text",
     //         pythonPath: ".venv/bin/python",
@@ -109,7 +109,7 @@ async function makeImgSRC() {
     //         img_src = img_src.concat(result)
     //     });
       
-        await exec(`python data_call/aqi.py`, (error, stdout, stderr)=>{
+        exec(`python data_call/aqi.py`, (error, stdout, stderr)=>{
             if(error){
             console.error('exec error: ${error}');
             return;
@@ -117,6 +117,7 @@ async function makeImgSRC() {
             img_src = "data:image/png;base64,";
             img_src = img_src.concat(stdout)
       })
+    });
   } 
 
 
