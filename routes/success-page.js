@@ -100,6 +100,7 @@ async function makeImgSRC() {
             img_src = img_src.concat(stdout)
             resolve(img_src);
          });
+         resolve();
     });
   } 
 
@@ -122,7 +123,7 @@ router.get('/', async (req,res) => {
         res.redirect('/login');
     }
 }catch(error){
-    res.redirect('/login')
+    console.error(error);
 }
 
 })
