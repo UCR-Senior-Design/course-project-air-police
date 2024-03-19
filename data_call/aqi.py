@@ -9,7 +9,6 @@ import data as dc
 from dotenv import load_dotenv
 load_dotenv()
 import numpy as np
-import mysql.connector
 import io
 from io import BytesIO
 import base64

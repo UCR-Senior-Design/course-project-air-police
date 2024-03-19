@@ -1,6 +1,5 @@
 const express = require('express')
 const router = express.Router()
-let { PythonShell } = require("python-shell");
 
 // sql imports
 // const mysql = require("mysql2");
@@ -98,7 +97,7 @@ async function getAQIValues(monitorId) {
 }
 const { exec } = require('child_process');
 async function makeImgSRC() {
-    await new Promise((resolve, reject) => {
+
     //     let options = {
     //         mode: "text",
     //         pythonPath: ".venv/bin/python",
@@ -110,7 +109,7 @@ async function makeImgSRC() {
     //         img_src = img_src.concat(result)
     //     });
       
-        exec(`python data_call/aqi.py`, (error, stdout, stderr)=>{
+        await exec(`python data_call/aqi.py`, (error, stdout, stderr)=>{
             if(error){
             console.error('exec error: ${error}');
             return;
@@ -118,7 +117,6 @@ async function makeImgSRC() {
             img_src = "data:image/png;base64,";
             img_src = img_src.concat(stdout)
       })
-    });
   } 
 
 
