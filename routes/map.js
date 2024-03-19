@@ -18,9 +18,15 @@ const postgreConfig = {
 
 router.get("/", async (req, res) => {
   try {
-    var con = new Pool(postgreConfig);
-    await con.connect();
-    const token = req.session.token;
+    var pool = new Pool(postgreConfig);
+    const con = await pool.connect();
+    const cookieHeader = req.headers.cookie;
+    if(!cookieHeader){
+      res.redirect('/rlogin');
+      return;
+    }
+    const cookies = cookieHeader.split(';');
+    const token = cookies.find(cookie => cookie.trim().startsWith('token=')).split('=')[1];
     let user;
     let isPorter = false;
     if (token) {
@@ -41,6 +47,7 @@ router.get("/", async (req, res) => {
     var result;
     result = await con.query(query, value);
     const rows = result.rows;
+    await con.release();
     if (rows.length > 0) {
       res.render("map", {
         title: "AirPolice Map",

@@ -26,6 +26,8 @@ def dropTables():
     mycursor = mydb.cursor()
     sql = "DROP TABLE IF EXISTS Devices"
     mycursor.execute(sql)
+    mycursor.close()
+    mydb.close()
 
 def createDataTable():
     mydb = conn()

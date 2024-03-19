@@ -61,16 +61,6 @@ def fetchData():
 # database stuff cant do it in its own folder
 # connect to mongoclient
 def connect():
-    # mhost = os.environ['mysqlhost']
-    # muer = os.environ['mysqlUser']
-    # mpassword = os.environ['mysqlPassword']
-    # mdatabase = os.environ['mysqlDB']
-    # mydb = mysql.connector.connect(
-    #     host = mhost,
-    #     user = muer,
-    #     password = mpassword,
-    #     database = mdatabase
-    # )
     mydb = postgre.connect(
         os.environ['POSTGRES_URL'],
         user = os.environ['POSTGRES_USER'],
@@ -111,6 +101,8 @@ def grabAllSensor():
     mycursor.executemany(query, values)
     mydb.commit()
     print(mycursor.rowcount, "was inserted")
+    mycursor.close()
+    mydb.close()
 # grabAllSensor()
 # def mapIdToSN(id):
 #     mydb = connect()
@@ -140,6 +132,8 @@ def getUniqueDevices():
     list = []
     for i, sn in dataframe.iterrows():
         list.append(sn[0])
+    mycursor.close()
+    mydb.close()
     return list
 
 def pushFullDB():
@@ -247,6 +241,8 @@ def checkOffline():
     mycursor = mydb.cursor()
     mycursor.executemany(query, value)
     mydb.commit()
+    mycursor.close()
+    mydb.close()
 
 def updateHealth(serialNumber):
     if serialNumber == None:
@@ -280,6 +276,8 @@ def updateHealth(serialNumber):
     mycursor = mydb.cursor()
     mycursor.execute(query, values)
     mydb.commit()
+    mycursor.close()
+    mydb.close()
 
 
 
@@ -310,6 +308,8 @@ def pushDB(data):
     mycursor.executemany(query,values)
     mydb.commit()
     print(mycursor.rowcount, "was inserted")
+    mycursor.close()
+    mydb.close()
 
 
 #should  work like how pullData used to work.
@@ -331,6 +331,8 @@ def getAllRecent():
     recent = pd.DataFrame(recent).dropna(how='all', axis = 0)
     recent = recent.rename(columns = {0: 'sn',1:'description', 2:'geo.lat', 3:'geo.lon', 4:'pmHealth',5:'sdHealth', 6:'status', 7:'Data Fraction', 8:'pm25', 9: "pm10", 10: "timestamp"})
     recent.replace(0, np.nan, inplace=True)
+    mycursor.close()
+    mydb.close()
     return recent
 
 
@@ -352,7 +354,8 @@ def pullData(serialNumber=None):
         data = pd.DataFrame(data).dropna(how='all', axis = 0)
         data = data.rename(columns = {0: 'sn',1: 'description', 2:'pm25', 3:'pm10', 4:'timestamp', 5:'geo.lat', 6:'geo.lon', 7:'pmHealth', 8:'sdHealh'})
         return data
-
+    mycursor.close()
+    mydb.close()
 
 
 #find devices that are not outputting a pm2.5 or pm10 reading
@@ -400,6 +403,7 @@ def notFunctional(data=None):
                 reason.append('geo.lat or geo.lon not reading properly')
                 nonFunc.append(row['sn'])
     nf = pd.DataFrame({'index': ind, 'sn': nonFunc, 'reason': reason})
+
     return nf
 
 
@@ -427,6 +431,8 @@ def pullDataTime(serialNumber, time=30):
     data = mycursor.fetchall()
     pdData = pd.DataFrame(data).rename(columns = {0: 'sn',1: 'description',2: 'pm25', 3:'pm10', 4:'timestamp', 5:'geo.lat',6:'geo.lon'})
     print(pdData)
+    mycursor.close()
+    mydb.close()
     return pdData
 # pullDataTime('MOD-PM-00645', 30);
 
@@ -713,6 +719,8 @@ def updateAllDataFraction():
     query = "UPDATE Devices SET dataFraction = %s WHERE sn = %s"
     mycursor.executemany(query, list)
     mydb.commit()
+    mycursor.close()
+    mydb.close()
 
 import os
 def genTimeGraph(serialNumber):

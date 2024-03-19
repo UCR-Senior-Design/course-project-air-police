@@ -7,10 +7,10 @@ require("dotenv").config();
 var monitorKeys;
 
 async function fetchMonitorDesc() {
-  const postgreConfig = Pool;
+
   try {
-    var con = new Pool(postgreConfig);
-    await con.connect();
+    var pool = new Pool(postgreConfig);
+    const con = await pool.connect();
     var query1 = "SELECT description FROM Devices;";
 
     // await con.promise().query(query1)
@@ -21,7 +21,7 @@ async function fetchMonitorDesc() {
     //     console.error(err);
     // });
     var results = await con.query(query1);
-    await con.end();
+    await con.release();
     monitorKeys = results.rows;
   } catch (error) {
     console.error(error);
