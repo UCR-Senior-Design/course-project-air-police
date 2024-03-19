@@ -2,8 +2,9 @@ const express = require("express");
 const router = express.Router();
 const { Pool } = require("pg");
 const jwt = require("jsonwebtoken");
-let { PythonShell } = require("python-shell");
+// let { PythonShell } = require("python-shell");
 
+const { exec } = require('child_process');
 // Getting all
 //router.get('/', (req,res) => {
 //    res.render('map', {

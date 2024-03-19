@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { Pool } = require("pg");
 const jwt = require("jsonwebtoken");
-
+const { exec } = require('child_process');
 const postgreConfig = {
   connectionString: process.env.POSTGRES_URL ,
 };
@@ -10,6 +10,7 @@ router.get("/", async (req, res) => {
   // if(req.session.logged_in){
   //   res.redirect('/table') // sends status code 302 by default
   // }else{
+
   try{
     var pool = new Pool(postgreConfig);
     const con = await pool.connect();
@@ -45,7 +46,7 @@ router.get("/", async (req, res) => {
     } else {
       res.render("rlogin", {
         title: "LOGIN ",
-        displayText: "researcher login test",
+        displayText: "researcher login ",
       });
       res.status(200);
     }
