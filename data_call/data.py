@@ -487,7 +487,7 @@ def mapGeneration(data=None, pm_type='pm10'):
         latitude = row['geo.lat']
         longitude = row['geo.lon']
         pm_value = row[pm_type]
-        img = genTimeGraph(row['sn'])
+        img = genTimeGraph(row['description'])
         # Determine the air quality color based on the PM2.5 value
         marker_color = "blue"  # Default color if value doesn't fall into any range
         for (min_value, max_value), color in selected_color_range.items():
@@ -513,12 +513,12 @@ def mapGeneration(data=None, pm_type='pm10'):
                 {img}
             """
         ).add_to(m)
-        #border color is black now 
+        #border color is black now
         folium.CircleMarker(
         location=[latitude, longitude],
         radius=6,
-        color="black",  
-        fill=False,  
+        color="black",
+        fill=False,
         ).add_to(m)
 
 
@@ -726,8 +726,10 @@ def updateAllDataFraction():
     mydb.commit()
 
 import os
+import io
+from io import BytesIO
 def genTimeGraph(serialNumber):
-    data = pullDataTime(serialNumber, 1)
+    data = pullDataTime(serialNumber, 30)
     # print(data.keys())
     plt.figure(figsize=(10, 6))
     if(data.empty):
@@ -743,15 +745,20 @@ def genTimeGraph(serialNumber):
     plt.xlabel("time")
     plt.ylabel("PM Values")
     plt.legend()
-    temp_file_path = 'pmtimegraph_'+serialNumber+'.png'
-    plt.savefig(temp_file_path)
-    # file_pattern = 'pmtimegraph_*.png'
+    # temp_file_path = 'pmtimegraph_'+serialNumber+'.png'
+    # plt.savefig(temp_file_path)
+    # # file_pattern = 'pmtimegraph_*.png'
 
-    with open(temp_file_path, 'rb') as file:
-        img_data = file.read()
-        img_base64 = base64.b64encode(img_data).decode('utf-8')
-        img_html = f'<img src="data:image/png;base64,{img_base64}" alt="PM2.5 Graph"style="width:400px; height:200px;">'
-
+    # with open(temp_file_path, 'rb') as file:
+    #     img_data = file.read()
+    #     img_base64 = base64.b64encode(img_data).decode('utf-8')
+    #     img_html = f'<img src="data:image/png;base64,{img_base64}" alt="PM2.5 Graph"style="width:400px; height:200px;">'
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png')
+    image_base64 = base64.b64encode(buf.getvalue()).decode('utf-8').replace('\n', '')
+    buf.close()
+    img_html = f'<img src="data:image/png;base64,{image_base64}" alt="PM2.5 Graph"style="width:400px; height:200px;">'
     plt.clf()
-    os.remove(temp_file_path)
+    plt.close()
+    # os.remove(temp_file_path)
     return img_html
