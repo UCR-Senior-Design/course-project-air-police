@@ -762,3 +762,17 @@ def genTimeGraph(serialNumber):
     plt.close()
     # os.remove(temp_file_path)
     return img_html
+
+def removeOldData():
+    mydb = connect()
+    mycursor = mydb.cursor()
+
+    ayear = datetime.now() - timedelta(days=365)
+    ayearstring = ayear.strftime('%Y-%m-%dT%H:%M:%S')
+
+    query = "DELETE FROM Data WHERE timestamp < %s "
+    values = [ayearstring]
+    mycursor.execute(query, values)
+    mydb.commit()
+    mycursor.close()
+    mydb.close()
