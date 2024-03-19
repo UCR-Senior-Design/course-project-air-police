@@ -5,7 +5,7 @@ const router = express.Router()
 // const mysql = require("mysql2");
 const { Pool } = require("pg");
 require("dotenv").config();
-
+const pythonPath = require.resolve('python');
 
 
 var img_src = "images/refresh.png";
@@ -90,7 +90,7 @@ const { exec } = require('child_process');
 async function makeImgSRC() {
     await new Promise((resolve, reject) => {
         
-        exec(`python data_call/aqi.py ${monitorId}`, (error, stdout, stderr)=>{
+        exec(`${pythonPath} data_call/aqi.py ${monitorId}`, (error, stdout, stderr)=>{
             if(error){
             console.error(`oops: ${error}`);
             reject();
