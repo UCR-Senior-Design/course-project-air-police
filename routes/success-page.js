@@ -90,10 +90,9 @@ const fs = require('fs');
 async function makeImgSRC() {
     await new Promise((resolve, reject) => {
         // exec("chmod +x data_call/aqi.py");
-        fs.chmod('data_call/aqi.py', '755', (err) => {
+        fs.chmod('../data_call', '755', (err) => {
             if (err) {
                 console.error(`Error setting execute permission: ${err}`);
-                res.status(500).send('Internal Server Error');
                 return;
             }
         });
