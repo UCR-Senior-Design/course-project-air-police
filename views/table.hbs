@@ -1,193 +1,288 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Researcher Dashboard</title>
-    <style>
-        .text-red {
-            color: red;
-        }
-        .text-green {
-            color: green;
-        }
-    </style>
-    <!-- Include Bootstrap for styling -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-</head>
-<body>
-<div class="container mt-4">
-    <h4 class="text text-success text-center">
-        A list of all the monitors with errors
-    </h4>
-
-    <table class="table-striped border-success" id="errorTable">
-        <thead>
-        <tr>
-            <th data-field="sn">
-                <span class="text-success">
-                    Serial Number
-                </span>
-            </th>
-            <th data-field="description">
-                <span class="text-success">
-                    description
-                </span>
-            </th>
-            <th data-field="pmhealth">
-                <span class="text-success">
-                    PM Health
-                </span>
-            </th>
-            <th data-field="sdhealth">
-                <span class="text-success">
-                    SD Card
-                </span>
-            </th>
-            <th data-field="onlne">
-                <span class="text-success">
-                    State
-                </span>
-            </th>
-            <th data-field="datafraction">
-                <span class="text-success">
-                    Uptime
-                </span>
-            </th>
-            <th data-field="last_seen">
-                <span class="text-success">
-                    last_seen
-                </span>
-            </th>
-        </tr>
-        </thead>
-    </table>
-
-</div>
-
-<div class="container mt-4">
-
-    <h4 class="text text-success text-center">
-        Ordered list of all Salton Sea monitors
-    </h4>
-
-    <table class="table-striped border-success" id="normalTable">
-        <thead>
-        <tr>
-            <th data-field="sn">
-                <span class="text-success">
-                    Serial Number
-                </span>
-            </th>
-            <th data-field="pm25">
-                <span class="text-success">
-                    PM 2.5
-                </span>
-            </th>
-            <th data-field="pm10">
-                <span class="text-success">
-                    PM 10
-                </span>
-            </th>
-            <th data-field="pmHealth">
-                <span class="text-success">
-                    PM Health
-                </span>
-            </th>
-            <th data-field="sdHealth">
-                <span class="text-success">
-                    SD Card
-                </span>
-            </th>
-            <th data-field="onlne">
-                <span class="text-success">
-                    State
-                </span>
-            </th>
-            <th data-field="dataFraction">
-                <span class="text-success">
-                    Uptime
-                </span>
-            </th>
-            <th data-field="timestamp">
-                <span class="text-success">
-                    Last Seen
-                </span>
-            </th>
-        </tr>
-        </thead>
-    </table>
-
-</div>
-
-
-<div class="container">
-    * Uptime is the monitor's activity percentage over the past 24 hours.
-</div>
-
-<!-- Include jQuery and other required files for Bootstrap -->
-<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-<script src="https://unpkg.com/bootstrap-table@1.16.0/dist/bootstrap-table.min.js"></script>
-
-<script type="text/javascript">
-    fetch('/errorData')
-        .then(response => response.json())
-        .then((data) => {
-            console.log(data);
-            $(document.getElementById('errorTable')).bootstrapTable({ data: data });
-        })
-        .catch(error => {
-            console.log(error);
-        });
-
-    fetch('/data')
-        .then(response => response.json())
-        .then((data) => {
-            console.log(data);
-            $(document.getElementById('normalTable')).bootstrapTable({ data: data }).on('post-body.bs.table', function() {
-            });
-        })
-        .catch(error => {
-            console.log(error);
-        });
-    $('#errorTable').on('post-body.bs.table',  function() {
-             applyColorToTable('#errorTable');
-        });
-    $('#normalTable').on('post-body.bs.table',  function() {
-             applyColorToTable('#normalTable');
-        });
-    function applyColorToTable(tableId) {
-    $(tableId + ' tbody tr').each(function() {
-        $(this).find('td').each(function(index) {
-            var value = $(this).text().trim().toLowerCase();
-            console.log("Column " + (index + 1) + ": " + value);
-            if (value.includes('error') || value.includes('offline')) {
-              imageUrl = '/images/redx.png';
-              var imageElement = $('<img>').attr('src', imageUrl, alt='error');
-              imageElement.css({
-                'width':'20px',
-                'height':'20px'
-              })
-              // Replace the text content of the cell with the image
-              $(this).html(imageElement);
-            } else if(value.includes('active') || value.includes('online')) {
-                imageUrl = '/images/green.png';
-                var imageElement = $('<img>').attr('src', imageUrl, alt='ok');
-                // Replace the text content of the cell with the image
-                imageElement.css({
-                'width':'20px',
-                'height':'20px'
-                })
-                $(this).html(imageElement);
-            } else if(value === '0.00%'){
-              $(this).addClass('text-red')
-            }else if(value.includes('%')){
-              $(this).addClass('text-green')
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Researcher Dashboard</title>
+        <style>
+            .text-red {
+                color: red;
             }
-        });
-    });
-}
+            .text-green {
+                color: green;
+            }
+            .pushRight {
+                margin-top: 5px;
+                margin-bottom: 10px;
+                position: absolute;
+                right: 10%;
+            }
+        </style>
+        <!-- Include Bootstrap for styling -->
+        <link
+            rel="stylesheet"
+            href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap4.min.css"
+        />
+    </head>
+    <body>
+        <div class="pushRight">
+            <form action="/force" method="POST" id="updateDB" class="pushRight">
+                <button
+                    name="forceUpdate"
+                    id="update"
+                    class="btn btn-lg btn-primary"
+                >
+                    ForceUpdate
+                </button>
+            </form>
+        </div>
+        <div class="container mt-4">
+            <h4 class="text text-success text-center">
+                A list of all the monitors with errors
+            </h4>
 
-</script>
-</body>
+            <table
+                class="table-striped table-bordered table-sm table"
+                id="errorTable"
+                cellspacing="0"
+                width="100%"
+            >
+                <thead>
+                    <tr>
+                        <th data-field="sn">
+                            <span class="text-success"> Serial Number </span>
+                        </th>
+                        <th data-field="description">
+                            <span class="text-success"> description </span>
+                        </th>
+                        <th data-field="pmHealth" name="pmhealth">
+                            <span class="text-success"> PM Health </span>
+                        </th>
+                        <th data-field="sdHealth" name="sdhealth">
+                            <span class="text-success"> SD Card </span>
+                        </th>
+                        <th data-field="onlne" name="status">
+                            <span class="text-success"> State </span>
+                        </th>
+                        <th data-field="dataFraction">
+                            <span class="text-success"> Uptime </span>
+                        </th>
+                        <th data-field="last_seen">
+                            <span class="text-success"> last_seen </span>
+                        </th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+
+        <div class="container mt-4">
+            <h4 class="text text-success text-center">
+                Ordered list of all Salton Sea monitors
+            </h4>
+
+            <table
+                class="table-striped table-bordered table-sm table"
+                id="normalTable"
+                cellspacing="0"
+                width="100%"
+            >
+                <thead>
+                    <tr>
+                        <th data-field="sn">
+                            <span class="text-success"> Serial Number </span>
+                        </th>
+                        <th data-field="pm25">
+                            <span class="text-success"> PM 2.5 </span>
+                        </th>
+                        <th data-field="pm10">
+                            <span class="text-success"> PM 10 </span>
+                        </th>
+                        <th data-field="pmHealth" name="pmhealth">
+                            <span class="text-success"> PM Health </span>
+                        </th>
+                        <th data-field="sdHealth" name="sdhealth">
+                            <span class="text-success"> SD Card </span>
+                        </th>
+                        <th data-field="onlne" name="status">
+                            <span class="text-success"> State </span>
+                        </th>
+                        <th data-field="dataFraction">
+                            <span class="text-success"> Uptime </span>
+                        </th>
+                        <th data-field="timestamp">
+                            <span class="text-success"> Last Seen </span>
+                        </th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+
+        <div class="container">
+            * Uptime is the monitor's activity percentage over the past 24
+            hours.<br>
+            ** Force Update will take a while Before the database is updated.
+        </div>
+
+        <!-- Include jQuery and other required files for Bootstrap -->
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+        <script src="https://unpkg.com/bootstrap-table@1.16.0/dist/bootstrap-table.min.js"></script>
+        <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap4.min.js"></script>
+
+        <script></script>
+
+        <script type="text/javascript">
+            $(document).ready(function () {
+                fetch("/errorData")
+                    .then((response) => response.json())
+                    .then((data) => {
+                        console.log(data);
+                        $(document.getElementById("errorTable")).bootstrapTable(
+                            { data: data },
+                        );
+                        $.fn.dataTable.ext.order["imageSource"] = function (
+                            settings,
+                            col,
+                        ) {
+                            var columnNodes = this.api()
+                                .column(col, { order: "index" })
+                                .nodes();
+                            var sortedData = columnNodes.map(function (td, i) {
+                                var imgSrc = $(td).find("img").attr("alt");
+                                return imgSrc === "ok" ? "1" : "0";
+                            });
+                            return sortedData;
+                        };
+                        $("#errorTable").DataTable({
+                            columnDefs: [
+                                {
+                                    className: "pmhealth",
+                                    targets: 2,
+                                    type: "imageSource",
+                                },
+                                {
+                                    className: "sdhealth",
+                                    targets: 3,
+                                    type: "imageSource",
+                                },
+                                {
+                                    className: "status",
+                                    targets: 4,
+                                    type: "imageSource",
+                                },
+                                { targets: "_all", orderable: true },
+                            ],
+                        });
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                    });
+
+                fetch("/data")
+                    .then((response) => response.json())
+                    .then((data) => {
+                        console.log(data);
+                        $(document.getElementById("normalTable"))
+                            .bootstrapTable({ data: data })
+                            .on("post-body.bs.table", function () {});
+                        $.fn.dataTable.ext.order["imageSource"] = function (
+                            settings,
+                            col,
+                        ) {
+                            var columnNodes = this.api()
+                                .column(col, { order: "index" })
+                                .nodes();
+                            var sortedData = columnNodes.map(function (td, i) {
+                                var imgSrc = $(td).find("img").attr("alt");
+                                return imgSrc === "ok" ? "1" : "0";
+                            });
+                            return sortedData;
+                        };
+                        $("#normalTable").DataTable({
+                            columnDefs: [
+                                {
+                                    className: "pmhealth",
+                                    targets: 3,
+                                    type: "imageSource",
+                                },
+                                {
+                                    className: "sdhealth",
+                                    targets: 4,
+                                    type: "imageSource",
+                                },
+                                {
+                                    className: "status",
+                                    targets: 5,
+                                    type: "imageSource",
+                                },
+                                { targets: "_all", orderable: true },
+                            ],
+                        });
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                    });
+
+                $("#errorTable").on("post-body.bs.table", function () {
+                    applyColorToTable("#errorTable");
+                });
+                $("#normalTable").on("post-body.bs.table", function () {
+                    applyColorToTable("#normalTable");
+                });
+                function applyColorToTable(tableId) {
+                    $(tableId + " tbody tr").each(function () {
+                        $(this)
+                            .find("td")
+                            .each(function (index) {
+                                var value = $(this).text().trim().toLowerCase();
+                                console.log(
+                                    "Column " + (index + 1) + ": " + value,
+                                );
+                                if (
+                                    value.includes("error") ||
+                                    value.includes("offline")
+                                ) {
+                                    imageUrl = "/images/redx.png";
+                                    var imageElement = $("<img>").attr(
+                                        "src",
+                                        imageUrl,
+                                        (alt = "error"),
+                                    );
+                                    imageElement.css({
+                                        width: "20px",
+                                        height: "20px",
+                                    });
+                                    // Replace the text content of the cell with the image
+                                    $(this).html(imageElement);
+                                } else if (
+                                    value.includes("active") ||
+                                    value.includes("online")
+                                ) {
+                                    imageUrl = "/images/green.png";
+                                    var imageElement = $("<img>").attr(
+                                        "src",
+                                        imageUrl,
+                                        (alt = "ok"),
+                                    );
+                                    // Replace the text content of the cell with the image
+                                    imageElement.css({
+                                        width: "20px",
+                                        height: "20px",
+                                    });
+                                    $(this).html(imageElement);
+                                } else if (value === "0.00%") {
+                                    $(this).addClass("text-red");
+                                } else if (value.includes("%")) {
+                                    $(this).addClass("text-green");
+                                }
+                            });
+                    });
+                }
+            });
+        </script>
+    </body>
 </html>

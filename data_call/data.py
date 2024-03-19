@@ -337,7 +337,7 @@ def getAllRecent():
 
 
 #tested and works a little slow but works unless your doing a data visualization you do not need to use this.
-def pullData(serialNumber=None):
+def pullData(desc=None):
     #######################################################################
     ## pulls all data from database                                      ##
     ## PARAMETERS:                                                       ##
@@ -347,12 +347,20 @@ def pullData(serialNumber=None):
     #######################################################################
     mydb = connect()
     mycursor = mydb.cursor()
-    if serialNumber == None:
-        query = "SELECT Data.sn, Devices.description, Data.pm25, Data.pm10, Data.timestamp, Devices.lat, Devices.lon, Devices.pmHealth, Devices.sdHealth FROM Data LEFT OUTER JOIN Devices ON Data.sn = Devices.sn"
+    if desc == None:
+        query = "SELECT Devices.sn, Devices.description, Devices.lat, Devices.lon, Devices.pmHealth, Devices.sdHealth, Devices.onlne, Devices.datafraction,  Data.pm25, Data.pm10, Data.timestamp FROM Data LEFT OUTER JOIN Devices ON Data.sn = Devices.sn"
         mycursor.execute(query)
         data = mycursor.fetchall()
-        data = pd.DataFrame(data).dropna(how='all', axis = 0)
-        data = data.rename(columns = {0: 'sn',1: 'description', 2:'pm25', 3:'pm10', 4:'timestamp', 5:'geo.lat', 6:'geo.lon', 7:'pmHealth', 8:'sdHealh'})
+        data = pd.DataFrame(data).dropna(how='all', axis = 0).drop(columns=4, axis = 1)
+        data = data.rename(columns = {0: 'sn',1:'description', 2:'geo.lat', 3:'geo.lon', 4:'pmHealth',5:'sdHealth', 6:'status', 7:'Data Fraction', 8:'pm25', 9: "pm10", 10: "timestamp"})
+        return data
+    else:
+        query = "SELECT pm25, pm10, timestamp FROM Data WHERE sn IN (SELECT sn FROM Devices WHERE description = %s ORDER BY timestamp DESC)" # LIMIT 1
+        values = [desc]
+        mycursor.execute(query, values)
+        data = mycursor.fetchall()
+        #data = pd.DataFrame(data).dropna(how='all', axis = 0).drop(columns=4, axis = 1)
+        #data = data.rename(columns = {0: 'pm25',1:'pm10', 2: "timestamp"})
         return data
     mycursor.close()
     mydb.close()
@@ -407,8 +415,8 @@ def notFunctional(data=None):
     return nf
 
 
-# this should help with some of the data visualizations.
-def pullDataTime(serialNumber, time=30):
+# monitor description is unique so it should be able to substitute for primary key sn
+def pullDataTime(description, time=30):
     #########################################################################
     ## pulls data from specific serialNumber within the last time days     ##
     ## PARAMETERS:                                                         ##
@@ -418,23 +426,20 @@ def pullDataTime(serialNumber, time=30):
     ##   data: returns a dson/ dataframe/ list / dataframe  of recent data ##
     #########################################################################
     ## check if serialNumber is None
-    if(serialNumber == None):
+    if(description == None):
         return pd.DataFrame()
     curDate = datetime.now()
     threshold = timedelta(days=time)
     thresh = (curDate - threshold).strftime('%Y-%m-%dT%H:%M:%S')
-    query = "SELECT Data.sn, Devices.description, Data.pm25, Data.pm10, Data.timestamp, Devices.lat, Devices.lon FROM Data LEFT OUTER JOIN Devices ON Data.sn = Devices.sn WHERE Data.sn = %s AND  Data.timestamp > %s"
-    values = [serialNumber, thresh]
+    query = "SELECT Data.sn, Devices.description, Data.pm25, Data.pm10, Data.timestamp, Devices.lat, Devices.lon FROM Data LEFT OUTER JOIN Devices ON Data.sn = Devices.sn WHERE Data.sn IN (SELECT sn FROM Devices WHERE description = %s) AND Data.timestamp > %s"
+    values = [description, thresh]
     mydb = connect()
     mycursor = mydb.cursor()
     mycursor.execute(query, values)
     data = mycursor.fetchall()
-    pdData = pd.DataFrame(data).rename(columns = {0: 'sn',1: 'description',2: 'pm25', 3:'pm10', 4:'timestamp', 5:'geo.lat',6:'geo.lon'})
-    print(pdData)
-    mycursor.close()
-    mydb.close()
+    pdData = pd.DataFrame(data).rename(columns = {0: 'sn', 1: 'description',2: 'pm25', 3:'pm10', 4:'timestamp', 5:'geo.lat',6:'geo.lon'})
+    #print(pdData) # uncommenting this will break generated aqi encoding!
     return pdData
-# pullDataTime('MOD-PM-00645', 30);
 
 
 
@@ -458,7 +463,6 @@ def mapGeneration(data=None, pm_type='pm10'):
         data = getAllRecent()
     if(data.empty):
         return
-
     # Generate a map with a central location of the Salton Sea area
     central_latitude = data['geo.lat'].mean()
     central_longitude = data['geo.lon'].mean()
@@ -500,6 +504,8 @@ def mapGeneration(data=None, pm_type='pm10'):
                 marker_color = color
                 break
 
+
+
         folium.CircleMarker(
             location=[latitude, longitude],
             radius=5,
@@ -516,6 +522,14 @@ def mapGeneration(data=None, pm_type='pm10'):
                 {img}
             """
         ).add_to(m)
+        #border color is black now 
+        folium.CircleMarker(
+        location=[latitude, longitude],
+        radius=6,
+        color="black",  
+        fill=False,  
+        ).add_to(m)
+
 
     # Adding Dropdown Menu
     dropdown_html = f"""
