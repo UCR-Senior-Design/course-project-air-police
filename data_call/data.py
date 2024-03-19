@@ -448,7 +448,7 @@ import folium
 import webbrowser
 import pandas as pd
 from folium.plugins import HeatMap
-from contentful import Client
+from contentful_management import Client
 
 ###############################################################################################################
 ####                                            mapGeneration                                              ####
@@ -577,17 +577,58 @@ def mapGeneration(data=None, pm_type='pm10'):
     # html_file_path = 'views/map.hbs'
     # m.save(html_file_path)
     # print(m)
-    client = Client(space_id=os.environ['ContentfulID'], access_token=os.environ['ContentfulApiToken'])
+    client = Client(os.environ['ContentfulApiToken'])
+    # print(type(m))
+    html_content = m.get_root().render()
     entry_data = {
         'fields': {
+            'testing': {
+                'en-US': "hello"
+            },
             'htmlContent': {
-                'en-US': m
+                'en-US': {
+                    'nodeType': 'document',
+                    'data': {},  # Add required data attribute
+                    'content': [
+                        {
+                            'nodeType': 'paragraph',
+                            'data': {},  # Add required data attribute
+                            'content': [
+                                {
+                                    'nodeType': 'text',
+                                    'value':  html_content,
+                                    'data':{},
+                                    'marks':[]
+                                }
+                            ]
+                        }
+                    ]
+                }
             }
         }
     }
+
+
     try:
-        new_entry = client.entries().create(entry_data)
-        print('New entry created:', new_entry)
+        
+            
+        space_id = os.environ['ContentfulID']
+        environment_id = os.environ['environmentID']
+        content_type_id = 'n21o2'  # Replace 'n21o2' with the actual content type ID
+        space = client.spaces().find(space_id)
+        environment = space.environments().find(environment_id)
+        entry_id = 'map'
+        try:
+            entry = client.entries(space_id, environment_id).find(entry_id)
+            if(entry):
+                print(entry)
+                updated_entry = entry.update(entry_data)
+                published_entry = updated_entry.publish()
+            else:
+                entry = environment.content_types().find(content_type_id).entries().create('map', entry_data)
+                entry.publish()
+        except Exception as e:
+            print('Error creating entry:', e)
     except Exception as e:
         print('Error creating entry:', e)
     url = f'http://localhost:3000/map?pm_type={pm_type}'
@@ -774,5 +815,6 @@ def genTimeGraph(serialNumber):
         img_html = f'<img src="data:image/png;base64,{img_base64}" alt="PM2.5 Graph"style="width:400px; height:200px;">'
 
     plt.clf()
+    plt.close()
     os.remove(temp_file_path)
     return img_html
