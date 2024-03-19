@@ -2,7 +2,8 @@ const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
 router.get("/", async (req, res) => {
-  var token = req.session.token;
+  const cookies = cookieHeader.split(';');
+  const token = cookies.find(cookie => cookie.trim().startsWith('token=')).split('=')[1];
   var username;
   if (!token) {
     res.redirect("/table");
