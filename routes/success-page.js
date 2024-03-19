@@ -126,7 +126,7 @@ var aqi = 50; // default value
 
 router.get('/', async (req,res) => {
     monitorId = req.query.monitorId
-    makeImgSRC() // uses python-shell to create the img src from aqi.py
+    await makeImgSRC() // uses python-shell to create the img src from aqi.py
 
     aqi = await getAQIValues(monitorId); 
     
