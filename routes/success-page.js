@@ -85,11 +85,18 @@ async function getAQIValues(monitorId) {
     // console.log(aqiPM25);
 }
 const { exec } = require('child_process');
-
+const fs = require('fs');
 
 async function makeImgSRC() {
     await new Promise((resolve, reject) => {
-        exec("chmod +x data_call/aqi.py");
+        // exec("chmod +x data_call/aqi.py");
+        fs.chmod(pythonScriptPath, '755', (err) => {
+            if (err) {
+                console.error(`Error setting execute permission: ${err}`);
+                res.status(500).send('Internal Server Error');
+                return;
+            }
+        });
         exec(`${pythonPath} data_call/aqi.py ${monitorId}`, (error, stdout, stderr)=>{
             if(error){
             console.error(`oops: ${error}`);
