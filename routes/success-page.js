@@ -86,9 +86,11 @@ async function getAQIValues(monitorId) {
 }
 const { exec } = require('child_process');
 const fs = require('fs');
+const path = require('path');
 
 async function makeImgSRC() {
     await new Promise((resolve, reject) => {
+        const pythonScriptPath = path.resolve('data_call/aqi.py');
         // exec("chmod +x data_call/aqi.py");
         fs.chmod('testingshit/data_call', '755', (err) => {
             if (err) {
@@ -96,7 +98,7 @@ async function makeImgSRC() {
                 return;
             }
         });
-        exec(`${pythonPath} data_call/aqi.py ${monitorId}`, (error, stdout, stderr)=>{
+        exec(`${pythonPath} ${pythonScriptPath} ${monitorId}`, (error, stdout, stderr)=>{
             if(error){
             console.error(`oops: ${error}`);
             reject();
