@@ -21,7 +21,7 @@ def get_data():
 
 @app.route('/api/genMap', methods=['POST'])
 async def genMap():
-    pm_type = request.headers("pm_type")
+    pm_type = request.headers.get("pm_type")
     
     await gm.mapGeneration(pm_type)
     return jsonify({
