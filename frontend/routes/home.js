@@ -7,13 +7,15 @@ router.get("/", async (req, res) => {
   const response  = await fetch('/api/genMap', {
     method:"POST",
     headers:{
-      pm_type: 'pm25'
+      'Content-Type': 'application/json',
+      'pm_type': 'pm25'
     }
   })
   const response2  = await fetch('/api/genMap', {
     method:"POST",
     headers:{
-      pm_type: 'pm10'
+      'Content-Type': 'application/json',
+      'pm_type': 'pm10'
     }
   })
   res.render("home", {
