@@ -5,7 +5,6 @@ const router = express.Router()
 // const mysql = require("mysql2");
 const { Pool } = require("pg");
 require("dotenv").config();
-const pythonPath = require.resolve('python');
 
 
 var img_src = "images/refresh.png";
