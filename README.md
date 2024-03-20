@@ -17,6 +17,9 @@
 # Dependencies
 * Node.js - https://nodejs.org
   ```
+  npm install mysql2
+  ```
+  ```
   pip install folium
   ```
   ```
@@ -29,7 +32,7 @@
   pip install pandas
   ```
   ```
-  pip install pymongo
+  pip install my-sql-connector-python
   ```
   
 # Install node js
@@ -41,16 +44,22 @@
 # Set up .env
 * create a .env file to the main directory and add
   ```
-  c_URI = ""
-  api_key =""
-  DataBase_URL =
-  mysqlhost = "localhost"
+  api_key = ""
+  HASH = 
+  private_key = ""
+  key=""
+  mailtrapeuser=""
+  mailtrappassword=""
+  porterUser = ""
+
+  mysqlhost = ""
   mysqlUser = ""
-  mysqlPort = 3306
+  mysqlPort = 
   mysqlPassword = ""
+  mysqlDB = ""
     
   ```
-  Make sure c_URI and DataBase_URL is your mongoDB api key
+  Make sure to set up a mailtrap account and a mysql server
   and api_key is the quantaq, api_key
   
 # How to access our local host website
