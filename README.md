@@ -31,19 +31,17 @@
 
 # Set up enviroment secrets (.env for your IDE or Secrets for Vercel)
 * create a .env file to the main directory and add
-  ```
+```
 api_key = 
 HASH = 
 private_key = 
-key="oops"
+key=
 mailtrapeuser=
 mailtrappassword=  
 porterUser = 
-
 POSTGRES_URL=
-POSTGRES_USER=       # this should automatically be generated for you through vercel.
+POSTGRES_USER=       
 POSTGRES_PASSWORD=
-
 ContentfulID = 
 ContentfulApiToken=
 environmentIDs = 
