@@ -10,10 +10,6 @@
   "routes": [
     { "handle": "filesystem" },
     {
-      "src": "/api/(.*)",
-      "dest": "backend/api/$1.py"
-    },
-    {
       "src": "/(.*)",
       "dest": "frontend/build/$1"
     }
