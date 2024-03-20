@@ -2,16 +2,14 @@
   "version": 2,
   "builds": [
     {
-      "src": "frontend/package.json",
-      "use": "@vercel/node",
-      "config": { "distDir": "frontend/build" }
+      "src": "server.js",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
-    { "handle": "filesystem" },
     {
       "src": "/(.*)",
-      "dest": "frontend/build/$1"
+      "dest": "server.js"
     }
   ]
 }
