@@ -30,6 +30,7 @@
 
 
 # If you are reading this before deployment is completely done, please use mysql instead of postgres.
+.env portion for mysql
 ```
 mysqlhost = 
 mysqlUser = 
@@ -37,7 +38,7 @@ mysqlPort =
 mysqlPassword = 
 mysqlDB = 
 ```
-and Run initializeDB.py file by 
+and Run initializeDB.py file...
 
 ```
 python data_call/initializeDB.py
