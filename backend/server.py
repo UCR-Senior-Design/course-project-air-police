@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request
 import data as dc
+import genMap as gm
 app = Flask(__name__)
 import asyncio
 
@@ -22,7 +23,7 @@ def get_data():
 async def genMap():
     pm_type = request.headers("pm_type")
     
-    await dc.mapGeneration(pm_type)
+    await gm.mapGeneration(pm_type)
     return jsonify({
         "message": "Map has generated"
     })
