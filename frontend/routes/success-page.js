@@ -5,7 +5,6 @@ const router = express.Router()
 // const mysql = require("mysql2");
 const { Pool } = require("pg");
 require("dotenv").config();
-const pythonPath = require.resolve('python');
 
 
 var img_src = "images/refresh.png";
@@ -89,26 +88,21 @@ const fs = require('fs');
 const path = require('path');
 
 async function makeImgSRC() {
-    await new Promise((resolve, reject) => {
-        const pythonScriptPath = path.resolve('data_call/aqi.py');
-        // exec("chmod +x data_call/aqi.py");
-        fs.chmod(pythonScriptPath, '755', (err) => {
-            if (err) {
-                console.error(`Error setting execute permission: ${err}`);
-                return;
+    try{
+        const response = await fetch('/api/aqi.py', {
+            method:'POST',
+            headers: {
+                "description": monitorId
             }
         });
-        exec(`${pythonPath} ${pythonScriptPath} ${monitorId}`, (error, stdout, stderr)=>{
-            if(error){
-            console.error(`oops: ${error}`);
-            reject();
-            }
-            img_src = "data:image/png;base64,";
-            img_src = img_src.concat(stdout)
-            resolve(img_src);
-         });
-         resolve();
-    });
+        const data = await response.json();
+        img_src = "data:image/png;base64,";
+        img_src = img_src.concat(data.b64);
+    }
+    catch(error){
+        console.error("Error Fetching Data: ", error);
+        throw error;
+    }
   } 
 
 

@@ -2,7 +2,20 @@ const express = require("express");
 const router = express.Router();
 const { exec } = require('child_process');
 // Getting all
-router.get("/", (req, res) => {
+router.get("/", async (req, res) => {
+
+  const response  = await fetch('/api/genMap', {
+    method:"POST",
+    headers:{
+      pm_type: 'pm25'
+    }
+  })
+  const response2  = await fetch('/api/genMap', {
+    method:"POST",
+    headers:{
+      pm_type: 'pm10'
+    }
+  })
   res.render("home", {
     title: "AirPolice",
   });
@@ -10,20 +23,7 @@ router.get("/", (req, res) => {
 });
 
 
-const param = "pm25";
-exec(`python data_call/generateMap.py ${param}`, (error, stdout, stderr)=>{
-  if(error){
-    console.error('exec error: ${error}');
-    return;
-  }
-})
-const param2 = "pm10";
-exec(`python data_call/generateMap.py ${param2}`, (error, stdout, stderr)=>{
-  if(error){
-    console.error('exec error: ${error}');
-    return;
-  }
-})
+
 // Runs test.py once the website starts running
 // let { PythonShell } = require("python-shell");
 

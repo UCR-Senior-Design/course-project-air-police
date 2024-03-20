@@ -1,5 +1,4 @@
-import requests
-import datetime
+
 from requests.auth import HTTPBasicAuth
 import pandas as pd
 from datetime import datetime
@@ -9,57 +8,18 @@ import data as dc
 from dotenv import load_dotenv
 load_dotenv()
 import numpy as np
-import mysql.connector
 import io
 from io import BytesIO
 import base64
-import sys
+# import sys
 
 
-def check_type(x):
-    if isinstance(x, (int, float)):
-        return calculate_aqi(x, 'pm25')
-    else:
-        print(f"Non-numeric value found: {x}")
-        return None
+
 
 def calculate_aqi(pm_value, pm_type):
-
     return None
     
-    if pm_type == 'PM25':
-        breakpoints = [0, 12.1, 35.5, 55.5, 150.5, 250.5, 350.5, 500.5]
-        aqi_ranges = [0, 50, 100, 150, 200, 300, 400, 500]
-    elif pm_type == 'PM10':
-        breakpoints = [0, 54, 154, 254, 354, 424, 504, 604]
-        aqi_ranges = [0, 50, 100, 150, 200, 300, 400, 500]
-    else:
-        return None
     
-    #convert to float
-    try:
-        pm_value = float(pm_value)
-    except ValueError:
-        print(f"Error converting {pm_value} to float")
-        return None
-    
-    #checking if pm_value is NaN
-    if pd.isnull(pm_value):
-        return None
-    
-    for i in range(len(breakpoints) - 1):
-        if pm_value >= breakpoints[i] and pm_value <= breakpoints[i + 1]:
-            aqi = ((aqi_ranges[i + 1] - aqi_ranges[i]) / (breakpoints[i + 1] - breakpoints[i])) * (pm_value - breakpoints[i]) + aqi_ranges[i]
-            return int(aqi)
-    
-    return None
-
-"""
-    for i in range(len(breakpoints) - 1):
-        if pm_value >= breakpoints[i] and pm_value <= breakpoints[i + 1]:
-            aqi = ((aqi_ranges[i + 1] - aqi_ranges[i]) / (breakpoints[i + 1] - breakpoints[i])) * (pm_value - breakpoints[i]) + aqi_ranges[i]
-            return int(aqi)
-"""
 
 # this will be passed into the file as an argument
 # if len(sys.argv) < 2:
