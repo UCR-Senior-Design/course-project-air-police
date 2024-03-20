@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en" , class="rloginBackground">
+    <head>
+        <style>
+            h1 {
+                font-weight: bold;
+                color: white;
+                text-align: center;
+            }
+            .container {
+                width: 40%;
+                margin: auto;
+                margin-top: 10%;
+            }
+        </style>
+    </head>
+    <body class="rloginBackground">
+        <div class="container p-1">
+            <h1>Researcher Login</h1>
+            {{!-- change class for styling --}}
+            <form action="/rlogin" method="POST" id="login-form">
+                {{!-- if logins were unsuccessful --}} {{!-- based off harrisons
+                old project --}}
+                <script>
+                    try {
+                        const queryString = window.location.search;
+                        const urlParams = new URLSearchParams(queryString);
+                        const error = urlParams.get("error");
+                        if (error) {
+                            window.addEventListener("load", function () {
+                                var psd_msg =
+                                    document.getElementById(
+                                        "incorrect_password",
+                                    );
+                                var username_msg =
+                                    document.getElementById(
+                                        "incorrect_username",
+                                    );
+                                var lgn_msg = document.getElementById("ngl");
+                                lgn_msg.style.visibility = "hidden";
+                                psd_msg.style.visibility = "hidden";
+                                username_msg.style.visibility = "hidden";
+                                if (error.includes("ngl")) {
+                                    lgn_msg.style.visibility = "visible";
+                                    lgn_msg.innerHTML =
+                                        "<span style=color:red>You need to be logged in</span>";
+                                }
+                                if (error.includes("ngl2")) {
+                                    lgn_msg.style.visibility = "visible";
+                                    lgn_msg.innerHTML =
+                                        "<span style=color:red>User already Exists</span>";
+                                }
+                                if (error.includes("usr1")) {
+                                    username_msg.style.visibility = "visible";
+                                    username_msg.innerHTML =
+                                        "<span style=color:red>Username does not exist</span>";
+                                }
+                                if (error.includes("usr2")) {
+                                    username_msg.style.visibility = "visible";
+                                    username_msg.innerHTML =
+                                        "<span style=color:red>Username is needed</span>";
+                                }
+                                if (error.includes("pw1")) {
+                                    psd_msg.style.visibility = "visible";
+                                    psd_msg.innerHTML =
+                                        "<span style=color:red>Password does not match</span>";
+                                }
+                                if (error.includes("pw2")) {
+                                    psd_msg.style.visibility = "visible";
+                                    psd_msg.innerHTML =
+                                        "<span style=color:red>Password field cannot be blank</span>";
+                                }
+                            });
+                        }
+                    } catch (error) {
+                        console.error(error);
+                    }
+                </script>
+                {{!-- temporary error page maybe include if needed --}}
+                <p id="ngl" , name="ngl"></p>
+                {{!-- username input group --}}
+                <div class="form-group">
+                    <label for="username" style="color: white">Username</label>
+                    <input
+                        class="form-control"
+                        id="username"
+                        type="username"
+                        name="username"
+                        placeholder="Enter username"
+                    /><br />
+                    <p id="incorrect_username" , name="incorrect_username"></p>
+                </div>
+                {{!-- password input group change class for styling --}}
+                <div class="form-group">
+                    <label for="password" style="color: white">Password</label>
+                    <input
+                        type="password"
+                        id="password"
+                        class="form-control"
+                        name="password"
+                        placeholder="Enter Password"
+                    />
+                    <p id="incorrect_password" , name="incorrect_password"></p>
+                </div>
+                {{!-- submit button --}}
+                <div class="d1">
+                    <button type="submit" id="submit" class="jbtn">
+                        Submit
+                    </button>
+                </div>
+            </form>
+        </div>
+    </body>
+</html>

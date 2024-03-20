@@ -1,0 +1,56 @@
+{{!-- BOOTSTRAP TEMPLATE FROM https://getbootstrap.com/docs/4.0/examples/checkout/ --}}
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Participant Login</title>
+
+    <style>
+          h1 {
+            font-weight: bold;
+            color: rgb(12, 12, 12);
+            text-align: center;
+          }
+          .container {
+              margin-top: 7%;
+          }
+      </style>
+  </head>
+
+  <body class="loginBackground">
+    <div class="container">
+      <div class="py-5 text-center">
+        <h1>Participant Login</h1>
+      </div>
+
+      <div class="row justify-content-center">
+        <div class="col-md-8 order-md-1">
+          <form class="needs-validation" novalidate>
+            <div class="mb-3">
+              <label for="monitorId">Please enter your Description ID</label>
+              <input type="text" class="form-control" id="monitorId" name="monitorId" placeholder="SSIF_A0_000" required>
+              <div class="invalid-feedback">
+                  Please enter a valid Description ID.
+              </div>
+            </div>
+
+            <hr class="mb-4">
+            <div class="text-center">
+                <button class="btn btn-outline-dark btn-md" type="submit">Submit</button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+
+    </div>
+
+    
+
+    <script>
+      // validation
+    </script>
+
+
+  </body>
+</html>

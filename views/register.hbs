@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en" , class="loginBackground">
+    <body class="loginBackground">
+        <div class="corner">
+            <button id="back" class="jbtn">back</button>
+            <script>
+                document
+                    .getElementById("back")
+                    .addEventListener("click", function () {
+                        window.location.href = "/home";
+                    });
+            </script>
+        </div>
+        <div class="claln">
+            <p class="loginTitle">Researcher Login</p>
+            {{!-- change class for styling --}}
+            <form action="/register" method="POST" id="login-form">
+                {{!-- if logins were unsuccessful --}} {{!-- based off harrisons
+                old project --}}
+                <script>
+                    const queryString = window.location.search;
+                    const urlParams = new URLSearchParams(queryString);
+
+                    window.addEventListener("DOMContentLoaded", function () {
+                        const token = urlParams.get("token");
+                        var tkninp = document.getElementById("tokenINP");
+                        tkninp.value = token;
+                        const error = urlParams.get("error");
+                        var psd_msg =
+                            document.getElementById("incorrect_password");
+                        var username_msg =
+                            document.getElementById("incorrect_username");
+                        var lgn_msg = document.getElementById("ngl");
+                        lgn_msg.style.visibility = "hidden";
+                        psd_msg.style.visibility = "hidden";
+                        username_msg.style.visibility = "hidden";
+                        if (error.includes("ngl")) {
+                        }
+                        if (error.includes("usr1")) {
+                            username_msg.style.visibility = "visible";
+                            username_msg.innerHTML =
+                                "<span style=color:red>Username exists</span>";
+                        }
+                        if (error.includes("usr2")) {
+                            username_msg.style.visibility = "visible";
+                            username_msg.innerHTML =
+                                "<span style=color:red>Username is needed</span>";
+                        }
+                        if (error.includes("pw1")) {
+                            psd_msg.style.visibility = "visible";
+                            psd_msg.innerHTML =
+                                "<span style=color:red>Password does not meet requirements ( 1 lower 1 upper 1 number and 1 special character minimum of 8 characters</span>";
+                        }
+                        if (error.includes("pw2")) {
+                            psd_msg.style.visibility = "visible";
+                            psd_msg.innerHTML =
+                                "<span style=color:red>Password field cannot be blank</span>";
+                        }
+                        if (error.includes("pw3")) {
+                            psd_msg.style.visibility = "visible";
+                            psd_msg.innerHTML =
+                                "<span style=color:red>Retyped password does not match</span>";
+                        }
+                    });
+                </script>
+
+                {{!-- temporary error page maybe include if needed --}}
+                <p id="ngl" , name="ngl"></p>
+                {{!-- username input group --}}
+                <div class="form-group">
+                    <label for="username" style="color: white">username</label>
+                    <input
+                        class="form-control"
+                        id="username"
+                        type="username"
+                        name="username"
+                        placeholder="Enter username"
+                    /><br />
+                    <p id="incorrect_username" , name="incorrect_username"></p>
+                </div>
+                {{!-- password input group change class for styling --}}
+                <div class="form-group">
+                    <label for="password" style="color: white">Password</label>
+                    <input
+                        type="password"
+                        id="password"
+                        class="form-control"
+                        name="password"
+                        placeholder="Enter Password"
+                    />
+                    <p id="incorrect_password" , name="incorrect_password"></p>
+                </div>
+                <div class="form-group">
+                    <label for="retype" style="color: white"
+                        >Retype Password</label
+                    >
+                    <input
+                        type="password"
+                        id="retype"
+                        class="form-control"
+                        name="retype"
+                        placeholder="Retype Password"
+                    />
+                    <p id="notMatch" , name="notMatch"></p>
+                </div>
+                {{!-- submit button --}}
+                <div class="d1">
+                    <button type="submit" id="submit" class="jbtn">
+                        Submit
+                    </button>
+                </div>
+                <div class="form-group" id="tkn">
+                    <input
+                        style="visibility: hidden"
+                        id="tokenINP"
+                        name="token"
+                    />
+                </div>
+            </form>
+        </div>
+    </body>
+</html>

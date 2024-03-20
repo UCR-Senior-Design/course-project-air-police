@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en" , class="loginBackground">
+    <script
+        type="text/javascript"
+        src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"
+    ></script>
+
+    <script>
+        //{{!-- use this script to load the already invited users --}}
+
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        const error = urlParams.get("error");
+        window.addEventListener("load", function () {
+            var existmsg = document.getElementById("emailAdded");
+            existmsg.style.visibility = "hidden";
+            if (error != null) {
+                if (error.includes("usrE")) {
+                    existmsg.style.visibility = "visible";
+                    existmsg.innerHTML =
+                        "<span style=color:red>Researcher email already added</span>";
+                }
+            }
+            var addbox = document.getElementById("addBox");
+            fetch("/researcher")
+                .then((response) => response.json())
+                .then((data) => {
+                    console.log(data);
+                    data.forEach(function (element) {
+                        console.log(element["email"]);
+                        addbox.innerHTML +=
+                            "<span style=margin-left:10px>  " +
+                            element["email"] +
+                            "</span> <br>";
+                    });
+                });
+        });
+    </script>
+    <body>
+        <h1 style="margin-left: 5%; color: blue">Researchers added</h1>
+        <div id="addBox" class="box">
+            {{!-- this box is for the viewing the already invited users--}}
+        </div>
+        <div
+            style="
+                margin-top: 2%;
+                display: flex;
+                justify-content: center;
+                align-content: center;
+            "
+        >
+            <form
+                id="invite"
+                action="/invite"
+                method="POST"
+                style="width: 50%; display: flex; justify-content: center"
+            >
+                <input
+                    name="email"
+                    class="email"
+                    placeholder="Enter Email of Researcher"
+                    style="width: 50%; height: 50px; margin-right: 5px"
+                />
+                <button type="submit" id="submit" class="jbtn">Submit</button>
+            </form>
+        </div>
+        <p id="emailAdded" , name="emailAdded"></p>
+        <script></script>
+    </body>
+</html>
