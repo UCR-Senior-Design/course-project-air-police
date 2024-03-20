@@ -330,7 +330,7 @@ def getAllRecent():
 
 
 #tested and works a little slow but works unless your doing a data visualization you do not need to use this.
-def pullData(serialNumber=None):
+def pullData(desc=None):
     #######################################################################
     ## pulls all data from database                                      ##
     ## PARAMETERS:                                                       ##
@@ -340,12 +340,20 @@ def pullData(serialNumber=None):
     #######################################################################
     mydb = connect()
     mycursor = mydb.cursor()
-    if serialNumber == None:
+    if desc == None:
         query = "SELECT Devices.sn, Devices.description, Devices.lat, Devices.lon, Devices.pmHealth, Devices.sdHealth, Devices.onlne, Devices.datafraction,  Data.pm25, Data.pm10, Data.timestamp FROM Data LEFT OUTER JOIN Devices ON Data.sn = Devices.sn"
         mycursor.execute(query)
         data = mycursor.fetchall()
         data = pd.DataFrame(data).dropna(how='all', axis = 0).drop(columns=4, axis = 1)
         data = data.rename(columns = {0: 'sn',1:'description', 2:'geo.lat', 3:'geo.lon', 4:'pmHealth',5:'sdHealth', 6:'status', 7:'Data Fraction', 8:'pm25', 9: "pm10", 10: "timestamp"})
+        return data
+    else:
+        query = "SELECT pm25, pm10, timestamp FROM Data WHERE sn IN (SELECT sn FROM Devices WHERE description = %s ORDER BY timestamp DESC)" # LIMIT 1
+        values = [desc]
+        mycursor.execute(query, values)
+        data = mycursor.fetchall()
+        #data = pd.DataFrame(data).dropna(how='all', axis = 0).drop(columns=4, axis = 1)
+        #data = data.rename(columns = {0: 'pm25',1:'pm10', 2: "timestamp"})
         return data
 
 
@@ -398,8 +406,8 @@ def notFunctional(data=None):
     return nf
 
 
-# this should help with some of the data visualizations.
-def pullDataTime(serialNumber, time=30):
+# monitor description is unique so it should be able to substitute for primary key sn
+def pullDataTime(description, time=30):
     #########################################################################
     ## pulls data from specific serialNumber within the last time days     ##
     ## PARAMETERS:                                                         ##
@@ -409,21 +417,20 @@ def pullDataTime(serialNumber, time=30):
     ##   data: returns a dson/ dataframe/ list / dataframe  of recent data ##
     #########################################################################
     ## check if serialNumber is None
-    if(serialNumber == None):
+    if(description == None):
         return pd.DataFrame()
     curDate = datetime.now()
     threshold = timedelta(days=time)
     thresh = (curDate - threshold).strftime('%Y-%m-%dT%H:%M:%S')
-    query = "SELECT Data.sn, Devices.description, Data.pm25, Data.pm10, Data.timestamp, Devices.lat, Devices.lon FROM Data LEFT OUTER JOIN Devices ON Data.sn = Devices.sn WHERE Data.sn = %s AND  Data.timestamp > %s"
-    values = [serialNumber, thresh]
+    query = "SELECT Data.sn, Devices.description, Data.pm25, Data.pm10, Data.timestamp, Devices.lat, Devices.lon FROM Data LEFT OUTER JOIN Devices ON Data.sn = Devices.sn WHERE Data.sn IN (SELECT sn FROM Devices WHERE description = %s) AND Data.timestamp > %s"
+    values = [description, thresh]
     mydb = connect()
     mycursor = mydb.cursor()
     mycursor.execute(query, values)
     data = mycursor.fetchall()
-    pdData = pd.DataFrame(data).rename(columns = {0: 'sn',1: 'description',2: 'pm25', 3:'pm10', 4:'timestamp', 5:'geo.lat',6:'geo.lon'})
-    print(pdData)
+    pdData = pd.DataFrame(data).rename(columns = {0: 'sn', 1: 'description',2: 'pm25', 3:'pm10', 4:'timestamp', 5:'geo.lat',6:'geo.lon'})
+    #print(pdData) # uncommenting this will break generated aqi encoding!
     return pdData
-# pullDataTime('MOD-PM-00645', 30);
 
 
 
@@ -445,7 +452,8 @@ from folium.plugins import HeatMap
 def mapGeneration(data=None, pm_type='pm10'):
     if data is None:
         data = getAllRecent()
-
+    if(data.empty):
+        return
     # Generate a map with a central location of the Salton Sea area
     central_latitude = data['geo.lat'].mean()
     central_longitude = data['geo.lon'].mean()
@@ -479,13 +487,15 @@ def mapGeneration(data=None, pm_type='pm10'):
         latitude = row['geo.lat']
         longitude = row['geo.lon']
         pm_value = row[pm_type]
-        img = genTimeGraph(row['sn'])
+        img = genTimeGraph(row['description'])
         # Determine the air quality color based on the PM2.5 value
         marker_color = "blue"  # Default color if value doesn't fall into any range
         for (min_value, max_value), color in selected_color_range.items():
             if min_value <= pm_value <= max_value:
                 marker_color = color
                 break
+
+
 
         folium.CircleMarker(
             location=[latitude, longitude],
@@ -503,6 +513,14 @@ def mapGeneration(data=None, pm_type='pm10'):
                 {img}
             """
         ).add_to(m)
+        #border color is black now
+        folium.CircleMarker(
+        location=[latitude, longitude],
+        radius=6,
+        color="black",
+        fill=False,
+        ).add_to(m)
+
 
     # Adding Dropdown Menu
     dropdown_html = f"""
@@ -708,8 +726,10 @@ def updateAllDataFraction():
     mydb.commit()
 
 import os
+import io
+from io import BytesIO
 def genTimeGraph(serialNumber):
-    data = pullDataTime(serialNumber, 1)
+    data = pullDataTime(serialNumber, 30)
     # print(data.keys())
     plt.figure(figsize=(10, 6))
     if(data.empty):
@@ -725,15 +745,20 @@ def genTimeGraph(serialNumber):
     plt.xlabel("time")
     plt.ylabel("PM Values")
     plt.legend()
-    temp_file_path = 'pmtimegraph_'+serialNumber+'.png'
-    plt.savefig(temp_file_path)
-    # file_pattern = 'pmtimegraph_*.png'
+    # temp_file_path = 'pmtimegraph_'+serialNumber+'.png'
+    # plt.savefig(temp_file_path)
+    # # file_pattern = 'pmtimegraph_*.png'
 
-    with open(temp_file_path, 'rb') as file:
-        img_data = file.read()
-        img_base64 = base64.b64encode(img_data).decode('utf-8')
-        img_html = f'<img src="data:image/png;base64,{img_base64}" alt="PM2.5 Graph"style="width:400px; height:200px;">'
-
+    # with open(temp_file_path, 'rb') as file:
+    #     img_data = file.read()
+    #     img_base64 = base64.b64encode(img_data).decode('utf-8')
+    #     img_html = f'<img src="data:image/png;base64,{img_base64}" alt="PM2.5 Graph"style="width:400px; height:200px;">'
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png')
+    image_base64 = base64.b64encode(buf.getvalue()).decode('utf-8').replace('\n', '')
+    buf.close()
+    img_html = f'<img src="data:image/png;base64,{image_base64}" alt="PM2.5 Graph"style="width:400px; height:200px;">'
     plt.clf()
-    os.remove(temp_file_path)
+    plt.close()
+    # os.remove(temp_file_path)
     return img_html

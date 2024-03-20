@@ -497,6 +497,20 @@ app.post("/changePMType", async (req, res) => {
 
   res.redirect("/map"); //redirects back to the map page
 });
+
+app.post("/force", async (req, res) => {
+  let options = {
+    mode: "text",
+    pythonPath: ".venv/bin/python",
+    pythonOptions: ["-u"], // get print results in real-time
+  };
+  let { PythonShell } = require("python-shell");
+  PythonShell.run("data_call/forceUpdate.py", options, (err, results) => {
+    if (err) throw err;
+    console.log("results");
+  });
+  res.redirect("/table");
+});
 //Export the router
 module.exports = router;
 /////////////////////////////////////////////////////////////
