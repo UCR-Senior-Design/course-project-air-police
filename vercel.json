@@ -8,7 +8,7 @@
     },
     {
       "src": "backend/api/**/*.py",
-      "use": "@vercel/python3.12"
+      "use": "@vercel/python"
     }
   ],
   "routes": [
