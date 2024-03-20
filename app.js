@@ -392,7 +392,12 @@ app.route("/rlogin").post(async (req, res) => {
       haserror = true;
     }
     var input = result[0].pwd;
-    const response = bcrypt.compareSync(password, input);
+    let response;
+    try {
+      response = bcrypt.compareSync(password, input);
+    } catch (error) {
+      console.error(error);
+    }
     if (response == true) {
       if (!haserror) {
         req.session.logged_in = true;
@@ -417,7 +422,7 @@ app.route("/rlogin").post(async (req, res) => {
   if (haserror) {
     res.redirect(errorpage);
   }
-
+  con.close();
   // res.redirect('/rlogin?error=pw1')
 });
 

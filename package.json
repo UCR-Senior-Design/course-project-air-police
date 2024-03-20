@@ -15,7 +15,7 @@
   },
   "scripts": {
     "start": "nodemon server.js",
-    "test": "jest"
+    "test": "npx cypress run"
   },
   "events": {
     "crash": "sh -c 'lsof -i :${PORT:-3000} -t | xargs kill'"
