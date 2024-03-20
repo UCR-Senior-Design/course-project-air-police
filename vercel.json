@@ -5,10 +5,6 @@
       "src": "frontend/package.json",
       "use": "@vercel/node",
       "config": { "distDir": "frontend/build" }
-    },
-    {
-      "src": "backend/api/**/*.py",
-      "use": "@vercel/python"
     }
   ],
   "routes": [
