@@ -142,7 +142,6 @@ app.use("", homeRouter);
 // creates map page
 const mapRouter = require("./routes/map.js");
 app.use("/map", mapRouter);
-const {entryID, changeMap} = require('./routes/changepm.js')
 
 // create route for the researcher table data
 app.get("/data",  async (req, res) => {
@@ -324,13 +323,6 @@ app.use("/register", registerRouter);
 const { exec } = require('child_process');
 app.route("/rlogin").post(async (req, res) => {
   
-  const param = "pm25";
-  exec(`python data_call/generateMap.py ${param}`, (error, stdout, stderr)=>{
-    if(error){
-      console.error('exec error: ${error}');
-      return;
-    }
-  })
   try {
     // await createNewUser("tno@gmail.com", "pyTest", "1234");
     var pool = new Pool(postgreConfig);
@@ -447,43 +439,20 @@ app.get("/aqiData", async (req, res) => {
   res.json(aqidata);
 });
 */
+const {getID, changeMap} = require('./routes/changepm.js')
 app.post("/changePMType", async (req, res) => {
   const selectedPMType = req.body.pm_type;
-  console.log(selectedPMType);
   changeMap(selectedPMType);
-  // let options = {
-  //   mode: "text",
-  //   pythonPath: ".venv/bin/python",
-
-  //   pythonOptions: ["-u"], // get print results in real-time
-  //   args: [selectedPMType],
-  // };
-  // let { PythonShell } = require("python-shell");
-  // await PythonShell.run("data_call/generateMap.py", options, (err, results) => {
-  //   if (err) throw err;
-  //   console.log("Map generation completed");
-  // });
-
   res.redirect("/map"); //redirects back to the map page
 });
 
 app.post("/force", async (req, res) => {
-  // let options = {
-  //   mode: "text",
-  //   pythonPath: ".venv/bin/python",
-  //   pythonOptions: ["-u"], // get print results in real-time
-  // };
-  // let { PythonShell } = require("python-shell");
-  // PythonShell.run("data_call/forceUpdate.py", options, (err, results) => {
-  //   if (err) throw err;
-  //   console.log("results");
-  // });
-  exec(`python data_call/forceUpdate.py`, (error, stdout, stderr)=>{
-    if(error){
-      console.error('exec error: ${error}');
-      return;
+  await fetch('/api/pushDB', {
+    methods:'POST',
+    headers:{
+
     }
-  })
+  });
   res.redirect("/table");
 });
 //Export the router

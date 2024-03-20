@@ -12,7 +12,7 @@ import json
 from datetime import datetime, timedelta
 import psycopg2 as postgre
 import matplotlib.pyplot as plt
-
+import asyncio
 #input your apikey here... not sure if there is any safety issues of putting the api key into github, will look
 ## into but for now im not gonna put it in.
 
@@ -770,9 +770,9 @@ def print_aqi_for_all_monitors(aqi_values):
             print()
     else:
         print("No AQI data available for any monitors.")
-
+import asyncio
 # import glob
-def updateDataFractionForToday(serialNumber):
+async def updateDataFractionForToday(serialNumber):
     auth = HTTPBasicAuth(apiKey,"")
     #uses requests to get data from our network
     # uses try except for error handling
