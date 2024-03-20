@@ -29,6 +29,21 @@
 * Please set up Postgres for Vercel to ensure a working database for this website. The instructions are here: https://vercel.com/docs/storage/vercel-postgres/quickstart 
 
 
+# If you are reading this before deployment is completely done, please use mysql instead of postgres.
+.env portion for mysql
+```
+mysqlhost = 
+mysqlUser = 
+mysqlPort =
+mysqlPassword = 
+mysqlDB = 
+```
+and Run initializeDB.py file...
+
+```
+python data_call/initializeDB.py
+```
+
 # Set up enviroment secrets (.env for your IDE or Secrets for Vercel)
 * create a .env file to the main directory and add
 ```
