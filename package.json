@@ -15,7 +15,7 @@
     "window": "^4.2.7"
   },
   "scripts": {
-    "start": "nodemon server.js",
+    "start": "nodemon frontend/server.js",
     "test": "jest"
   },
   "events": {
