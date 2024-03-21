@@ -5,7 +5,22 @@
         <title>Success Page</title>
 
     </head>
+    <style>
+        @media only screen and (max-width: 768px) {
+            .element {
+                width:90vw;
+                height:20vh; /* Font size for smaller screens */
+            }
+        }
 
+        /* Media query for devices with a maximum width of 480px (e.g., smartphones) */
+        @media only screen and (max-width: 480px) {
+            .element {
+                width:150vw;
+                height:150vh;/* Font size for smartphones */
+            }
+        }
+    </style>
     <body class="loginBackground">
         
         <div class="container p-3 text-center">
@@ -84,7 +99,7 @@
                         levels.</p>
                 </div>
             </div>
-            <canvas id="myChart" width="400" height="400"></canvas>
+            <canvas id="myChart" class = "element"></canvas>
             <script>
                 const chartData = {{{data}}};
             </script>
