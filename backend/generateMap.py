@@ -1,5 +1,4 @@
-import data as dc
-import mysql.connector
+import backend.dbMfunctions as dc
 import sys
 import folium
 import webbrowser

@@ -1,4 +1,4 @@
-import data as dc
+import backend.dbMfunctions as dc
 
 def updateDataFraction():
     dc.updateAllDataFraction()

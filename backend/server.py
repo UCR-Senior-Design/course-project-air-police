@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request
-import data as dc
+import backend.dbMfunctions as dc
 import genMap as gm
 app = Flask(__name__)
 import asyncio
