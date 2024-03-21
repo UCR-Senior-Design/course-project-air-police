@@ -9,11 +9,9 @@ const hash = process.env.hash;
 const { Pool } = require("pg");
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const { request } = require("http");
-
 const postgreConfig = {
   connectionString: process.env.POSTGRES_URL
 };
-
 
 async function createNewUser(eml, usr, pswd) {
   try{

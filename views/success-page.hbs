@@ -84,7 +84,33 @@
                         levels.</p>
                 </div>
             </div>
-            <img class="img-fluid mb-4" src = {{img_src}} alt = "Data Visualization" >
+            <canvas id="myChart" width="400" height="400"></canvas>
+            <script>
+                const chartData = {{{data}}};
+            </script>
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <script>
+            document.addEventListener("DOMContentLoaded", async function() {
+                
+        const ctx = document.getElementById('myChart').getContext('2d');
+            const options = {
+                scales: {
+                yAxes: [{
+                    ticks: {
+                    beginAtZero: true
+                    }
+
+                }]
+                }
+            };
+            const myChart = new Chart(ctx, {
+            type: 'line',
+            data: {{{data}}}
+            });
+            });
+
+            </script>
+            {{!-- <img class="img-fluid mb-4" src = {{img_src}} alt = "Data Visualization" > --}}
         </div>
 
     </body>

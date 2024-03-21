@@ -111,12 +111,11 @@ router.get('/', async (req,res) => {
     monitorId = req.query.monitorId
     // uses python-shell to create the img src from aqi.py
     try{
-    await generateImage() 
-    console.log(img_src)
+    var data = await generateImage(monitorId); 
+    data = JSON.stringify(data)
     aqi = await getAQIValues(monitorId); 
-    
     if (monitorId) {
-        res.render("success-page", { title: 'SUCCESS PAGE ', aqiScore : (aqi.PM25 + aqi.PM10)/2, monitorId, img_src});
+        res.render("success-page", { title: 'SUCCESS PAGE ', aqiScore : (aqi.PM25 + aqi.PM10)/2, monitorId, data});
         res.status(200);
     }
     else {
