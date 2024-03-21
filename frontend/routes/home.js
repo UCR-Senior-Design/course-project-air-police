@@ -20,7 +20,7 @@ try{
   })
 }
 catch(error){
-  console.error("error executing map")
+  console.error("error executing map: " + error)
 }
   res.render("home", {
     title: "AirPolice",
