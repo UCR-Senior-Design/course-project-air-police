@@ -1,22 +1,124 @@
 <!doctype html>
 <html lang="en" , class="loginBackground">
+    <link rel="stylesheet" href="leaflet.css" />
+
+    <style>
+        #map{
+            height:800px;
+        }
+    </style>
     
     <body>
-        {{!-- <form action="/changePMType" method="post">
+        <script>
+            const p = {{{pm_type}}};
+            const t = p.pm_type;
+            console.log(t);
+            document.addEventListener("DOMContentLoaded", function() {
+        // Select the dropdown element
+            const dropdown = document.getElementById("pm_dropdown");
+            dropdown.value = t;
+            });
+        </script>
+        <form action="/changePMType" method="post">
             <select id="pm_dropdown" name = pm_type>
-                <option value="pm10" {'selected' if pm_type == 'pm10' else ''}>PM10</option>
-                <option value="pm25" {'selected' if pm_type == 'pm25' else ''}>PM2.5</option>
+                <option value="pm10" {'selected' if {{t}} == 'pm10' else ''}>PM10</option>
+                <option value="pm25" {'selected' if {{t}} == 'pm25' else ''}>PM2.5</option>
             </select>
             <button type="submit">Change</button>
-        </form> --}}
+        </form>
         <div id = "map"></div>
-        <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+        <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
-            var map = L.map('map').setView([{{{central_lat}}}, {{{central_lon}}}],13);
-            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19,
+
+            const pmtypes = {{{pm_type}}}
+            const pmtype = pmtypes.pm_type;
+            function getColorForValue(value, colorRange) {
+                for (const range of colorRange) {
+                    if (value >= range.range[0] && value <= range.range[1]) {
+                        return range.color;
+                    }
+                }
+                // Return default color if value doesn't fall within any range
+                return "black"; // or any other default color
+            }
+            
+            const colorRanges = {
+                pm10: [
+                    { range: [0, 50], color: "green" },
+                    { range: [51, 100], color: "yellow" },
+                    { range: [101, 150], color: "orange" },
+                    { range: [151, 200], color: "red" },
+                    { range: [201, 300], color: "purple" },
+                    { range: [301, Infinity], color: "maroon" }
+                ],
+                pm25: [
+                    { range: [0, 50], color: "green" },
+                    { range: [51, 100], color: "yellow" },
+                    { range: [101, 150], color: "orange" },
+                    { range: [151, 200], color: "red" },
+                    { range: [201, 300], color: "purple" },
+                    { range: [301, Infinity], color: "maroon" }
+                ]
+            };
+
+            const selectedColorRange = colorRanges[pmtype];
+
+            var map = L.map('map').setView([{{{central_lat}}}, {{{central_lon}}}],10);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             }).addTo(map);
+            const data = {{{datas}}};
+            var markerData = [];
+            for(var i = 0; i < data.length; i++){
+                
+                const colorValue = getColorForValue(data[i].pm25, selectedColorRange);
+                const markerHtmlStyles = `
+                background-color: ${colorValue};
+                width: 3rem;
+                height: 3rem;
+                display: block;
+                left: -1.5rem;
+                top: -1.5rem;
+                position: relative;
+                border-radius: 3rem 3rem 0;
+                transform: rotate(45deg);
+                border: 1px solid #FFFFFF`;
+
+                const icon = L.divIcon({
+                    className: "my-custom-pin",
+                    iconAnchor: [0, 24],
+                    labelAnchor: [-6, 0],
+                    popupAnchor: [0, -36],
+                    html: `<span style="${markerHtmlStyles}" />`
+                })
+                var obj;
+                if(pmtype === "pm25"){
+                    obj = {
+                        name: data[i].sn,
+                        lat: Number(data[i].lat),
+                        lon: Number(data[i].lon),
+                        custIcon:icon,
+                        popupContent: `Serial Number: ${data[i].sn}<br> Latitude: ${data[i].lat}<br>Longitude: ${data[i].lon}<br>pm25: ${data[i].pm25}<br> Timestamp: ${data[i].timestamp}<br>`
+                    }
+                }
+                else{
+                    obj = {
+                        name: data[i].sn,
+                        lat: Number(data[i].lat),
+                        lon: Number(data[i].lon),
+                        custIcon:icon,
+                        popupContent: `Serial Number: ${data[i].sn}<br> Latitude: ${data[i].lat}<br>Longitude: ${data[i].lon}<br>pm25: ${data[i].pm25}<br> Timestamp: ${data[i].timestamp}<br>`
+                    }
+                }
+                result = {{{data}}}
+                markerData.push(obj)
+            }
+            markerData.forEach(function(data) {
+            icon = data.custIcon
+            var marker = L.marker([data.lat, data.lon], {icon} ).addTo(map);
+            marker.bindPopup(data.popupContent);
+        });
         </script>
     </body>
 </html>

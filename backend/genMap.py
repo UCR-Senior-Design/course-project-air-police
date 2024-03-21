@@ -3,7 +3,7 @@ import pandas as pd
 from datetime import datetime
 import matplotlib.pyplot as plt
 import os
-import backend.dbMfunctions as dc
+import dbMfunctions as dc
 from dotenv import load_dotenv
 load_dotenv()
 import numpy as np
@@ -149,7 +149,7 @@ def mapGeneration(data=None, pm_type='pm10'):
     entry_data = {
         'fields': {
             'testing': {
-                'en-US': "hello"
+                'en-US': "t"
             },
             'htmlContent': {
                 'en-US': {
@@ -176,8 +176,6 @@ def mapGeneration(data=None, pm_type='pm10'):
 
 
     try:
-        
-            
         space_id = os.environ['ContentfulID']
         environment_id = os.environ['environmentID']
         content_type_id = 'n21o2'  # Replace 'n21o2' with the actual content type ID
@@ -189,7 +187,7 @@ def mapGeneration(data=None, pm_type='pm10'):
             if(entry):
                 print(entry)
                 updated_entry = entry.update(entry_data)
-                published_entry = updated_entry.publish()
+                updated_entry.publish()
             else:
                 entry = environment.content_types().find(content_type_id).entries().create(entry_id, entry_data)
                 entry.publish()
@@ -204,8 +202,6 @@ def mapGeneration(data=None, pm_type='pm10'):
         # new_entry = space.entries().create(id, entry_data)
     except Exception as e:
         print('Error creating entry:', e)
-    url = f'http://localhost:3000/map?pm_type={pm_type}'
-    print(url)
 
 
 def genTimeGraph(serialNumber):

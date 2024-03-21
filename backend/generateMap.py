@@ -1,4 +1,4 @@
-import backend.dbMfunctions as dc
+import genMap as dc
 import sys
 import folium
 import webbrowser

@@ -21,14 +21,9 @@ const postgreConfig = {
 const genData = require("../helperFunctions/genMap.js");
 
 router.get("/", async (req, res) => {
-  const client = createClient({
-    space: process.env.ContentfulID,
-    accessToken: process.env.environmentIDs
-  });
   try {
-    const entries = await client.getEntry(getID());
     const {data, central_lat, central_lon} = await genData("pm25");
-
+    var datas = JSON.stringify(data);
     var pool = new Pool(postgreConfig);
     const con = await pool.connect();
     const cookieHeader = req.headers.cookie;
@@ -64,9 +59,14 @@ router.get("/", async (req, res) => {
       //   title: "AirPolice Map",
       // });
       // res.status(200);
-      console.log(central_lat)
+      var pm_type = {
+        pm_type:getID()};
+      pm_type = JSON.stringify(pm_type);
       res.render('map', {
-        data, central_lat, central_lon
+        datas: datas,
+        central_lat: central_lat,
+        central_lon: central_lon,
+        pm_type: pm_type
       });
       // res.status(200).send(map);
     } else {
