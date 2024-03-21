@@ -9,6 +9,7 @@
     "fs": "^0.0.1-security",
     "handlebars": "^4.7.8",
     "jsonwebtoken": "^9.0.2",
+    "node-fetch": "^3.3.2",
     "nodemailer": "^6.9.9",
     "pg": "^8.11.3",
     "util": "^0.12.5",

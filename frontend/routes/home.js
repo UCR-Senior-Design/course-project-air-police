@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { exec } = require('child_process');
+const fetch = require("node-fetch");
 // Getting all
 router.get("/", async (req, res) => {
 
@@ -23,19 +24,5 @@ router.get("/", async (req, res) => {
   });
   res.status(200);
 });
-
-
-
-// Runs test.py once the website starts running
-// let { PythonShell } = require("python-shell");
-
-// let options = {
-//   mode: "text",
-//   pythonPath: ".venv/bin/python",
-//   pythonOptions: ["-u"], // get print results in real-time
-//   args: ["pm25"],
-// };
-
-// PythonShell.run("data_call/generateMap.py", options);
 
 module.exports = router;
