@@ -12,7 +12,6 @@ import json
 from datetime import datetime, timedelta
 import psycopg2 as postgre
 import matplotlib.pyplot as plt
-import asyncio
 #input your apikey here... not sure if there is any safety issues of putting the api key into github, will look
 ## into but for now im not gonna put it in.
 
