@@ -18,6 +18,7 @@ const {getID, changeMap} = require('./changepm.js')
 const postgreConfig = {
   connectionString: process.env.POSTGRES_URL ,
 };
+const genData = require("../helperFunctions/genMap.js");
 
 router.get("/", async (req, res) => {
   const client = createClient({
@@ -26,8 +27,8 @@ router.get("/", async (req, res) => {
   });
   try {
     const entries = await client.getEntry(getID());
+    const {data, central_lat, central_lon} = await genData("pm25");
 
-    var map = entries.fields.htmlContent.content[0].content[0].value;
     var pool = new Pool(postgreConfig);
     const con = await pool.connect();
     const cookieHeader = req.headers.cookie;
@@ -63,8 +64,9 @@ router.get("/", async (req, res) => {
       //   title: "AirPolice Map",
       // });
       // res.status(200);
+      console.log(central_lat)
       res.render('map', {
-        mapContent: map // Use the HTML content obtained from Contentful
+        data, central_lat, central_lon
       });
       // res.status(200).send(map);
     } else {
