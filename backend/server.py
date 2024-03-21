@@ -2,7 +2,6 @@ from flask import Flask, jsonify, request
 import backend.dbMfunctions as dc
 import genMap as gm
 app = Flask(__name__)
-import asyncio
 
 @app.route('/')
 def index():
@@ -20,7 +19,7 @@ def get_data():
     return jsonify(data)
 
 @app.route('/api/genMap', methods=['POST'])
-async def genMap():
+def genMap():
     pm_type = request.headers.get("pm_type")
     
     gm.mapGeneration(pm_type)
@@ -31,17 +30,17 @@ async def genMap():
 
 
 # Example route handling POST requests
-@app.route('/api/pushDB', methods=['POST'])
-async def create_post():
+# @app.route('/api/pushDB', methods=['POST'])
+# async def create_post():
 
-    tasks = [
-        asyncio.create_task(dc.checkOffline()),
-        asyncio.create_task(dc.updateAllHealth()),
-        asyncio.create_task(dc.pushFullDB()),
-        asyncio.create_task(dc.updateAllDataFraction())
-    ]
-    # Wait for all tasks to complete
-    await asyncio.gather(*tasks)
+#     tasks = [
+#         asyncio.create_task(dc.checkOffline()),
+#         asyncio.create_task(dc.updateAllHealth()),
+#         asyncio.create_task(dc.pushFullDB()),
+#         asyncio.create_task(dc.updateAllDataFraction())
+#     ]
+#     # Wait for all tasks to complete
+#     await asyncio.gather(*tasks)
 
 
 
