@@ -1,4 +1,4 @@
-import backend.dbMfunctions as dc
+import dbMfunctions as dc
 
 def updateDBs():
     dc.grabAllSensor()

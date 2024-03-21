@@ -6,7 +6,7 @@ const router = express.Router()
 const { Pool } = require("pg");
 require("dotenv").config();
 
-
+const generateImage = require("../helperFunctions/genAqiImage");
 var img_src = "images/refresh.png";
 var monitorId = "default"; // while the python script sees "defualt" it will generate a loading img as a placeholder
 
@@ -44,7 +44,6 @@ const postgreConfig = {
     connectionString: process.env.POSTGRES_URL ,
   };
 async function fetchPMValues(monitorId) {
-    
 
     try {
         var pool = new Pool(postgreConfig);
@@ -87,23 +86,23 @@ const { exec } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-async function makeImgSRC() {
-    try{
-        const response = await fetch('/api/aqi.py', {
-            method:'POST',
-            headers: {
-                "description": monitorId
-            }
-        });
-        const data = await response.json();
-        img_src = "data:image/png;base64,";
-        img_src = img_src.concat(data.b64);
-    }
-    catch(error){
-        console.error("Error Fetching Data: ", error);
-        throw error;
-    }
-  } 
+// async function makeImgSRC() {
+//     try{
+//         const response = await fetch('/api/aqi.py', {
+//             method:'POST',
+//             headers: {
+//                 "description": monitorId
+//             }
+//         });
+//         const data = await response.json();
+//         img_src = "data:image/png;base64,";
+//         img_src = img_src.concat(data.b64);
+//     }
+//     catch(error){
+//         console.error("Error Fetching Data: ", error);
+//         throw error;
+//     }
+//   } 
 
 
 var aqi = 50; // default value
@@ -112,7 +111,7 @@ router.get('/', async (req,res) => {
     monitorId = req.query.monitorId
     // uses python-shell to create the img src from aqi.py
     try{
-    await makeImgSRC() 
+    await generateImage() 
     console.log(img_src)
     aqi = await getAQIValues(monitorId); 
     

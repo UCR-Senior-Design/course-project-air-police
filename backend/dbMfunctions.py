@@ -31,7 +31,7 @@ def fetchData():
     #uses requests to get data from our network
     # uses try except for error handling
     try:
-        req = requests.request("get","https://api.quant-aq.com/device-api/v1/data/most-recent/?network_id=9", headers = None, auth = auth)
+        req = requests.request("get","", headers = None, auth = auth)
     except:
         print("Error Incorrect API Key")
         return None
@@ -175,7 +175,7 @@ def fillNAs():
     mycursor = mydb.cursor()
 
     query = "SELECT sn, last_seen FROM Devices"
-    mycursor.execute(query);
+    mycursor.execute(query)
     data = pd.DataFrame(mycursor.fetchall())
     for i, d in data.iterrows():
         date = d[1][0:10]
