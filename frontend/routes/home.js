@@ -3,7 +3,7 @@ const router = express.Router();
 const { exec } = require('child_process');
 // Getting all
 router.get("/", async (req, res) => {
-
+try{
   const response  = await fetch('/api/genMap', {
     method:"POST",
     headers:{
@@ -18,6 +18,10 @@ router.get("/", async (req, res) => {
       'pm_type': 'pm10'
     }
   })
+}
+catch(error){
+  console.error("error executing map")
+}
   res.render("home", {
     title: "AirPolice",
   });
