@@ -10,7 +10,6 @@ import numpy as np
 import io
 from io import BytesIO
 import base64
-
 import folium
 import webbrowser
 import pandas as pd
