@@ -59,7 +59,7 @@ def initialize():
     createDevicesTable()
     createUserTable()
     print("Initialized")
-import data as dc
+import backend.dbMfunctions as dc
 def initialFill():
     dc.grabAllSensor()
     dc.fillNAs()

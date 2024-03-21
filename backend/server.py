@@ -23,7 +23,7 @@ def get_data():
 async def genMap():
     pm_type = request.headers.get("pm_type")
     
-    await gm.mapGeneration(pm_type)
+    gm.mapGeneration(pm_type)
     return jsonify({
         "message": "Map has generated"
     })

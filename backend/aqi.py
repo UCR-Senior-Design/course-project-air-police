@@ -4,7 +4,7 @@ import pandas as pd
 from datetime import datetime
 import matplotlib.pyplot as plt
 import os
-import data as dc
+import backend.dbMfunctions as dc
 from dotenv import load_dotenv
 load_dotenv()
 import numpy as np
