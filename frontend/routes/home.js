@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const { exec } = require('child_process');
-const fetch = require("node-fetch");
 // Getting all
 router.get("/", async (req, res) => {
 
