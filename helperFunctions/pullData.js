@@ -66,7 +66,7 @@ async function quer(query, values) {
 }
 
 // had to get it optimize it through batches
-async function pullDataFromQuant() {
+async function pullData() {
     var data = await grabsnLastSeen();
 
     // Set a batch size for batch inserts
@@ -110,4 +110,4 @@ async function pullDataFromQuant() {
 
 
 
-module.exports = pullDataFromQuant;
+module.exports = pullData;
