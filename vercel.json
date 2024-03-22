@@ -4,7 +4,10 @@
     {
       "src": "server.js",
       "use": "@vercel/node"
-    }
+    },
+    {"src":"/backend/pushingToDB.py",
+    "use":"@vercel/python"
+  }
   ],
   "routes": [
     {
