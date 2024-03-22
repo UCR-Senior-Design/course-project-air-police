@@ -122,13 +122,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "hbs");
 
-app.use(
-  session({
-    secret: "secret",
-    resave: true,
-    saveUninitialized: true,
-  }),
-);
+
 // --------------- end of code for setting up the application ---------------
 
 // --------------- code for routing to pages ---------------

@@ -38,7 +38,7 @@ router.get("/", async (req, res) => {
         const token = tokenCookie.split('=')[1];
         // Token exists, continue processing
     } else {
-        res.redirect('/rlogin');
+        res.redirect('/rlogin?error=ngl');
     }
     let user;
     let isPorter = false;

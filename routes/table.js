@@ -37,7 +37,7 @@ router.get("/", async (req, res) => {
     // const token = req.session.token;
     const cookieHeader = req.headers.cookie;
     if(!cookieHeader){
-      res.redirect('/rlogin');
+      res.redirect('/rlogin?error=ngl');
       return;
     }
     const cookies = cookieHeader.split(';');
@@ -47,7 +47,7 @@ router.get("/", async (req, res) => {
         const token = tokenCookie.split('=')[1];
         // Token exists, continue processing
     } else {
-        res.redirect('/rlogin');
+        res.redirect('/rlogin?error=ngl');
     }
     let user;
     let isPorter = false;
