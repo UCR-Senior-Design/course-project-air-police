@@ -4,10 +4,7 @@
     {
       "src": "server.js",
       "use": "@vercel/node"
-    },
-    {"src":"/api/pushingToDB.py",
-    "use":"@vercel/python"
-  }
+    }
   ],
   "routes": [
     {
@@ -15,10 +12,16 @@
       "dest": "server.js"
     }
   ],
-  "crons":[
+  "functions": {
+    "pullData": {
+      "handler": "helperFunctions/pullData.js"
+    }
+  },
+  "crons": [
     {
-      "path": "/helperFunctions/pullData.js",
-      "schedule":"0 */6 * * *"
+      "name": "pullData",
+      "schedule": "0 */6 * * *",
+      "target": "pullData"
     }
   ]
 }

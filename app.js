@@ -318,7 +318,9 @@ app.route("/register").post(async (req, res) => {
 });
 const registerRouter = require("./routes/register.js");
 app.use("/register", registerRouter);
-const { exec } = require('child_process');
+
+
+
 app.route("/rlogin").post(async (req, res) => {
   
   try {
