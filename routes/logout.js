@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-
+const cookieParser = require('cookie-parser');
 router.get("/", (req, res) => {
   req.session.logged_in = false;
   // const cookieHeader = req.headers.cookie;
