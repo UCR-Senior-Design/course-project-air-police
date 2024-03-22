@@ -30,7 +30,7 @@ async function grabsnLastSeen(){
 }
 async function pullSpecific(serialNumber, last_seen){
     const date = last_seen.split("T")[0]
-    const url = `https://api.quant-aq.com/device-api/v1/devices/${serialNumber}/data-by-date/${date}`
+    const url = `https://api.quant-aq.com/device-api/v1/data/resampled/?sn=${serialNumber}&start_date=${date}&end_date=${date}&period=1h`
     console.log(url)
     const list = await fetch(url, {method:'GET', headers: headers})
     .then( response =>{
@@ -107,7 +107,6 @@ async function pullData() {
         }
     }
 }
-
 
 
 module.exports = pullData;
