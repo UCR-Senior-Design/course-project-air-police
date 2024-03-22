@@ -5,7 +5,7 @@
       "src": "server.js",
       "use": "@vercel/node"
     },
-    {"src":"/backend/pushingToDB.py",
+    {"src":"/api/pushingToDB.py",
     "use":"@vercel/python"
   }
   ],
@@ -17,7 +17,7 @@
   ],
   "crons":[
     {
-      "path": "/backend/pushingToDB.py",
+      "path": "/api/pushingToDB.py",
       "schedule":"0 */6 * * *"
     }
   ]
