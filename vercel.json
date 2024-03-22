@@ -12,7 +12,7 @@
       "dest": "server.js"
     }
   ],
-  "cron":[
+  "crons":[
     {
       "path": "backend/pushingToDB.py",
       "schedule":"0 */6 * * *"
