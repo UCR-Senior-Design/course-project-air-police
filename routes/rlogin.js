@@ -22,9 +22,9 @@ router.get("/", async (req, res) => {
     }
     const cookies = cookieHeader.split(';');
     const tokenCookie = cookies.find(cookie => cookie.trim().startsWith('token='));
-
+    var token;
     if (tokenCookie) {
-        const token = tokenCookie.split('=')[1];
+        token = tokenCookie.split('=')[1];
         // Token exists, continue processing
     } 
     let user;
