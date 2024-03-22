@@ -32,6 +32,11 @@ router.get("/", async (req, res) => {
       jwt.verify(token, process.env.key, (error, decoded) => {
         if (error) {
           console.error(error);
+          res.render("rlogin", {
+            title: "LOGIN ",
+            displayText: "researcher login ",
+          });
+          res.status(200);
         }
         user = decoded.username;
       });

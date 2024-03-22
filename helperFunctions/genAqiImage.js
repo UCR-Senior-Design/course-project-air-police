@@ -25,7 +25,6 @@ async function retrieveData(description){
     }
 
 }
-console.log("hello");
 async function generateImage(description){
     try{
     console.log("description is " + description);

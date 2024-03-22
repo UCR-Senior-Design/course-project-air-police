@@ -22,7 +22,7 @@ const genData = require("../helperFunctions/genMap.js");
 
 router.get("/", async (req, res) => {
   try {
-    const {data, central_lat, central_lon} = await genData("pm25");
+    const {data, central_lat, central_lon} = await genData(getID);
     var datas = JSON.stringify(data);
     var pool = new Pool(postgreConfig);
     const con = await pool.connect();

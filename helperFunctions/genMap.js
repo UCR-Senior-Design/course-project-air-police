@@ -25,9 +25,9 @@ async function grabData(pm_type){
         const con = await pool.connect();
         var query = ""
         if(pm_type = "pm25"){
-            query = "SELECT Devices.sn, Devices.lat, Devices.lon, Data.pm25, Data.pm10, Data.timestamp FROM Devices LEFT JOIN ( SELECT d1.* FROM Data d1 JOIN ( SELECT sn, MAX(timestamp) AS max_timestamp FROM Data GROUP BY sn ) d2 ON d1.sn = d2.sn AND d1.timestamp = d2.max_timestamp ) AS Data ON Data.sn = Devices.sn ORDER BY Devices.sn;"
+            query = "SELECT Devices.sn, Devices.description, Devices.lat, Devices.lon, Data.pm25, Data.pm10, Data.timestamp FROM Devices LEFT JOIN ( SELECT d1.* FROM Data d1 JOIN ( SELECT sn, MAX(timestamp) AS max_timestamp FROM Data GROUP BY sn ) d2 ON d1.sn = d2.sn AND d1.timestamp = d2.max_timestamp ) AS Data ON Data.sn = Devices.sn ORDER BY Devices.sn;"
         } else{
-            query = "SELECT Devices.sn, Devices.lat, Devices.lon, Data.pm10, Data.pm25, Data.timestamp FROM Devices LEFT JOIN ( SELECT d1.* FROM Data d1 JOIN ( SELECT sn, MAX(timestamp) AS max_timestamp FROM Data GROUP BY sn ) d2 ON d1.sn = d2.sn AND d1.timestamp = d2.max_timestamp ) AS Data ON Data.sn = Devices.sn ORDER BY Devices.sn";
+            query = "SELECT Devices.sn,Devices.description, Devices.lat, Devices.lon, Data.pm10, Data.pm25, Data.timestamp FROM Devices LEFT JOIN ( SELECT d1.* FROM Data d1 JOIN ( SELECT sn, MAX(timestamp) AS max_timestamp FROM Data GROUP BY sn ) d2 ON d1.sn = d2.sn AND d1.timestamp = d2.max_timestamp ) AS Data ON Data.sn = Devices.sn ORDER BY Devices.sn";
         }
         const result = await con.query(query);
         const queryResult = result.rows;
@@ -42,9 +42,7 @@ async function genData(pm_type){
     var data = await grabData(pm_type);
     const lat = data.map(rows => rows.lat);
     const lon = data.map(rows => rows.lon);
-    console.log(lat);
     const central_lat = calculateAverage(lat);
-    console.log(central_lat);
     const central_lon = calculateAverage(lon);
     return {data, central_lat, central_lon};
     // var map = L.map('map').setView([central_lat, central_lon],20);
