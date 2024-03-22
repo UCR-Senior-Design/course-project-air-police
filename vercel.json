@@ -12,10 +12,13 @@
       "dest": "server.js"
     }
   ],
+  "rewrites":[
+    {"source": "/(.*)", "destination": "/"}
+  ],
   "crons": [
     {
       "schedule": "0 0 * * *",
-      "path": "/helperFunctions/test.js"
+      "path": "/helperFunctions/pullData.js"
     }
   ]
 }
