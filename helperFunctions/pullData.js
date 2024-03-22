@@ -66,7 +66,7 @@ async function quer(query, values) {
 }
 
 // had to get it optimize it through batches
-async function pullDatas() {
+async function pullData() {
     var data = await grabsnLastSeen();
 
     // Set a batch size for batch inserts
@@ -106,9 +106,6 @@ async function pullDatas() {
             console.error("Error loading data: " + error);
         }
     }
-}
-function pullData(){
-    console.log("Hello")
 }
 
 
