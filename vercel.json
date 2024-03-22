@@ -15,7 +15,7 @@
   "crons": [
     {
       "schedule": "0 0 * * *",
-      "path": "/api/pushingToDB.js"
+      "path": "/api/pushingToDB.py"
     }
   ]
 }
