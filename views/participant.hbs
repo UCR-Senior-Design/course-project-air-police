@@ -21,15 +21,24 @@
             }
         }
     </style>
+
     <body class="loginBackground">
-        
-        <div class="container p-3 text-center">
-            <h5>Welcome! You have successfully logged in with monitor: {{ monitorId }}.</h5>
-            
-            <h2 id = 'aqi'> {{! this is how to set text color with bootstrap}}
-                Your aqi score is {{ aqiScore }} 
-            </h2>
+
+        <div class="container p-3">
+            {{!-- <div class="text-center">
+                <h5>Welcome! You have successfully logged in with monitor: {{ monitorId }}.</h5>
+            </div> --}}
+
+            <div class="d-flex">
+                <div class="p-1"><h5>Your aqi for pm2.5 is {{ aqi.PM25 }}</h5></div>
+                <div class="ml-auto p-1"><h5>Your  aqi for pm10 is {{aqi.PM10}}</h5></div>
+            </div>
+
+    `       <div class="text-center">
+                <h2 id = 'aqi'> Your current AQI score is {{ aqiScore }}</h2>
+            </div>
         </div>
+
 
 
         <div class="container p-3 mt-3 text-center">
@@ -42,11 +51,7 @@
                         different levels of air pollution. The AQI ranges from 0 to 500, where lower values indicate 
                         better air quality and higher values indicate worse air quality. <br> <br>
                         The AQI is divided into different categories, each associated with a color code and indicating 
-                        the level of hazards. The image below has a more detailed description of how the colors 
-                        correspond to the AQI value.</p>
-                </div>
-                <div class = "col-sm">
-                    <img id = 'aqiChart' class="img-fluid mb-4" src="/images/aqi_colors.png" alt="AQI Colors and Values, and What They Mean">
+                        the level of hazards. Find out more at https://www.airnow.gov/aqi/aqi-basics/.</p>
                 </div>
             </div>
 
@@ -56,27 +61,21 @@
         <script>
             if ({{ aqiScore }} <= 50) {
                 document.getElementById('aqi').style.color = "lime";
-                document.getElementById('aqiChart').src = "/images/aqi_colors1.png";
             }
             else if ({{ aqiScore }} <= 100) {
                 document.getElementById('aqi').style.color = "yellow";
-                document.getElementById('aqiChart').src = "/images/aqi_colors2.png";
             }
             else if ({{ aqiScore }} <= 150) {
                 document.getElementById('aqi').style.color = "orange";
-                document.getElementById('aqiChart').src = "/images/aqi_colors3.png";
             }
             else if ({{ aqiScore }} <= 200) {
                 document.getElementById('aqi').style.color = "red";
-                document.getElementById('aqiChart').src = "/images/aqi_colors4.png";
             }
             else if ({{ aqiScore }} <= 300) {
                 document.getElementById('aqi').style.color = "purple";
-                document.getElementById('aqiChart').src = "/images/aqi_colors4.png";
             }
             else {
                 document.getElementById('aqi').style.color = "maroon";
-                document.getElementById('aqiChart').src = "/images/aqi_colors6.png";
             }
         </script>
 

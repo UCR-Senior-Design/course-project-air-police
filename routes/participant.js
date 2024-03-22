@@ -67,7 +67,6 @@ async function getAQIValues(monitorId) {
         let aqiPM25 = -1;
         let aqiPM10 = -1;
         if(pmValues){
-            console.log('hi');
             aqiPM25 = calculateAQI(pmValues.pm25, 'PM25');
             aqiPM10 = calculateAQI(pmValues.pm10, 'PM10');
         }
@@ -102,26 +101,25 @@ const path = require('path');
 //     }
 //   } 
 
-
-var aqi = 50; // default value
+var aqi = 50;
 
 router.get('/', async (req,res) => {
     monitorId = req.query.monitorId
     // uses python-shell to create the img src from aqi.py
     try{
-    var data = await generateImage(monitorId); 
-    data = JSON.stringify(data)
-    aqi = await getAQIValues(monitorId); 
-    if (monitorId) {
-        res.render("participant", { title: 'Participant View', aqiScore : (aqi.PM25 + aqi.PM10)/2, monitorId, data});
-        res.status(200);
+        var data = await generateImage(monitorId); 
+        data = JSON.stringify(data)
+        aqi = await getAQIValues(monitorId); 
+        if (monitorId) {
+            res.render("participant", { title: 'Participant View', aqi, monitorId, data, aqiScore : Math.max(aqi.PM25, aqi.PM10)});
+            res.status(200);
+        }
+        else {
+            res.redirect('/login');
+        }
+    }catch(error){
+        console.error(error);
     }
-    else {
-        res.redirect('/login');
-    }
-}catch(error){
-    console.error(error);
-}
 
 })
 
