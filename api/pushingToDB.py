@@ -1,12 +1,8 @@
 import dbMfunctions as dc
 
 def updateDBs():
-    dc.grabAllSensor()
     dc.checkOffline()
     dc.updateAllHealth()
-    # dc.pushDB(dc.fetchData())
-    # dc.pushFullDB()
-    dc.removeOldData()
-    dc.fillNAs()
+    dc.updateAllDataFraction()
     print('ok')
 updateDBs()
