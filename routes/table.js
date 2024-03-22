@@ -41,7 +41,14 @@ router.get("/", async (req, res) => {
       return;
     }
     const cookies = cookieHeader.split(';');
-    const token = cookies.find(cookie => cookie.trim().startsWith('token=')).split('=')[1];
+    const tokenCookie = cookies.find(cookie => cookie.trim().startsWith('token='));
+
+    if (tokenCookie) {
+        const token = tokenCookie.split('=')[1];
+        // Token exists, continue processing
+    } else {
+        res.redirect('/rlogin');
+    }
     let user;
     let isPorter = false;
     if (token) {
