@@ -17,7 +17,7 @@
   ],
   "crons":[
     {
-      "path": "/api/pushingToDB.py",
+      "path": "/helperFunctions/pullData.js",
       "schedule":"0 */6 * * *"
     }
   ]

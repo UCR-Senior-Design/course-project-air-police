@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 // Getting all
 router.get("/", async (req, res) => {
+
 // try{
 // //   const response  = await fetch('/api/api/genMap', {
 // //     method:"POST",
