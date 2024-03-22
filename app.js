@@ -348,7 +348,6 @@ app.route("/rlogin").post(async (req, res) => {
       if (response == true) {
         // console.log(true);
         if (!haserror) {
-          req.session.logged_in = true;
           token = jwt.sign(
             { username: result.rows[0].username },
             process.env.key,
