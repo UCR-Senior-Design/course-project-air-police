@@ -14,7 +14,8 @@
   ],
   "functions": {
     "pullData": {
-      "handler": "helperFunctions/pullData.js"
+      "runtime": "@vercel/node",
+      "handler": "helperFunctions/pullData.default"
     }
   },
   "crons": [
