@@ -4,7 +4,7 @@ import pandas as pd
 from datetime import datetime
 import matplotlib.pyplot as plt
 import os
-import backend.dbMfunctions as dc
+import dbMfunctions as dc
 from dotenv import load_dotenv
 load_dotenv()
 import numpy as np
@@ -63,6 +63,6 @@ def generateAqi( desc="default" ):
         # print(image_base64)
         return image_base64
 
-
+print(generateAqi('SSIF_A7_666'))
 
  
