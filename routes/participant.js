@@ -1,8 +1,6 @@
 const express = require('express')
 const router = express.Router()
 
-// sql imports
-// const mysql = require("mysql2");
 const { Pool } = require("pg");
 require("dotenv").config();
 
@@ -115,7 +113,7 @@ router.get('/', async (req,res) => {
     data = JSON.stringify(data)
     aqi = await getAQIValues(monitorId); 
     if (monitorId) {
-        res.render("success-page", { title: 'SUCCESS PAGE ', aqiScore : (aqi.PM25 + aqi.PM10)/2, monitorId, data});
+        res.render("participant", { title: 'Participant View', aqiScore : (aqi.PM25 + aqi.PM10)/2, monitorId, data});
         res.status(200);
     }
     else {

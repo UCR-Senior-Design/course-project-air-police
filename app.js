@@ -155,9 +155,9 @@ app.get("/researcher", async (req, res) => {
 const loginRouter = require("./routes/login.js");
 app.use("/login", loginRouter);
 
-//creates success page
-const successRouter = require("./routes/success-page.js");
-app.use("/success-page", successRouter);
+//creates participant page
+const participantRouter = require("./routes/participant.js");
+app.use("/participant", participantRouter);
 
 ///////////////////////////
 
