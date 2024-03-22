@@ -34,7 +34,6 @@ router.get("/", async (req, res) => {
     var pool = new Pool(postgreConfig);
     const con = await pool.connect();
     var query = "SELECT * FROM usrs WHERE username = $1";
-    // const token = req.session.token;
     const cookieHeader = req.headers.cookie;
     if(!cookieHeader){
       res.redirect('/rlogin?error=ngl');

@@ -7,25 +7,26 @@ const postgreConfig = {
   connectionString: process.env.POSTGRES_URL ,
 };
 router.get("/", async (req, res) => {
-  // if(req.session.logged_in){
-  //   res.redirect('/table') // sends status code 302 by default
-  // }else{
+
 
   try{
     var pool = new Pool(postgreConfig);
     const con = await pool.connect();
-    // const cookieHeader = req.headers.cookie;
-    // if(!cookieHeader){
-    //   res.render("rlogin", {
-    //     title: "LOGIN ",
-    //     displayText: "researcher login test",
-    //   });
-    //   res.status(200);
-    // }
-    // const cookies = cookieHeader.split(';');
-    // const token = cookies.find(cookie => cookie.trim().startsWith('token=')).split('=')[1];
-  
-    const token = req.session.token;
+    const cookieHeader = req.headers.cookie;
+    if(!cookieHeader){
+      res.render("rlogin", {
+        title: "LOGIN ",
+        displayText: "researcher login test",
+      });
+      res.status(200);
+    }
+    const cookies = cookieHeader.split(';');
+    const tokenCookie = cookies.find(cookie => cookie.trim().startsWith('token='));
+
+    if (tokenCookie) {
+        const token = tokenCookie.split('=')[1];
+        // Token exists, continue processing
+    } 
     let user;
     if (token) {
       jwt.verify(token, process.env.key, (error, decoded) => {
