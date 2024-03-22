@@ -444,15 +444,16 @@ app.post("/changePMType", async (req, res) => {
   res.redirect("/map"); //redirects back to the map page
 });
 
-app.post("/force", async (req, res) => {
-  await fetch('/api/pushDB', {
-    methods:'POST',
-    headers:{
+const genChart = require('./helperFunctions/chartImg');
+app.post("/chart", async (req, res)=>{
+  const sn = req.body.sn;
+  // // do a function here to get base64
+  //this do not work
+  // var img_src = await genChart(sn);
+  // var img = {link: img}
+  // res.json(img);
+})
 
-    }
-  });
-  res.redirect("/table");
-});
 //Export the router
 module.exports = router;
 /////////////////////////////////////////////////////////////
