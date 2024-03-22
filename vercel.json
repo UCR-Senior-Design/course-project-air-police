@@ -11,12 +11,5 @@
       "src": "/(.*)",
       "dest": "server.js"
     }
-  ],
-  "crons":[
-    {
-      "path": "/backend/pushingToDB.py",
-      "schedule":"0 */6 * * *"
-    }
-    
   ]
 }
