@@ -12,17 +12,11 @@
       "dest": "server.js"
     }
   ],
-  "functions": {
-    "pullData": {
-      "runtime": "@vercel/node",
-      "handler": "helperFunctions/pullData.default"
-    }
-  },
   "crons": [
     {
       "name": "pullData",
       "schedule": "0 */6 * * *",
-      "target": "pullData"
+      "path": "helperFunctions/pullData.js"
     }
   ]
 }
