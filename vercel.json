@@ -14,7 +14,7 @@
   ],
   "crons":[
     {
-      "path": "backend/pushingToDB.py",
+      "path": "/backend/pushingToDB.py",
       "schedule":"0 */6 * * *"
     }
   ]
