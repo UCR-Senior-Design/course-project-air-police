@@ -10,7 +10,7 @@ router.get("/", (req, res) => {
   //   }
   //   const cookies = cookieHeader.split(';');
   //   const token = cookies.find(cookie => cookie.trim().startsWith('token=')).split('=')[1];
-  res,clearCookie('token').send('Cookie Cleared');
+  res.clearCookie('token');
   res.redirect("/home");
 });
 module.exports = router;
