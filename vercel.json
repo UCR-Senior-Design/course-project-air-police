@@ -15,7 +15,7 @@
   "crons": [
     {
       "schedule": "0 0 * * *",
-      "path": "/helperFunctions/pullData.js"
+      "path": "helperFunctions/pullData.js"
     }
   ]
 }
