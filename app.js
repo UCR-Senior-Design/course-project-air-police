@@ -161,9 +161,6 @@ app.use("/success-page", successRouter);
 
 ///////////////////////////
 
-//viewDataRouter
-const viewDataRouter = require("./routes/viewData.js");
-app.use("/view-data", viewDataRouter);
 
 //////////////////////
 app.route("/invite").post(async (req, res) => {
@@ -409,29 +406,7 @@ app.get("/monitorIds", async (req, res) => {
 });
 //////////////////////////////////////////////
 
-/*
-// fix this
-async function fetchAQIData() {
-  const result = await new Promise((resolve, reject) => {
-    PythonShell.run("data_call/idontfuckingknow.py", options).then((result) => {
-      // if (err) {
-      //     console.error('Error fetching AQI data:', err);
-      //     return;
-      // }
-      console.log("hello");
-      aqiData = JSON.parse(result);
-      return aqiData;
-    });
-  });
-}
-fetchAQIData();
 
-app.get("/aqiData", async (req, res) => {
-  let aqidata = await fetchAQIData();
-  console.log(aqidata);
-  res.json(aqidata);
-});
-*/
 const {getID, changeMap} = require('./routes/changepm.js')
 app.post("/changePMType", async (req, res) => {
   const selectedPMType = req.body.pm_type;
