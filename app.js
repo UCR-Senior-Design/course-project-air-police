@@ -406,7 +406,11 @@ app.get("/monitorIds", async (req, res) => {
 });
 //////////////////////////////////////////////
 
-
+const pullData = require("./helperFunctions/pullData.js");
+app.post("/pushData", async (req, res)=>{
+  await pullData();
+  res.send({"message": "DataBase updated"});
+})
 const {getID, changeMap} = require('./routes/changepm.js')
 app.post("/changePMType", async (req, res) => {
   const selectedPMType = req.body.pm_type;
